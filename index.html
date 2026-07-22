@@ -1,0 +1,2358 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>InCiclo — CicloWay</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<!-- Supabase (autenticação + banco). O client é criado em config.js -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<style>
+/* ── RESET & VARS ──────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#09090b; --bg2:#0f0f12; --card:#18181b; --cardh:#1e1e23;
+  --border:#27272a; --border2:#3f3f46;
+  --text:#fafafa; --text2:#a1a1aa; --muted:#52525b;
+  --blue:#3b82f6; --bl:rgba(59,130,246,.1); --bm:rgba(59,130,246,.22);
+  --green:#22c55e; --gl:rgba(34,197,94,.1);
+  --yellow:#eab308; --yl:rgba(234,179,8,.1);
+  --red:#ef4444; --rl:rgba(239,68,68,.1);
+  --sw:220px; --hh:56px;
+}
+html,body{height:100%}
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* ── LOGIN ─────────────────────────────────────── */
+#login{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(59,130,246,.14),transparent)
+}
+.lcard{width:100%;max-width:360px;padding:40px;background:var(--card);border:1px solid var(--border);border-radius:16px}
+.l-logo{display:flex;align-items:center;gap:12px;margin-bottom:28px}
+.l-icon{width:42px;height:42px;background:var(--blue);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff;letter-spacing:-1px;flex-shrink:0}
+.l-wordmark{font-size:22px;font-weight:800;letter-spacing:-.5px}
+.l-wordmark em{color:var(--blue);font-style:normal}
+.l-sub{font-size:12px;color:var(--muted);margin-bottom:24px;line-height:1.5}
+.fg{margin-bottom:14px}
+.fl{font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:5px;letter-spacing:.03em;text-transform:uppercase}
+.fi{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:10px 12px;font-size:13px;font-family:inherit;outline:none;transition:border-color .15s}
+.fi:focus{border-color:var(--blue)}
+.fi::placeholder{color:var(--muted)}
+.l-err{font-size:12px;color:var(--red);margin-top:6px;display:none}
+.l-btn{width:100%;padding:11px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;transition:opacity .15s;margin-top:8px}
+.l-btn:hover{opacity:.88}
+.l-hint{font-size:11px;color:var(--muted);text-align:center;margin-top:14px}
+.l-footer{text-align:center;margin-top:24px;padding-top:18px;border-top:1px solid var(--border);font-size:12px;color:var(--muted)}
+.l-footer strong{color:var(--blue)}
+
+/* ── APP SHELL ─────────────────────────────────── */
+#app{display:none;min-height:100vh}
+#app.on{display:block}
+
+/* Header */
+#hdr{
+  position:fixed;top:0;left:0;right:0;height:var(--hh);z-index:200;
+  display:flex;align-items:center;padding:0 20px;justify-content:space-between;
+  background:var(--bg2);border-bottom:1px solid var(--border)
+}
+.hdr-l{display:flex;align-items:center;gap:12px}
+.hdr-icon{width:30px;height:30px;background:var(--blue);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff}
+.hdr-name{font-size:16px;font-weight:800;letter-spacing:-.4px}
+.hdr-name em{color:var(--blue);font-style:normal}
+.hdr-div{width:1px;height:20px;background:var(--border);margin:0 6px}
+.hdr-cw{font-size:11px;color:var(--muted)}
+.hdr-r{display:flex;align-items:center;gap:10px}
+.hdr-user{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:8px;cursor:default}
+.hdr-av{width:28px;height:28px;border-radius:50%;background:var(--bl);border:1.5px solid var(--bm);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--blue)}
+.hdr-uname{font-size:13px;font-weight:500}
+.hdr-role{font-size:10px;color:var(--muted)}
+.btn-out{padding:5px 12px;background:transparent;border:1px solid var(--border);color:var(--text2);font-size:12px;font-weight:500;border-radius:6px;cursor:pointer;font-family:inherit;transition:all .15s}
+.btn-out:hover{border-color:var(--blue);color:var(--blue)}
+
+/* Sidebar */
+#sb{
+  position:fixed;top:var(--hh);left:0;bottom:0;width:var(--sw);
+  background:var(--bg2);border-right:1px solid var(--border);
+  overflow-y:auto;z-index:100;padding:14px 10px;display:flex;flex-direction:column;gap:2px
+}
+.nav-sec{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:12px 10px 4px}
+.nav-it{
+  display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;
+  cursor:pointer;font-size:13px;font-weight:500;color:var(--text2);
+  transition:background .12s,color .12s;border:none;background:none;width:100%;
+  text-align:left;font-family:inherit
+}
+.nav-it:hover{background:var(--card);color:var(--text)}
+.nav-it.on{background:var(--bl);color:var(--blue);font-weight:600}
+.nav-it .ic{font-size:15px;flex-shrink:0;width:20px;text-align:center}
+
+/* Main */
+#main{margin-left:var(--sw);margin-top:var(--hh);min-height:calc(100vh - var(--hh))}
+.pg{display:none;padding:28px 32px 64px}
+.pg.on{display:block}
+.pg-title{font-size:22px;font-weight:700;letter-spacing:-.4px;margin-bottom:3px}
+.pg-sub{font-size:13px;color:var(--text2);margin-bottom:24px}
+
+/* ── HOME ──────────────────────────────────────── */
+.h-greet{font-size:26px;font-weight:700;letter-spacing:-.5px;margin-bottom:2px}
+.h-date{font-size:13px;color:var(--text2);margin-bottom:26px}
+.cal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.cal-wl{font-size:14px;font-weight:600}
+.cal-nav{display:flex;gap:5px}
+.cal-btn{padding:5px 11px;background:var(--card);border:1px solid var(--border);color:var(--text2);border-radius:6px;cursor:pointer;font-size:12px;font-family:inherit;transition:all .15s}
+.cal-btn:hover{border-color:var(--blue);color:var(--blue)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:28px}
+.cal-day{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 8px;min-height:108px}
+.cal-day.today{border-color:var(--blue);background:var(--bl)}
+.cal-day.wknd{background:var(--bg2)}
+.cal-dn{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:3px}
+.cal-dd{font-size:18px;font-weight:700;line-height:1;margin-bottom:8px}
+.cal-day.today .cal-dd{color:var(--blue)}
+.cal-ev{padding:2px 6px;border-radius:4px;font-size:10px;font-weight:500;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:default}
+.ev-m{background:var(--bl);color:var(--blue)}
+.ev-h{background:var(--rl);color:var(--red)}
+.ev-t{background:var(--yl);color:var(--yellow)}
+.ev-e{background:var(--gl);color:var(--green)}
+.upc-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:12px}
+.ev-list{display:flex;flex-direction:column;gap:8px;max-width:640px}
+.ev-item{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 16px}
+.ev-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.ev-dot.m{background:var(--blue)} .ev-dot.h{background:var(--red)} .ev-dot.t{background:var(--yellow)} .ev-dot.e{background:var(--green)}
+.ev-name{font-size:13px;font-weight:500}
+.ev-meta{font-size:11px;color:var(--muted)}
+
+/* ── ORGANOGRAMA ────────────────────────────────── */
+.sb-wrap{position:relative;margin-bottom:16px;max-width:480px}
+.sb-inp{width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:9px 12px 9px 36px;font-size:13px;font-family:inherit;outline:none;transition:border-color .15s}
+.sb-inp:focus{border-color:var(--blue)}
+.sb-inp::placeholder{color:var(--muted)}
+.sb-ic{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;pointer-events:none}
+.frow{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px}
+.fchip{padding:5px 13px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .15s}
+.fchip:hover{border-color:var(--blue);color:var(--blue)}
+.fchip.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(198px,1fr));gap:10px}
+.pcard{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;transition:border-color .15s,background .15s}
+.pcard:hover{border-color:var(--bm);background:var(--cardh)}
+.pc-top{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}
+.pc-av{width:36px;height:36px;border-radius:50%;background:var(--bl);border:1.5px solid var(--bm);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--blue);flex-shrink:0}
+.pc-av.pj{background:var(--yl);border-color:rgba(234,179,8,.3);color:var(--yellow)}
+.pc-av.ceo{background:var(--blue);border-color:var(--blue);color:#fff}
+.pc-nm{font-size:12px;font-weight:600;line-height:1.3}
+.pc-tt{font-size:11px;color:var(--text2);line-height:1.35;margin-top:1px}
+.pc-ft{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.badge{font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;letter-spacing:.02em}
+.b-clt{background:var(--gl);color:var(--green)}
+.b-pj{background:var(--yl);color:var(--yellow)}
+.b-ceo{background:var(--bl);color:var(--blue)}
+.b-ext{background:rgba(255,255,255,.05);color:var(--muted)}
+.b-dept{background:rgba(255,255,255,.04);color:var(--muted)}
+
+/* ── MODAL ──────────────────────────────────────── */
+.mov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:500;align-items:center;justify-content:center;padding:20px}
+.mov.on{display:flex}
+.mbox{background:var(--card);border:1px solid var(--border);border-radius:14px;max-width:540px;width:100%;max-height:84vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.6)}
+.mhd{padding:20px 22px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;gap:12px;position:sticky;top:0;background:var(--card);z-index:1}
+.mhd h2{font-size:16px;font-weight:700;margin-bottom:3px}
+.mhd p{font-size:13px;color:var(--text2)}
+.mcls{background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;flex-shrink:0}
+.mcls:hover{color:var(--text)}
+.mbdy{padding:18px 22px 22px}
+.mtags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.mtag{font-size:11px;font-weight:600;padding:2px 8px;border-radius:5px}
+.mt-bl{background:var(--bl);color:var(--blue);border:1px solid var(--bm)}
+.mt-gr{background:var(--gl);color:var(--green)}
+.mt-ye{background:var(--yl);color:var(--yellow)}
+.mt-mu{background:rgba(255,255,255,.05);color:var(--text2)}
+.msec{margin-top:16px}
+.msec h3{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-bottom:8px}
+.msec p{font-size:13px;color:var(--text2);line-height:1.6}
+.mlist{list-style:none}
+.mlist li{font-size:12px;color:var(--text2);padding:5px 0;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:flex-start;line-height:1.5}
+.mlist li:last-child{border-bottom:none}
+.mlist li::before{content:'';width:4px;height:4px;background:var(--blue);border-radius:50%;margin-top:7px;flex-shrink:0}
+
+/* ── TRAINING ───────────────────────────────────── */
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.vcard{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color .15s}
+.vcard:hover{border-color:var(--bm)}
+.vthumb{height:136px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:44px;border-bottom:1px solid var(--border);position:relative}
+.vplay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.35);opacity:0;transition:opacity .15s}
+.vcard:hover .vplay{opacity:1}
+.vplay-ic{width:44px;height:44px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px}
+.vinfo{padding:14px}
+.vcat{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--blue);margin-bottom:4px}
+.vtitle{font-size:13px;font-weight:600;line-height:1.4;margin-bottom:5px}
+.vdesc{font-size:11px;color:var(--text2);line-height:1.5;margin-bottom:12px}
+.vft{display:flex;align-items:center;justify-content:space-between}
+.vdur{font-size:11px;color:var(--muted)}
+.vstatus{font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;border:1px solid;cursor:pointer;transition:all .15s;font-family:inherit;background:transparent}
+.vstatus.pend{color:var(--muted);border-color:var(--border)}
+.vstatus.pend:hover{color:var(--blue);border-color:var(--blue);background:var(--bl)}
+.vstatus.done{color:var(--green);border-color:var(--green);background:var(--gl)}
+
+/* ── ONBOARDING ─────────────────────────────────── */
+.ob-wrap{max-width:680px}
+.ob-prog{display:flex;align-items:center;margin-bottom:32px}
+.ob-dot{width:32px;height:32px;border-radius:50%;background:var(--bg2);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--muted);flex-shrink:0;z-index:1}
+.ob-dot.done{background:var(--green);border-color:var(--green);color:#09090b}
+.ob-dot.cur{background:var(--blue);border-color:var(--blue);color:#fff}
+.ob-line{flex:1;height:2px;background:var(--border)}
+.ob-line.done{background:var(--green)}
+.ob-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:28px}
+.ob-sn{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--blue);margin-bottom:4px}
+.ob-st{font-size:20px;font-weight:700;letter-spacing:-.3px;margin-bottom:8px}
+.ob-sd{font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.65}
+.ob-cl{list-style:none;margin-bottom:24px}
+.ob-ci{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:opacity .15s}
+.ob-ci:hover{opacity:.8}
+.ob-ci:last-child{border-bottom:none}
+.ob-cb{width:20px;height:20px;border-radius:5px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;font-size:11px}
+.ob-ci.ck .ob-cb{background:var(--green);border-color:var(--green);color:#09090b}
+.ob-ci.ck .ob-ct{text-decoration:line-through;color:var(--muted)}
+.ob-ct{font-size:13px}
+.ob-act{display:flex;gap:10px}
+.btn-sec{padding:9px 20px;background:var(--bg2);border:1px solid var(--border);color:var(--text2);border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s}
+.btn-sec:hover{border-color:var(--border2);color:var(--text)}
+.btn-bl{padding:9px 20px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .15s}
+.btn-bl:hover{opacity:.88}
+.btn-bl:disabled{opacity:.3;cursor:not-allowed}
+
+/* ── BOAS PRÁTICAS ──────────────────────────────── */
+.bp-layout{display:flex;gap:24px;align-items:flex-start}
+.bp-nav{width:196px;flex-shrink:0;background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;position:sticky;top:20px}
+.bp-ni{padding:10px 14px;font-size:12px;cursor:pointer;color:var(--text2);border-bottom:1px solid var(--border);transition:background .12s,color .12s;display:flex;align-items:center;gap:7px}
+.bp-ni:last-child{border-bottom:none}
+.bp-ni:hover{background:var(--cardh);color:var(--text)}
+.bp-ni.on{background:var(--bl);color:var(--blue);font-weight:600}
+.bp-body{flex:1}
+.bp-sec{display:none}
+.bp-sec.on{display:block}
+.bp-h{font-size:20px;font-weight:700;letter-spacing:-.3px;margin-bottom:4px}
+.bp-meta{font-size:12px;color:var(--muted);margin-bottom:20px}
+.bp-txt{font-size:13px;color:var(--text2);line-height:1.8}
+.bp-txt h3{font-size:14px;font-weight:700;color:var(--text);margin:22px 0 8px}
+.bp-txt p{margin-bottom:14px}
+.bp-txt ul{list-style:none;margin-bottom:14px;padding-left:4px}
+.bp-txt ul li{padding:4px 0 4px 16px;position:relative}
+.bp-txt ul li::before{content:'→';position:absolute;left:0;color:var(--blue);font-size:11px;top:5px}
+.callout{background:var(--bl);border:1px solid var(--bm);border-radius:8px;padding:12px 16px;margin:16px 0;font-size:13px;color:var(--text);line-height:1.6}
+
+/* ── PRODUTOS ───────────────────────────────────── */
+.prodgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.prcard{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color .15s}
+.prcard:hover{border-color:var(--bm)}
+.pr-img{height:156px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:54px;border-bottom:1px solid var(--border)}
+.pr-body{padding:14px}
+.pr-cat{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--blue);margin-bottom:3px}
+.pr-nm{font-size:14px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.pr-new{font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;background:var(--yl);color:var(--yellow);text-transform:uppercase;letter-spacing:.04em}
+.pr-specs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px}
+.spec{background:var(--bg2);border-radius:6px;padding:6px 8px}
+.sp-l{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:1px}
+.sp-v{font-size:12px;font-weight:600}
+.pr-price{font-size:15px;font-weight:700;color:var(--blue)}
+.pr-price.consult{color:var(--text2);font-size:13px}
+
+/* ── BIRTHDAY ───────────────────────────────────── */
+.bday-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:0}
+.bday-card{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 14px;flex:1;min-width:155px;max-width:210px}
+.bday-card.today{border-color:rgba(234,179,8,.45);background:rgba(234,179,8,.06)}
+.bday-av{width:34px;height:34px;border-radius:50%;background:var(--yl);border:1.5px solid rgba(234,179,8,.35);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--yellow);flex-shrink:0}
+.bday-nm{font-size:12px;font-weight:600;line-height:1.3}
+.bday-dt{font-size:11px;color:var(--muted)}
+.bday-today{font-size:10px;font-weight:700;color:var(--yellow);margin-top:1px}
+
+/* ── STOCK ──────────────────────────────────────── */
+.stk-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.stk-table{width:100%;border-collapse:collapse;font-size:13px}
+.stk-table th{text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);padding:10px 14px;border-bottom:1px solid var(--border)}
+.stk-table td{padding:11px 14px;border-bottom:1px solid var(--border);color:var(--text2)}
+.stk-table tr:last-child td{border-bottom:none}
+.stk-table tr:hover td{background:rgba(255,255,255,.02);color:var(--text)}
+.stk-table td:first-child{font-weight:600;color:var(--text)}
+.sk-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600}
+.sk-ok{background:var(--gl);color:var(--green)}
+.sk-low{background:var(--yl);color:var(--yellow)}
+.sk-out{background:var(--rl);color:var(--red)}
+.stk-sum{display:flex;gap:12px;margin-bottom:20px}
+.stk-sc{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 16px;flex:1;text-align:center}
+.stk-sc-v{font-size:22px;font-weight:700}
+.stk-sc-l{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* ── LEAD QUALI ─────────────────────────────────── */
+.lq-layout{display:grid;grid-template-columns:1fr 300px;gap:20px;max-width:940px}
+.lq-form{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px}
+.lq-sec-t{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.lq-item{margin-bottom:16px}
+.lq-q{font-size:13px;font-weight:500;margin-bottom:7px}
+.lq-opts{display:flex;flex-direction:column;gap:5px}
+.lq-opt{display:flex;align-items:center;gap:8px;padding:7px 10px;border:1px solid var(--border);border-radius:7px;cursor:pointer;transition:all .13s;font-size:12px;color:var(--text2)}
+.lq-opt:hover{border-color:var(--blue);background:var(--bl);color:var(--text)}
+.lq-opt.sel{border-color:var(--blue);background:var(--bl);color:var(--blue);font-weight:500}
+.lq-opt input[type=radio]{accent-color:var(--blue);width:13px;height:13px;flex-shrink:0}
+.lq-score-box{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px;position:sticky;top:20px}
+.lq-st{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:14px}
+.lq-score-num{font-size:56px;font-weight:800;letter-spacing:-2px;line-height:1;margin-bottom:3px}
+.lq-score-max{font-size:12px;color:var(--muted);margin-bottom:14px}
+.lq-temp{font-size:14px;font-weight:700;padding:8px 14px;border-radius:8px;text-align:center;margin-bottom:16px}
+.temp-hot{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.25)}
+.temp-warm{background:rgba(234,179,8,.12);color:var(--yellow);border:1px solid rgba(234,179,8,.25)}
+.temp-cold{background:rgba(148,163,184,.08);color:var(--text2);border:1px solid var(--border)}
+.lq-bar-wrap{height:7px;background:var(--bg);border-radius:4px;overflow:hidden;margin-bottom:16px}
+.lq-bar{height:100%;border-radius:4px;transition:width .4s ease,background-color .4s ease}
+.lq-action{font-size:12px;color:var(--text2);line-height:1.65;padding:12px;background:var(--bg);border-radius:8px}
+.btn-reset{width:100%;padding:9px;background:transparent;border:1px solid var(--border);color:var(--text2);border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit;margin-top:12px;transition:all .15s}
+.btn-reset:hover{border-color:var(--border2);color:var(--text)}
+
+/* ── OBJECTIONS ─────────────────────────────────── */
+.obj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:10px}
+.obj-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:15px;cursor:pointer;transition:border-color .12s,background .12s}
+.obj-card:hover{border-color:var(--bm)}
+.obj-card.open{border-color:var(--blue);background:rgba(59,130,246,.06)}
+.obj-tag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;margin-bottom:8px;display:inline-block;text-transform:uppercase}
+.ot-p{background:var(--rl);color:var(--red)}
+.ot-c{background:var(--bl);color:var(--blue)}
+.ot-pr{background:var(--gl);color:var(--green)}
+.ot-s{background:var(--yl);color:var(--yellow)}
+.obj-q{font-size:13px;font-weight:600;color:var(--text);line-height:1.4}
+.obj-ans{font-size:12px;color:var(--text2);line-height:1.7;margin-top:10px;display:none;padding-top:10px;border-top:1px solid var(--border)}
+.obj-card.open .obj-ans{display:block}
+
+/* ── SALES JOURNEY ──────────────────────────────── */
+.jrn-pipe{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:28px}
+.jrn-stage{background:var(--card);border:1px solid var(--border);border-top:3px solid;border-radius:0 0 10px 10px;padding:16px 14px}
+.jrn-ic{font-size:22px;margin-bottom:8px}
+.jrn-nm{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px}
+.jrn-cnt{font-size:24px;font-weight:800;margin-bottom:2px}
+.jrn-val{font-size:11px;color:var(--muted);margin-bottom:14px;font-weight:500}
+.jrn-items{list-style:none}
+.jrn-item{background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:8px 10px;margin-bottom:6px}
+.jrn-co{font-size:12px;font-weight:600;color:var(--text)}
+.jrn-prod{font-size:11px;color:var(--text2);margin-top:2px}
+.jrn-val-sm{font-size:10px;color:var(--muted);margin-top:2px;font-weight:500}
+.j-conv{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.j-cv{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center}
+.j-cv-v{font-size:22px;font-weight:800;color:var(--blue)}
+.j-cv-l{font-size:11px;color:var(--muted);margin-top:3px}
+
+/* ── PRICE POLICY ───────────────────────────────── */
+.pp-layout{display:flex;gap:22px;max-width:960px;align-items:flex-start}
+.pp-toc{width:190px;flex-shrink:0;background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;position:sticky;top:20px}
+.pp-ti{padding:10px 14px;font-size:12px;cursor:pointer;color:var(--text2);border-bottom:1px solid var(--border);transition:all .12s;display:flex;align-items:center;gap:8px}
+.pp-ti:last-child{border-bottom:none}
+.pp-ti:hover{background:var(--cardh);color:var(--text)}
+.pp-ti.on{background:var(--bl);color:var(--blue);font-weight:600}
+.pp-doc{flex:1}
+.pp-sec{display:none}
+.pp-sec.on{display:block}
+.pp-h{font-size:20px;font-weight:700;margin-bottom:4px}
+.pp-meta{font-size:12px;color:var(--muted);margin-bottom:18px}
+.pp-tbl{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:20px}
+.pp-tbl th{text-align:left;padding:9px 12px;background:var(--bg2);border:1px solid var(--border);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.pp-tbl td{padding:9px 12px;border:1px solid var(--border);color:var(--text2);line-height:1.4}
+.pp-tbl tr:hover td{background:var(--card);color:var(--text)}
+.pp-txt{font-size:13px;color:var(--text2);line-height:1.8}
+.pp-txt h3{font-size:14px;font-weight:700;color:var(--text);margin:20px 0 8px}
+.pp-txt p{margin-bottom:12px}
+.pp-txt ul{list-style:none;padding-left:4px;margin-bottom:14px}
+.pp-txt ul li{padding:3px 0 3px 14px;position:relative;font-size:13px}
+.pp-txt ul li::before{content:'·';position:absolute;left:2px;color:var(--blue)}
+.callout-pp{background:var(--bl);border:1px solid var(--bm);border-radius:8px;padding:12px 16px;margin:14px 0;font-size:13px;line-height:1.6}
+
+/* ── KPI DASHBOARD ──────────────────────────────── */
+.kpi-tabs{display:flex;gap:0;margin-bottom:24px;background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;width:fit-content}
+.kpi-tab{padding:9px 24px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;border:none;background:none;font-family:inherit;transition:all .13s}
+.kpi-tab.on{background:var(--blue);color:#fff;font-weight:600}
+.kpi-panel{display:none}
+.kpi-panel.on{display:block}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin-bottom:24px}
+.kpi-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px}
+.kpi-l{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px}
+.kpi-v{font-size:28px;font-weight:800;letter-spacing:-1px;line-height:1}
+.kpi-m{font-size:11px;color:var(--muted);margin-top:4px}
+.kpi-d{font-size:11px;font-weight:600;margin-top:5px}
+.kd-ok{color:var(--green)}.kd-warn{color:var(--yellow)}.kd-bad{color:var(--red)}
+.kpi-bar-sec{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:12px}
+.kpi-bar-title{font-size:13px;font-weight:600;margin-bottom:16px}
+.bar-row{margin-bottom:14px}
+.bar-lbl{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;color:var(--text2)}
+.bar-lbl strong{color:var(--text);font-weight:600}
+.bar-track{height:7px;background:var(--bg);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px}
+
+/* ── DOWNLOADS ──────────────────────────────────── */
+.dl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
+.dl-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color .13s}
+.dl-card:hover{border-color:var(--bm)}
+.dl-hd{padding:18px;border-bottom:1px solid var(--border);background:var(--bg2)}
+.dl-emoji{font-size:26px;margin-bottom:8px}
+.dl-title{font-size:14px;font-weight:700;margin-bottom:3px}
+.dl-sub{font-size:11px;color:var(--text2)}
+.dl-bd{padding:15px}
+.dl-desc{font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:12px}
+.dl-meta{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px}
+.dl-tag{font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;background:var(--bg2);color:var(--muted);border:1px solid var(--border)}
+.btn-dl{width:100%;padding:9px;background:var(--bg2);border:1px solid var(--border);color:var(--text2);border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:7px}
+.btn-dl:hover{border-color:var(--blue);color:var(--blue);background:var(--bl)}
+.dl-toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--bm);border-radius:10px;padding:12px 22px;font-size:13px;font-weight:500;box-shadow:0 8px 32px rgba(0,0,0,.5);z-index:999;opacity:0;transition:opacity .2s;pointer-events:none;color:var(--blue)}
+.dl-toast.show{opacity:1}
+
+/* ── KPI v2 ─────────────────────────────────────── */
+.kmt-row{display:flex;gap:2px;margin-bottom:18px;background:var(--card);border:1px solid var(--border);border-radius:10px;overflow-x:auto;padding:3px;scrollbar-width:none}
+.kmt-row::-webkit-scrollbar{display:none}
+.kmt{padding:8px 14px;font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;border:none;background:transparent;font-family:inherit;transition:all .13s;white-space:nowrap;border-radius:7px}
+.kmt:hover{background:var(--cardh);color:var(--text)}
+.kmt.on{background:var(--blue);color:#fff;font-weight:600}
+.kpanel{display:none}
+.kpanel.on{display:block}
+.ks{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px 20px;margin-bottom:14px}
+.ks-t{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:14px}
+.km-row{display:flex;gap:10px;flex-wrap:wrap}
+.km{flex:1;min-width:130px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
+.km-l{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.km-v{font-size:20px;font-weight:800;letter-spacing:-.5px;line-height:1.1}
+.km-m{font-size:11px;color:var(--muted);margin-top:3px}
+.km-d{font-size:11px;font-weight:600;margin-top:3px}
+.kt-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:0}
+.kt{flex:1;min-width:160px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
+.kt-hd{display:flex;justify-content:space-between;margin-bottom:8px;font-size:12px}
+.kt-l{color:var(--text2)}
+.kt-vv{font-weight:700;color:var(--text)}
+.kt-bar{height:5px;background:var(--bg);border-radius:3px;overflow:hidden;margin-bottom:5px}
+.kt-fill{height:100%;border-radius:3px;transition:width .4s}
+.kt-bot{font-size:10px;color:var(--muted)}
+.kfunnel{display:flex;flex-direction:column;gap:6px}
+.kfn{display:flex;align-items:center;gap:10px}
+.kfn-l{width:160px;font-size:11px;color:var(--text2);text-align:right;flex-shrink:0}
+.kfn-wrap{flex:1;background:var(--bg);border-radius:4px;overflow:hidden;height:28px}
+.kfn-bar{height:100%;display:flex;align-items:center;padding:0 10px;font-size:11px;font-weight:600;color:#fff;min-width:24px;transition:width .4s}
+.kfn-n{width:38px;font-size:13px;font-weight:700;text-align:center;flex-shrink:0}
+.kfn-c{width:46px;font-size:10px;color:var(--muted);text-align:right;flex-shrink:0}
+.ktbl{width:100%;border-collapse:collapse;font-size:12px}
+.ktbl th{text-align:left;padding:7px 10px;border-bottom:1px solid var(--border);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.ktbl td{padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text2)}
+.ktbl tr:last-child td{border-bottom:none}
+.ktbl td:first-child{font-weight:600;color:var(--text)}
+.ktbl tr:hover td{background:rgba(255,255,255,.02)}
+.kpi-2g{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.kpi-3g{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.kstrat{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px}
+.kst-item{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;display:flex;align-items:flex-start;gap:10px}
+.kst-ic{font-size:20px;flex-shrink:0;line-height:1}
+.kst-nm{font-size:12px;font-weight:600;line-height:1.3}
+.kst-st{font-size:11px;margin-top:3px;font-weight:500}
+
+/* ── MISC ───────────────────────────────────────── */
+.empty{text-align:center;padding:48px 20px;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+
+<!-- ═══ LOGIN ═══════════════════════════════ -->
+<div id="login">
+  <div class="lcard">
+    <div class="l-logo">
+      <div class="l-icon">In</div>
+      <div class="l-wordmark">In<em>Ciclo</em></div>
+    </div>
+    <div class="l-sub">Portal interno da CicloWay — Mobilidade Elétrica</div>
+    <div class="fg">
+      <label class="fl">E-mail</label>
+      <input id="l-em" type="email" class="fi" placeholder="seu@cicloway.com.br" autocomplete="email"/>
+    </div>
+    <div class="fg">
+      <label class="fl">Senha</label>
+      <input id="l-pw" type="password" class="fi" placeholder="••••••••" autocomplete="current-password"/>
+    </div>
+    <div class="l-err" id="l-err">E-mail ou senha incorretos.</div>
+    <button class="l-btn" onclick="doLogin()">Entrar</button>
+    <div class="l-hint">Acesso restrito a colaboradores CicloWay</div>
+    <div class="l-footer">Portal exclusivo <strong>CicloWay</strong></div>
+  </div>
+</div>
+
+<!-- ═══ APP ══════════════════════════════════ -->
+<div id="app">
+
+  <!-- Header -->
+  <header id="hdr">
+    <div class="hdr-l">
+      <div class="hdr-icon">In</div>
+      <div class="hdr-name">In<em>Ciclo</em></div>
+      <div class="hdr-div"></div>
+      <span class="hdr-cw">CicloWay · Mobilidade Elétrica</span>
+    </div>
+    <div class="hdr-r">
+      <div class="hdr-user">
+        <div class="hdr-av" id="h-av">--</div>
+        <div>
+          <div class="hdr-uname" id="h-nm">—</div>
+          <div class="hdr-role" id="h-rl">—</div>
+        </div>
+      </div>
+      <button class="btn-out" onclick="doLogout()">Sair</button>
+    </div>
+  </header>
+
+  <!-- Sidebar -->
+  <nav id="sb">
+    <button class="nav-it on" data-p="home"><span class="ic">🏠</span>Home</button>
+    <div class="nav-sec">Pessoas</div>
+    <button class="nav-it" data-p="org"><span class="ic">🏢</span>Organograma</button>
+    <div class="nav-sec">Aprendizado</div>
+    <button class="nav-it" data-p="training"><span class="ic">🎬</span>Treinamentos</button>
+    <button class="nav-it" data-p="onboarding"><span class="ic">🚀</span>Onboarding</button>
+    <div class="nav-sec">Cultura</div>
+    <button class="nav-it" data-p="practices"><span class="ic">📖</span>Boas Práticas</button>
+    <div class="nav-sec">Vendas</div>
+    <button class="nav-it" data-p="journey"><span class="ic">🗺️</span>Jornada de Vendas</button>
+    <button class="nav-it" data-p="leads"><span class="ic">🎯</span>Qualificação de Leads</button>
+    <button class="nav-it" data-p="objections"><span class="ic">💬</span>Biblioteca de Objeções</button>
+    <button class="nav-it" data-p="price"><span class="ic">💰</span>Política de Preço</button>
+    <button class="nav-it" data-p="proposals"><span class="ic">📄</span>Propostas Padrão</button>
+    <div class="nav-sec">Operacional</div>
+    <button class="nav-it" data-p="stock"><span class="ic">📦</span>Estoque</button>
+    <div class="nav-sec">Documentos</div>
+    <button class="nav-it" data-p="cases"><span class="ic">🏆</span>Cases</button>
+    <button class="nav-it" data-p="contracts"><span class="ic">📋</span>Contratos</button>
+    <div class="nav-sec">Gestão</div>
+    <button class="nav-it" data-p="kpis"><span class="ic">📊</span>Dashboard KPIs</button>
+    <div class="nav-sec">Catálogo</div>
+    <button class="nav-it" data-p="products"><span class="ic">🛒</span>Produtos</button>
+  </nav>
+
+  <!-- Main -->
+  <main id="main">
+
+    <!-- HOME -->
+    <div id="pg-home" class="pg on">
+      <div class="h-greet" id="greet"></div>
+      <div class="h-date" id="h-dt"></div>
+      <div id="bday-sec" style="margin-bottom:26px">
+        <div class="upc-title">🎂 Aniversariantes do Mês</div>
+        <div class="bday-row" id="bday-row"></div>
+      </div>
+      <div class="cal-hdr">
+        <span class="cal-wl" id="cal-wl"></span>
+        <div class="cal-nav">
+          <button class="cal-btn" onclick="wk(-1)">← Anterior</button>
+          <button class="cal-btn" onclick="wk(0)">Hoje</button>
+          <button class="cal-btn" onclick="wk(1)">Próxima →</button>
+        </div>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+      <div class="upc-title">Próximos Eventos</div>
+      <div class="ev-list" id="upc-list"></div>
+    </div>
+
+    <!-- ORGANOGRAMA -->
+    <div id="pg-org" class="pg">
+      <div class="pg-title">Organograma</div>
+      <div class="pg-sub">45 colaboradores · CicloWay 2026</div>
+      <div class="sb-wrap"><span class="sb-ic">🔍</span><input id="org-q" type="text" class="sb-inp" placeholder="Buscar por nome ou cargo..." oninput="filterOrg()"/></div>
+      <div class="frow" id="dept-row"></div>
+      <div class="pgrid" id="pgrid"></div>
+    </div>
+
+    <!-- TREINAMENTOS -->
+    <div id="pg-training" class="pg">
+      <div class="pg-title">Treinamentos</div>
+      <div class="pg-sub">Módulos de capacitação técnica e operacional</div>
+      <div class="frow" id="cat-row"></div>
+      <div class="tgrid" id="tgrid"></div>
+    </div>
+
+    <!-- ONBOARDING -->
+    <div id="pg-onboarding" class="pg">
+      <div class="pg-title">Onboarding</div>
+      <div class="pg-sub">Trilha de integração para novos colaboradores</div>
+      <div class="ob-wrap">
+        <div class="ob-prog" id="ob-prog"></div>
+        <div class="ob-card" id="ob-card"></div>
+      </div>
+    </div>
+
+    <!-- BOAS PRÁTICAS -->
+    <div id="pg-practices" class="pg">
+      <div class="pg-title">Boas Práticas</div>
+      <div class="pg-sub">Manual de cultura, processos e conduta</div>
+      <div class="bp-layout">
+        <nav class="bp-nav" id="bp-nav"></nav>
+        <div class="bp-body" id="bp-body"></div>
+      </div>
+    </div>
+
+    <!-- PRODUTOS -->
+    <div id="pg-products" class="pg">
+      <div class="pg-title">Produtos</div>
+      <div class="pg-sub">Catálogo completo de veículos elétricos CicloWay</div>
+      <div class="frow" id="prod-row"></div>
+      <div class="prodgrid" id="prodgrid"></div>
+    </div>
+
+    <!-- ESTOQUE -->
+    <div id="pg-stock" class="pg">
+      <div class="pg-title">Estoque</div>
+      <div class="pg-sub">Posição atual de veículos disponíveis — atualizado Jun/2026</div>
+      <div class="stk-sum" id="stk-sum"></div>
+      <div class="frow" id="stk-filter"></div>
+      <div class="stk-wrap">
+        <table class="stk-table">
+          <thead><tr><th>Modelo</th><th>Categoria</th><th>Qtd disponível</th><th>Localização</th><th>Status</th></tr></thead>
+          <tbody id="stk-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- QUALIFICAÇÃO DE LEADS -->
+    <div id="pg-leads" class="pg">
+      <div class="pg-title">Qualificação de Leads</div>
+      <div class="pg-sub">Avalie o potencial de um lead com base nos critérios comerciais da CicloWay</div>
+      <div class="lq-layout">
+        <div class="lq-form" id="lq-form"></div>
+        <div class="lq-score-box">
+          <div class="lq-st">Pontuação</div>
+          <div class="lq-score-num" id="lq-num">0</div>
+          <div class="lq-score-max">de 100 pontos</div>
+          <div class="lq-temp" id="lq-temp">❄️ Lead Frio</div>
+          <div class="lq-bar-wrap"><div class="lq-bar" id="lq-bar" style="width:0%;background:var(--text2)"></div></div>
+          <div class="lq-action" id="lq-action">Responda as perguntas ao lado para qualificar o lead.</div>
+          <button class="btn-reset" onclick="resetLeads()">↺ Reiniciar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BIBLIOTECA DE OBJEÇÕES -->
+    <div id="pg-objections" class="pg">
+      <div class="pg-title">Biblioteca de Objeções</div>
+      <div class="pg-sub">Respostas para as principais objeções de vendas — clique em uma objeção para ver a resposta</div>
+      <div class="sb-wrap" style="max-width:480px;margin-bottom:20px">
+        <span class="sb-ic">🔍</span>
+        <input id="obj-q" type="text" class="sb-inp" placeholder="Filtrar objeções..." oninput="filterObj()"/>
+      </div>
+      <div class="frow" id="obj-tags"></div>
+      <div class="obj-grid" id="obj-grid"></div>
+    </div>
+
+    <!-- JORNADA DE VENDAS -->
+    <div id="pg-journey" class="pg">
+      <div class="pg-title">Jornada de Vendas</div>
+      <div class="pg-sub">Pipeline comercial CicloWay — atualizado Jun/2026</div>
+      <div class="jrn-pipe" id="jrn-pipe"></div>
+      <div class="upc-title" style="margin-bottom:12px">Métricas de Conversão</div>
+      <div class="j-conv" id="j-conv"></div>
+    </div>
+
+    <!-- POLÍTICA DE PREÇO -->
+    <div id="pg-price" class="pg">
+      <div class="pg-title">Política de Preço</div>
+      <div class="pg-sub">Tabelas, condições de pagamento e regras de desconto — uso interno</div>
+      <div class="pp-layout">
+        <nav class="pp-toc" id="pp-toc"></nav>
+        <div class="pp-doc" id="pp-doc"></div>
+      </div>
+    </div>
+
+    <!-- DASHBOARD KPIs -->
+    <div id="pg-kpis" class="pg">
+      <div class="pg-title">Dashboard KPIs</div>
+      <div class="pg-sub">Estrutura de dashboards CicloWay 2026–2027</div>
+      <div class="kmt-row" id="kmt-row">
+        <button class="kmt on"  data-kp="exec" onclick="kpiMainTab('exec')">🎯 Executivo</button>
+        <button class="kmt"     data-kp="seg"  onclick="kpiMainTab('seg')">🤖 Segway</button>
+        <button class="kmt"     data-kp="gov"  onclick="kpiMainTab('gov')">🏛️ GOV</button>
+        <button class="kmt"     data-kp="tri"  onclick="kpiMainTab('tri')">🚲 Triciclos B2B</button>
+        <button class="kmt"     data-kp="mkt"  onclick="kpiMainTab('mkt')">📣 Marketing</button>
+        <button class="kmt"     data-kp="pv"   onclick="kpiMainTab('pv')">🔧 Pós-Venda</button>
+        <button class="kmt"     data-kp="op"   onclick="kpiMainTab('op')">⚙️ Operação</button>
+        <button class="kmt"     data-kp="prod" onclick="kpiMainTab('prod')">🏭 Produção</button>
+        <button class="kmt"     data-kp="qual" onclick="kpiMainTab('qual')">✅ Qualidade</button>
+      </div>
+      <div id="kpanel-exec" class="kpanel on"></div>
+      <div id="kpanel-seg"  class="kpanel"></div>
+      <div id="kpanel-gov"  class="kpanel"></div>
+      <div id="kpanel-tri"  class="kpanel"></div>
+      <div id="kpanel-mkt"  class="kpanel"></div>
+      <div id="kpanel-pv"   class="kpanel"></div>
+      <div id="kpanel-op"   class="kpanel"></div>
+      <div id="kpanel-prod" class="kpanel"></div>
+      <div id="kpanel-qual" class="kpanel"></div>
+    </div>
+
+    <!-- CASES -->
+    <div id="pg-cases" class="pg">
+      <div class="pg-title">Cases de Sucesso</div>
+      <div class="pg-sub">Histórias de clientes que transformaram sua operação com a CicloWay</div>
+      <div class="dl-grid" id="cases-grid"></div>
+    </div>
+
+    <!-- CONTRATOS -->
+    <div id="pg-contracts" class="pg">
+      <div class="pg-title">Modelos de Contrato</div>
+      <div class="pg-sub">Templates prontos para uso — revise sempre com o jurídico antes de enviar</div>
+      <div class="dl-grid" id="contracts-grid"></div>
+    </div>
+
+    <!-- PROPOSTAS PADRÃO -->
+    <div id="pg-proposals" class="pg">
+      <div class="pg-title">Propostas Padrão</div>
+      <div class="pg-sub">Templates de proposta comercial por segmento</div>
+      <div class="dl-grid" id="proposals-grid"></div>
+    </div>
+
+  </main>
+</div><!-- /app -->
+
+<!-- TOAST -->
+<div class="dl-toast" id="dl-toast">⏳ Arquivo em breve</div>
+
+<!-- MODAL -->
+<div class="mov" id="modal" onclick="closeMod(event)">
+  <div class="mbox">
+    <div class="mhd">
+      <div><h2 id="m-nm"></h2><p id="m-tt"></p></div>
+      <button class="mcls" onclick="closeMod()">×</button>
+    </div>
+    <div class="mbdy">
+      <div class="mtags" id="m-tags"></div>
+      <div class="msec"><h3>Resumo</h3><p id="m-sum"></p></div>
+      <div class="msec" id="m-resp-sec"><h3>Responsabilidades</h3><ul class="mlist" id="m-resp"></ul></div>
+      <div class="msec" id="m-tools-sec"><h3>Ferramentas</h3><ul class="mlist" id="m-tools"></ul></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   DATA
+═══════════════════════════════════════════════ */
+
+// Os usuários e senhas agora vivem no Supabase Auth (não mais em texto puro aqui).
+// O perfil do usuário logado (nome, iniciais, cargo, departamento) é lido da
+// tabela `profiles`. Ver bloco AUTH mais abaixo e supabase/schema.sql.
+
+const PEOPLE = [
+  {id:'joao',    in:'JH',nm:'João G. Z. Hannud',          tt:'CEO / Diretor',                          dept:'Diretoria',  ct:'CEO',since:'Fundador',
+   sum:'Lidera a transição estratégica da CicloWay para o mercado B2B/B2G. Conduz negociações de grandes contas (Amazon, prefeituras), estruturação societária para captação via FDIC e o projeto FINEP (R$5M).',
+   resp:['Definir e executar a estratégia B2B e B2G','Liderar negociações com Amazon e prefeituras','Estruturar a cisão societária (Montadora / Locadora / Arrendatária)','Supervisionar o projeto FINEP','Aprovar contratos, orçamentos e parcerias estratégicas'],
+   tools:['ChatGPT (agente de contratos)','Sankia (ERP)','Google Workspace']},
+  {id:'lucas',   in:'LL',nm:'Lucas Lopes',                 tt:'Gerente Financeiro',                     dept:'Financeiro', ct:'PJ', since:'Set/2018',
+   sum:'Gerente financeiro consultivo. Responsável pelo DRE mensal, Power BI e planejamento financeiro.',
+   resp:['Elaborar DRE mensal por unidade de negócio','Fechar o mês financeiro até o dia 1','Desenvolver dashboards no Power BI','Treinar Marcelo e Bruna'],
+   tools:['Power BI','Google Sheets','Extrato bancário Itaú','Sankia']},
+  {id:'marcelo', in:'MC',nm:'Marcelo de Jesus de Campos',  tt:'Coordenador Financeiro / Fiscal',         dept:'Financeiro', ct:'CLT',since:'Jun/2016',
+   sum:'Quase 10 anos de empresa. Inteligência fiscal da CicloWay no Sankia. Pós-graduação em Gestão Tributária (USP).',
+   resp:['Parametrizar TOPs no Sankia para todas as operações','Garantir conformidade fiscal (ICMS, IPI, ST, CFOP)','Monitorar portais SEFAZ estaduais 1-2x/semana'],
+   tools:['Sankia (módulo fiscal)','SEFAZ / eCAC','Google Sheets']},
+  {id:'bruna',   in:'BM',nm:'Bruna Figueiredo Marciano',   tt:'Analista de Contas a Pagar',              dept:'Financeiro', ct:'CLT',since:'Set/2019',
+   sum:'~600 lançamentos/mês. Controla o fluxo de caixa diário, concilia a fatura do cartão corporativo (~100 itens) e gerencia a frota de 200+ veículos.',
+   resp:['Lançar e classificar todos os documentos de contas a pagar','Conciliar fatura do cartão corporativo linha a linha','Gerir frota de 200+ veículos (IPVA, licenciamento, multas)'],
+   tools:['Google Sheets (fluxo de caixa)','Sankia','Inflate (gestão de frota)']},
+  {id:'fabio',   in:'FA',nm:'Fábio Alencar dos Santos',    tt:'Analista Financeiro — Contas a Receber',  dept:'Financeiro', ct:'CLT',since:'Out/2019',
+   sum:'Responsável por contas a receber: arquivos remessa/retorno Itaú, conciliação bancária, controle de comissões.',
+   resp:['Processar arquivos remessa/retorno Itaú','Realizar conciliação bancária diária','Controlar comissões do time comercial'],
+   tools:['Sankia','Portal Itaú','Google Sheets']},
+  {id:'ramon',   in:'RA',nm:'Ramon Matos Araújo',          tt:'Analista de Faturamento',                 dept:'Financeiro', ct:'CLT',since:'Jul/2019',
+   sum:'Emite praticamente todas as NFs da empresa. Faturamento de contratos de locação entre os dias 1-10 de cada mês.',
+   resp:['Emitir NFs de venda, serviço, locação e importação','Processar faturamento mensal de todos os contratos de locação'],
+   tools:['Sankia (módulo NF-e)','Google Sheets']},
+  {id:'cintia',  in:'CR',nm:'Cíntia Ribeiro dos Reis',     tt:'Compradora Jr',                          dept:'Financeiro', ct:'CLT',since:'Nov/2025',
+   sum:'Responsável pelas compras de insumos para oficina e P&D.',
+   resp:['Receber solicitações de compra das áreas','Realizar cotações com mínimo 3 fornecedores','Finalizar compras rotineiras com cartão corporativo'],
+   tools:['Google Workspace','Sankia','WhatsApp']},
+  {id:'elizabete',in:'EM',nm:'Elizabete F. X. M. Marciano',tt:'Coordenadora Comercial',                  dept:'Comercial',  ct:'CLT',since:'Ago/2015',
+   sum:'Quase 11 anos de empresa. Ponto de convergência entre o cliente e todas as áreas internas.',
+   resp:['Gerenciar carteira de clientes de locação','Negociar preços e fechar contratos B2B','Gerenciar reajustes (IPCA/GPL) de toda a carteira'],
+   tools:['RD Station (CRM)','Sankia','ChatGPT','Google Workspace']},
+  {id:'tiago-j', in:'TJ',nm:'Tiago de Jesus',              tt:'Representante Comercial (Triciclos)',     dept:'Comercial',  ct:'PJ', since:'Dez/2024',
+   sum:'Background KPMG (12 anos). Foco em triciclos e grandes contas. Intraempreendedor.',
+   resp:['Prospectar e qualificar leads de triciclos','Responder todos os leads até 9h30 diariamente','Follow-up estruturado até fechamento'],
+   tools:['RD Station','ChatGPT','WhatsApp']},
+  {id:'ingrid',  in:'ID',nm:'Ingrid Ferreira Dantas',      tt:'Assistente Comercial',                   dept:'Comercial',  ct:'CLT',since:'Jun/2024',
+   sum:'Opera RD Station, Sankia e chatbot. Triagem de leads, elaboração de propostas, análise de crédito.',
+   resp:['Qualificar leads via chatbot do RD Station','Elaborar propostas e confeccionar contratos','Coordenar ciclo de entrega com pós-vendas e oficina'],
+   tools:['RD Station (CRM + chatbot)','Sankia','Serasa','Autentique']},
+  {id:'deborah', in:'DC',nm:'Déborah C. Benetti',          tt:'Coordenadora de Marketing',              dept:'Marketing',  ct:'PJ', since:'Mar/2022',
+   sum:'Define estratégia de marketing digital, coordena Tagon e Sarah. Jornalismo + pós em Data-Driven Marketing.',
+   resp:['Definir estratégia de marketing digital','Elaborar briefings para Tagon e Sarah','Coordenar produção de manuais técnicos'],
+   tools:['Google Workspace','RD Station','Canva / Illustrator','ChatGPT']},
+  {id:'sarah',   in:'SH',nm:'Sarah Hounsell Barros',       tt:'Analista de Marketing / Designer',       dept:'Marketing',  ct:'PJ', since:'Jun/2025',
+   sum:'Executa todas as demandas criativas: apresentações (50-77 slides), redes sociais, vídeos, manuais técnicos.',
+   resp:['Criar e adaptar apresentações comerciais','Produzir conteúdo para LinkedIn, Instagram e YouTube','Editar vídeos (CapCut / Premiere / After Effects)'],
+   tools:['Adobe Illustrator / Premiere / After Effects','CapCut','Canva','ChatGPT']},
+  {id:'tagon',   in:'TG',nm:'Tagon',                       tt:'Agência de Marketing',                   dept:'Marketing',  ct:'EXT',since:'—',
+   sum:'Agência parceira responsável por site, mídia paga e newsletter da CicloWay.',
+   resp:['Gerir o site cicloway.com.br','Gerenciar mídia paga (Google Ads, Meta)','Produzir e enviar newsletter'],
+   tools:['Google Ads','Meta Ads','Webflow']},
+  {id:'sandra',  in:'SS',nm:'Sandra de F. H. dos Santos',  tt:'Analista de RH Sênior',                 dept:'RH',         ct:'CLT',since:'Fev/2022',
+   sum:'Única pessoa de RH e DP. Cuida sozinha de todo o ciclo: recrutamento, admissão, ponto, folha, benefícios, desligamento.',
+   resp:['Recrutar e selecionar candidatos','Processar folha de pagamento até o dia 5','Fechar ponto mensal e ajustar apontamentos'],
+   tools:['Sankia (RH + eSocial)','Ponto Seco','Excel','ChatGPT','Catho / LinkedIn']},
+  {id:'altair',  in:'AB',nm:'Altair Benedito da Silva',    tt:'Analista de Suporte T.I.',               dept:'T.I.',       ct:'CLT',since:'Dez/2020',
+   sum:'Único profissional de TI. Desde 2023, ~90% do tempo é dedicado ao Sankia. Evangelizador de IA. Está desenvolvendo integração API entre Produtivo e Sankia.',
+   resp:['Suportar infraestrutura de TI','Ser ponto focal interno do Sankia','Desenvolver integração API entre Produtivo e Sankia','Promover uso de IA nas rotinas'],
+   tools:['Sankia','Google Workspace','Gemini','Produtivo']},
+  {id:'diogenes',in:'DA',nm:"Diógenes D'Almeida",         tt:'Gerente de Pós-Vendas',                  dept:'Pós-Vendas', ct:'CLT',since:'Ago/2015',
+   sum:'10 anos de empresa. Gerencia pós-vendas e estoque. SLA: mesmo dia/dia seguinte em SP, até 5 dias fora.',
+   resp:['Coordenar atendimento de pós-vendas para todo o Brasil','Supervisionar Carmelino, Camila e Gustavo','Coordenar rede de técnicos externos'],
+   tools:['Produtivo','Sankia (módulo OS)','Google Sheets','WhatsApp']},
+  {id:'carmelino',in:'CE',nm:'Carmelino E. da Silva Filho',tt:'Analista Administrativo I — Pesados',    dept:'Pós-Vendas', ct:'CLT',since:'Jun/2019',
+   sum:'Analista de pós-vendas com foco em veículos pesados (triciclos).',
+   resp:['Receber e registrar chamados de pesados','Acionar e coordenar técnicos','Garantir registro no Produtivo'],
+   tools:['Produtivo','Sankia','WhatsApp']},
+  {id:'camila',  in:'CO',nm:'Camila de Oliveira',          tt:'Auxiliar Administrativo — Leves',       dept:'Pós-Vendas', ct:'CLT',since:'Mar/2026',
+   sum:'Auxiliar administrativa com foco em pós-vendas de veículos leves (Segways e patinetes).',
+   resp:['Atender clientes do segmento de veículos leves','Registrar e acompanhar chamados no Produtivo'],
+   tools:['Produtivo','Google Workspace','WhatsApp']},
+  {id:'gustavo', in:'GS',nm:'Gustavo Henrique da Silva',   tt:'Assistente Administrativo I — Leves',   dept:'Pós-Vendas', ct:'CLT',since:'Mai/2025',
+   sum:'Assistente de pós-vendas com foco em veículos leves e atendimento ao cliente final.',
+   resp:['Atender e dar suporte a clientes de veículos leves','Coordenar envio de peças e agendamento de técnicos'],
+   tools:['Produtivo','Google Workspace','WhatsApp']},
+  {id:'rafaela', in:'RP',nm:'Rafaela I. M. Pereira',       tt:'Assistente Administrativo III',         dept:'Pós-Vendas', ct:'CLT',since:'Mai/2024',
+   sum:'Assistente administrativa sênior no setor de pós-vendas.',
+   resp:['Apoiar a gestão administrativa do setor de pós-vendas','Manter fluxo de informações entre pós-vendas, estoque e oficina'],
+   tools:['Produtivo','Sankia','Google Workspace']},
+  {id:'raquel',  in:'RQ',nm:'Raquel I. M. Pereira',        tt:'Jovem Aprendiz',                         dept:'Pós-Vendas', ct:'CLT',since:'Fev/2026',
+   sum:'Jovem aprendiz em transição para o setor de pós-vendas/administrativo.',
+   resp:['Apoiar nas atividades administrativas','Auxiliar no registro e organização de documentos'],
+   tools:['Google Workspace','Produtivo (em aprendizado)']},
+  {id:'paulo-pcp',in:'PB',nm:'Paulo V. Barros Pereira',    tt:'Assistente de PCP',                      dept:'Produção',   ct:'CLT',since:'Mar/2023',
+   sum:'Único responsável pelo PCP. Lança OPs no Sankia, monta BOM e coordena líderes de produção.',
+   resp:['Lançar Ordens de Produção no Sankia','Montar BOM (chassi + motor + bateria)','Coordenar Wilson (GV) e Roberth (SP) até a entrega'],
+   tools:['Sankia (OP e BOM)','Google Sheets','WhatsApp','ChatGPT']},
+  {id:'leandro', in:'LP',nm:'Leandro Ponciano Alves',      tt:'Líder Técnico II — Segways / Leves',     dept:'Oficina',    ct:'CLT',since:'Mar/2016',
+   sum:'11 anos de empresa. Maior especialista em Segways. Detém planilha proprietária de 14-15 erros resolvidos sem RST.',
+   resp:['Liderar equipe técnica de veículos leves','Coordenar rede nacional de técnicos externos','Manter planilha proprietária de erros'],
+   tools:['Produtivo','WhatsApp (diagnóstico remoto)','Planilha de erros proprietária']},
+  {id:'roberth', in:'RP',nm:'Roberth M. S. Plácido',       tt:'Líder Técnico I — Pesados / Triciclos',  dept:'Oficina',    ct:'CLT',since:'Dez/2023',
+   sum:'Liderança técnica com foco nos veículos pesados (triciclos elétricos).',
+   resp:['Liderar equipe de técnicos de pesados em SP','Coordenar atendimentos e manutenções de triciclos'],
+   tools:['Produtivo','WhatsApp','Sankia']},
+  {id:'alexo-ponciano',in:'AP',nm:'Alessandro Ponciano Alves',tt:'Técnico de Desenvolvimento III',     dept:'Oficina',    ct:'CLT',since:'Out/2023',sum:'Técnico especializado com alto nível de senioridade.',resp:['Manutenção corretiva e preventiva','Treinar técnicos juniores'],tools:['Produtivo','Ferramentas de diagnóstico']},
+  {id:'rafael-jc',in:'RJ',nm:'Rafael Justino da Conceição', tt:'Técnico V.E. II',                        dept:'Oficina',    ct:'CLT',since:'Set/2024',sum:'Técnico de veículos elétricos nível intermediário.',resp:['Manutenção corretiva e preventiva','Diagnósticos de maior complexidade'],tools:['Produtivo','Ferramentas de diagnóstico']},
+  {id:'renan',   in:'RO',nm:'Renan Leal Oliveira',          tt:'Técnico V.E. I',                         dept:'Oficina',    ct:'CLT',since:'Mai/2022',sum:'Técnico de veículos elétricos com mais de 4 anos de empresa.',resp:['Manutenção corretiva e preventiva','Apoiar técnicos mais novos'],tools:['Produtivo','Ferramentas de diagnóstico']},
+  {id:'sergio',  in:'SF',nm:'Sergio Santos Ferreira',       tt:'Técnico V.E. I',                         dept:'Oficina',    ct:'CLT',since:'Dez/2021',sum:'Técnico de veículos elétricos com mais de 4 anos de empresa.',resp:['Manutenção corretiva e preventiva','Diagnósticos técnicos'],tools:['Produtivo','Ferramentas de diagnóstico']},
+  {id:'wellingthon',in:'WS',nm:'Wellingthon Soares Marques',tt:'Técnico V.E. I',                        dept:'Oficina',    ct:'CLT',since:'Dez/2021',sum:'Técnico de veículos elétricos com mais de 4 anos de empresa.',resp:['Manutenção corretiva e preventiva'],tools:['Produtivo','Ferramentas de diagnóstico']},
+  {id:'denilson',in:'DF',nm:'Denilson Ferreira de Carvalho',tt:'Técnico V.E. I',                        dept:'Oficina',    ct:'CLT',since:'Jul/2025',sum:'Técnico de veículos elétricos em desenvolvimento.',resp:['Manutenção corretiva','Registrar atendimentos no Produtivo'],tools:['Produtivo','Ferramentas de diagnóstico']},
+  {id:'jodson',  in:'JS',nm:'Jodson de Souza Santos',       tt:'Técnico V.E. I',                         dept:'Oficina',    ct:'CLT',since:'Jan/2025',sum:'Técnico de veículos elétricos em desenvolvimento.',resp:['Manutenção corretiva','Registrar diagnósticos'],tools:['Produtivo','Ferramentas de diagnóstico']},
+  {id:'luiz-fe', in:'LF',nm:'Luiz Felipe O. dos Santos',   tt:'Técnico V.E. I',                         dept:'Oficina',    ct:'CLT',since:'Out/2024',sum:'Técnico de veículos elétricos em desenvolvimento.',resp:['Manutenção corretiva','Apoiar nas manutenções preventivas'],tools:['Produtivo','Ferramentas de diagnóstico']},
+  {id:'samuel',  in:'SP',nm:'Samuel José Pereira',          tt:'Assistente Operacional III',             dept:'Oficina',    ct:'CLT',since:'Abr/2016',sum:'Um dos colaboradores mais antigos (desde 2016). Assistente operacional sênior.',resp:['Apoiar as operações da oficina','Controlar ferramentas e equipamentos'],tools:['Google Workspace','WhatsApp']},
+  {id:'alexo-farias',in:'AG',nm:'Alessandro G. M. de Farias',tt:'Assistente de Estoque II',             dept:'Oficina',    ct:'CLT',since:'Jul/2024',sum:'Responsável pelo controle e movimentação de estoque de peças e veículos.',resp:['Controlar entrada e saída de peças','Manter organização física do estoque'],tools:['Sankia','Google Sheets','WhatsApp']},
+  {id:'g-pacheco',in:'GF',nm:'Guilherme F. P. de Oliveira', tt:'Assistente Técnico',                     dept:'Oficina',    ct:'CLT',since:'Abr/2025',sum:'Assistente técnico em desenvolvimento.',resp:['Apoiar técnicos nas manutenções','Auxiliar na organização da oficina'],tools:['Ferramentas de oficina','WhatsApp']},
+  {id:'tony-v',  in:'TV',nm:'Tony P. de Campos Vergueiro',  tt:'Assistente Técnico',                     dept:'Oficina',    ct:'CLT',since:'Jul/2025',sum:'Assistente técnico apoiando operações da oficina.',resp:['Apoiar técnicos nas manutenções','Aprender procedimentos técnicos'],tools:['Ferramentas de oficina','WhatsApp']},
+  {id:'luciano', in:'LM',nm:'Luciano Mendes Pacheco',       tt:'Auxiliar Técnico',                       dept:'Oficina',    ct:'CLT',since:'Mar/2026',sum:'Auxiliar técnico com foco em suporte às operações da oficina.',resp:['Auxiliar a equipe técnica','Apoiar na organização do estoque'],tools:['Ferramentas de oficina']},
+  {id:'g-weippert',in:'GW',nm:'Guilherme Weippert Portella',tt:'Auxiliar Técnico',                       dept:'Oficina',    ct:'CLT',since:'Mai/2026',sum:'Auxiliar técnico recém-contratado, em fase inicial de integração.',resp:['Auxiliar a equipe técnica','Realizar tarefas operacionais'],tools:['Ferramentas de oficina']},
+  {id:'paulo-aux',in:'PO',nm:'Paulo Vinicius de Moraes',    tt:'Auxiliar Técnico',                       dept:'Oficina',    ct:'CLT',since:'Mai/2026',sum:'Auxiliar técnico recém-contratado.',resp:['Auxiliar a equipe técnica','Realizar tarefas operacionais'],tools:['Ferramentas de oficina']},
+  {id:'celso',   in:'CM',nm:'Celso Matoba',                  tt:'Analista de Logística',                  dept:'Oficina',    ct:'CLT',since:'Mar/2015',
+   sum:'Um dos mais antigos (desde 2015). Responsável pela logística de envio/recebimento de veículos e peças.',
+   resp:['Coordenar logística de envio e recebimento','Negociar com transportadoras','Emitir CT-e e DANFE'],
+   tools:['Sankia','Portais de transportadoras','Google Workspace']},
+  {id:'wilson',  in:'WY',nm:'Wilson Yope',                   tt:'Líder de P&D / Produção (Granja Viana)', dept:'P&D',        ct:'PJ', since:'Fev/2020',
+   sum:'Lidera a operação de produção e P&D na unidade da Granja Viana. Coordena montagem de veículos pesados.',
+   resp:['Liderar equipe de produção e P&D na Granja Viana','Coordenar a montagem de veículos pesados'],
+   tools:['WhatsApp','Ferramentas de serralheria e montagem']},
+  {id:'ulisses', in:'UY',nm:'Ulisses Yope',                  tt:'Líder de Serralheria',                   dept:'P&D',        ct:'PJ', since:'Ago/2025',
+   sum:'Responsável pela serralheria do P&D, fabricando estruturas metálicas e adaptações.',
+   resp:['Liderar equipe de serralheria','Fabricar estruturas metálicas para novos veículos'],
+   tools:['Ferramentas de serralheria','Equipamentos de solda e corte']},
+  {id:'hermes',  in:'HJ',nm:'Hermes José dos Santos',        tt:'Técnico de Preparação e Acabamento III', dept:'P&D',        ct:'CLT',since:'Out/2023',sum:'Técnico sênior de preparação e acabamento.',resp:['Acabamento de alta qualidade em veículos','Orientar técnicos juniores'],tools:['Ferramentas de acabamento e pintura']},
+  {id:'tony-s',  in:'TO',nm:'Tony Oliveira T. da Silva',     tt:'Técnico de Preparação e Acabamento I',   dept:'P&D',        ct:'CLT',since:'Ago/2025',sum:'Técnico de preparação e acabamento em nível inicial.',resp:['Auxiliar no acabamento de veículos'],tools:['Ferramentas de acabamento']},
+  {id:'cristiano',in:'CL',nm:'Cristiano Limoli',             tt:'Técnico de Desenvolvimento I',            dept:'P&D',        ct:'CLT',since:'Set/2025',sum:'Técnico de P&D em nível inicial, apoiando o desenvolvimento de novos veículos.',resp:['Apoiar no desenvolvimento de adaptações','Executar testes e validações'],tools:['Ferramentas de P&D','Google Workspace']},
+  {id:'tiago-l', in:'TL',nm:'Tiago Augusto de Lima',         tt:'Consultor de Importação',                 dept:'Importação', ct:'PJ', since:'Out/2022',
+   sum:'Consultor externo responsável por todo o processo de importação: trâmite aduaneiro, documentação, desembaraço e entrega.',
+   resp:['Coordenar importação de veículos e componentes da China','Gerenciar documentação de importação','Acompanhar desembaraço aduaneiro em Itajaí'],
+   tools:['SISCOMEX / portais aduaneiros','Google Workspace','E-mail']},
+];
+
+const EVENTS = [
+  {dt:'2026-06-01',nm:'Reunião Comercial Semanal',  tm:'09:00',tp:'m'},
+  {dt:'2026-06-03',nm:'Check-in Projeto InCiclo',   tm:'14:00',tp:'m'},
+  {dt:'2026-06-04',nm:'Corpus Christi',             tm:null,   tp:'h'},
+  {dt:'2026-06-05',nm:'Apresentação de Novos Produtos',tm:'10:00',tp:'e'},
+  {dt:'2026-06-10',nm:'Treinamento — Formigão G3',  tm:'13:30',tp:'t'},
+  {dt:'2026-06-12',nm:'Dia dos Namorados',          tm:null,   tp:'h'},
+  {dt:'2026-06-15',nm:'Reunião de Resultados — Q2', tm:'09:00',tp:'m'},
+  {dt:'2026-06-17',nm:'Treinamento Comercial',      tm:'14:00',tp:'t'},
+  {dt:'2026-06-22',nm:'Revisão de Processos InCiclo',tm:'10:00',tp:'m'},
+  {dt:'2026-06-30',nm:'Fechamento do Mês',          tm:'09:00',tp:'m'},
+];
+
+const TRAININGS = [
+  {id:'t1',emoji:'🛴',cat:'Manutenção',nm:'Manutenção Básica — Patinetes Linha SN',   dur:'32 min',desc:'Procedimentos de revisão preventiva para a linha SN-100 e SN-200.'},
+  {id:'t2',emoji:'⚙️',cat:'Manutenção',nm:'Diagnóstico de Bateria — Triciclos',       dur:'45 min',desc:'Processo completo de diagnóstico e substituição de baterias em triciclos.'},
+  {id:'t3',emoji:'🛤️',cat:'Operação',  nm:'Operação do Segway i2',                    dur:'18 min',desc:'Como operar e orientar clientes no uso correto do Segway i2.'},
+  {id:'t4',emoji:'🔧',cat:'Operação',  nm:'Calibração e Ajuste de Freios',            dur:'27 min',desc:'Procedimento de calibração de freios em veículos pesados e leves.'},
+  {id:'t5',emoji:'💻',cat:'Sistemas',  nm:'Uso do Produtivo — Chamados Técnicos',     dur:'22 min',desc:'Como abrir, acompanhar e fechar chamados técnicos no Produtivo.'},
+  {id:'t6',emoji:'📊',cat:'Sistemas',  nm:'Sankia — Módulo de Vendas e Contratos',    dur:'28 min',desc:'Cadastro de clientes, propostas e contratos no ERP Sankia.'},
+  {id:'t7',emoji:'⚠️',cat:'Segurança', nm:'Segurança no Trabalho — Oficina',          dur:'15 min',desc:'Normas de segurança para trabalho em oficina de veículos elétricos.'},
+  {id:'t8',emoji:'🚛',cat:'Produtos',  nm:'Formigão G3 — Visão Geral',                dur:'20 min',desc:'Apresentação completa do Formigão G3 (2025): specs, montagem e diferenciais.'},
+  {id:'t9',emoji:'🤝',cat:'Comercial', nm:'Atendimento ao Cliente B2B',               dur:'25 min',desc:'Boas práticas no atendimento a clientes corporativos da CicloWay.'},
+];
+
+const ONBOARDING = [
+  {num:1,nm:'Bem-vindo à CicloWay',desc:'Conheça nossa história, missão e valores. A CicloWay é pioneira em mobilidade elétrica no Brasil desde 2005.',
+   items:['Assista ao vídeo institucional da CicloWay','Acesse o site www.cicloway.com.br e explore os produtos','Leia o manual de cultura e boas práticas no InCiclo','Apresente-se para seu gestor direto no primeiro dia']},
+  {num:2,nm:'Conheça o Time',desc:'Familiarize-se com o organograma e identifique as pessoas-chave da sua área e das áreas com as quais você vai se relacionar.',
+   items:['Explore o Organograma no InCiclo e leia o JD do seu cargo','Identifique seu gestor direto e colegas de área','Conecte-se com as pessoas no WhatsApp','Agende um café/papo rápido com pelo menos 3 colegas de outra área']},
+  {num:3,nm:'Sistemas e Ferramentas',desc:'Configure suas contas nos sistemas que você vai usar no dia a dia. Se tiver dúvidas, o Altair (T.I.) é sua referência.',
+   items:['Configure seu e-mail @cicloway.com.br no Google Workspace','Acesse o Sankia com suas credenciais','Acesse o Produtivo e leia o treinamento de chamados','Entre no grupo de WhatsApp da sua área']},
+  {num:4,nm:'Treinamentos Obrigatórios',desc:'Assista aos módulos de treinamento relevantes para sua área. Você pode marcar cada um como concluído na tela de Treinamentos.',
+   items:['Assista: Segurança no Trabalho — Oficina','Assista: Uso do Produtivo — Chamados Técnicos','Assista: Sankia — Módulo de Vendas e Contratos','Complete ao menos 1 módulo da sua área específica']},
+  {num:5,nm:'Primeiros 30 Dias',desc:'Objetivos e entregas esperadas no primeiro mês. Pequenos progressos constantes são mais importantes do que grandes entregas no início.',
+   items:['Agende um 1:1 com seu gestor na primeira semana','Participe da reunião semanal da sua área','Anote pelo menos 3 dúvidas ou melhorias que você identificou','Tire dúvidas sobre processos com os colegas mais experientes']},
+];
+
+const PRACTICES = [
+  {id:'cultura',ic:'🌟',nm:'Cultura e Valores',
+   body:`<h3>Quem somos</h3>
+<p>A CicloWay é pioneira em mobilidade elétrica de curta distância no Brasil, atuando desde 2005. Somos uma empresa que acredita que é possível transformar como as pessoas e empresas se movem — com menos combustível, menos emissões e mais eficiência.</p>
+<p>Nossa tagline <strong>#DescubraOMovimento</strong> não é só marketing. É uma convicção de que o movimento — de pessoas, de ideias, de mudanças — é o que nos faz crescer.</p>
+<h3>Nossos valores</h3>
+<ul>
+<li><strong>Pioneirismo</strong> — Buscamos soluções antes que o mercado force isso. Somos os primeiros, não os que seguem.</li>
+<li><strong>Sustentabilidade real</strong> — +78 mil toneladas de CO₂ não emitidas não são um número de slide. É nossa razão de existir.</li>
+<li><strong>Inovação prática</strong> — Tecnologia só tem valor quando funciona na prática, no dia a dia dos nossos clientes.</li>
+<li><strong>Cuidado com as pessoas</strong> — Clientes, colaboradores, parceiros. Relações longas se constroem com respeito e entrega consistente.</li>
+</ul>
+<div class="callout">💡 A CicloWay tem clientes como iFood, Prosegur, Multiplan e Ferrari. Isso não acontece por acidente — acontece porque entregamos o que prometemos.</div>
+<h3>Como trabalhamos</h3>
+<p>Somos uma empresa de médio porte com agilidade de startup. Isso significa que as decisões são tomadas rápido, as hierarquias são diretas e cada pessoa tem impacto real no resultado. A contrapartida é que esperamos autonomia, proatividade e responsabilidade de todos.</p>`},
+  {id:'comunicacao',ic:'💬',nm:'Comunicação',
+   body:`<h3>Comunicação interna</h3>
+<p>A CicloWay usa principalmente <strong>WhatsApp</strong> para comunicação rápida e <strong>Google Workspace (e-mail)</strong> para comunicações formais e documentação. O ERP Sankia é o sistema de registro para tudo que precisa deixar rastro.</p>
+<h3>Boas práticas de WhatsApp</h3>
+<ul>
+<li>Mensagens profissionais durante o horário comercial (8h às 18h)</li>
+<li>Evite mandar áudios longos — prefira textos objetivos ou ligação direta</li>
+<li>Grupos de trabalho são para assuntos do grupo. Evite conversas paralelas no grupo</li>
+<li>Para urgências fora do horário: ligue. Não espere resposta de WhatsApp</li>
+</ul>
+<h3>E-mail</h3>
+<ul>
+<li>Use para registros formais, propostas, contratos e comunicações com clientes</li>
+<li>Responda e-mails em até 24h em dias úteis</li>
+<li>Assunto sempre claro e específico. Evite "Dúvida" ou "Olá" como assunto</li>
+</ul>
+<div class="callout">📌 Se uma decisão importante foi tomada por WhatsApp, registre por e-mail ou no sistema. O que não está no sistema não existe para o próximo que assumir a tarefa.</div>
+<h3>Reuniões</h3>
+<ul>
+<li>Chegue no horário. Respeito ao tempo dos colegas é respeito à empresa</li>
+<li>Toda reunião deve ter uma pauta mínima — o que precisa ser decidido?</li>
+<li>Saídas com ações concretas: quem faz o quê e até quando</li>
+</ul>`},
+  {id:'atendimento',ic:'🤝',nm:'Atendimento ao Cliente',
+   body:`<h3>O cliente no centro</h3>
+<p>A CicloWay tem clientes B2B de grande porte que escolheram a empresa por qualidade e confiança. Manter esse padrão é responsabilidade de todos, não só do time comercial.</p>
+<h3>Padrões de atendimento</h3>
+<ul>
+<li>Responda sempre em até 24h úteis. Para pós-vendas urgente: no mesmo dia</li>
+<li>Nunca deixe um cliente sem resposta — mesmo que seja para dizer "estou verificando e retorno em breve"</li>
+<li>Problemas existem. O que diferencia é como resolvemos. Seja transparente sobre prazos e limitações</li>
+<li>Chamados técnicos: SLA de mesmo dia/dia seguinte em SP, até 5 dias fora do estado</li>
+</ul>
+<div class="callout">🎯 A Elizabete (Comercial) e o Diógenes (Pós-Vendas) são as referências principais de atendimento ao cliente. Dúvidas sobre como proceder? Pergunte a eles.</div>
+<h3>RD Station — CRM</h3>
+<p>Todos os contatos com clientes e leads devem ser registrados no RD Station. Um cliente sem histórico no CRM é um cliente invisível para a empresa.</p>`},
+  {id:'sistemas',ic:'💻',nm:'Sistemas e Ferramentas',
+   body:`<h3>Sistemas principais</h3>
+<p>A CicloWay opera com um conjunto definido de sistemas. Conhecer bem cada um é parte do trabalho:</p>
+<ul>
+<li><strong>Sankia (ERP)</strong> — O coração da operação. NFs, contratos, estoque, financeiro, RH. Dúvidas: Altair (T.I.) ou Marcelo (Financeiro)</li>
+<li><strong>Produtivo</strong> — Gestão de chamados técnicos de pós-vendas e oficina. Referência: Diógenes</li>
+<li><strong>RD Station (CRM)</strong> — Pipeline comercial, leads e comunicação com clientes. Referência: Elizabete e Ingrid</li>
+<li><strong>Google Workspace</strong> — E-mail, Drive, Docs, Sheets. Padrão de colaboração documental</li>
+</ul>
+<h3>Integrações em desenvolvimento</h3>
+<p>O Altair está desenvolvendo a integração API entre Produtivo e Sankia para eliminar o lançamento duplo de chamados técnicos. Quando estiver pronto, vai economizar horas por semana da equipe de pós-vendas.</p>
+<div class="callout">🤖 A CicloWay incentiva o uso de IA (ChatGPT, Gemini) para aumentar produtividade. Não para substituir julgamento humano — para amplificar o que cada pessoa já faz bem.</div>
+<h3>Segurança digital</h3>
+<ul>
+<li>Nunca compartilhe credenciais de sistemas com colegas — cada um tem seu acesso</li>
+<li>Dúvidas de TI ou acesso: Altair é sua referência</li>
+<li>Documentos confidenciais (contratos, DRE) ficam no Drive em pastas restritas</li>
+</ul>`},
+  {id:'seguranca',ic:'⚠️',nm:'Segurança no Trabalho',
+   body:`<h3>Escritório</h3>
+<ul>
+<li>Mantenha seu espaço organizado e sem obstáculos nas passagens</li>
+<li>Equipamentos ligados sem uso devem ser desligados ao sair</li>
+<li>Em caso de emergência: saídas sinalizadas, ponto de encontro externo</li>
+</ul>
+<h3>Oficina e galpão</h3>
+<ul>
+<li>EPI obrigatório: óculos de proteção, luvas e botina em qualquer atividade na oficina</li>
+<li>Veículos elétricos trabalham com alta tensão. Nunca abra baterias sem treinamento específico</li>
+<li>Ferramentas: use a ferramenta certa para cada tarefa. Improviso gera acidente</li>
+<li>Piso da oficina: livre de óleo e água. Reporte qualquer derramamento imediatamente</li>
+</ul>
+<div class="callout">⚡ Atenção especial com baterias de lítio: não perfure, não exponha a calor extremo, não cortocircuite. Em caso de dúvida, consulte o Leandro ou o Roberth antes de qualquer intervenção.</div>
+<h3>Em caso de incidente</h3>
+<p>Qualquer acidente ou quase-acidente deve ser reportado imediatamente ao gestor direto e à Sandra (RH). Registro no eSocial é obrigatório. Não há penalidade por reportar — omitir é que cria problemas.</p>`},
+];
+
+const PRODUCTS = [
+  {id:'sn100',cat:'Patinetes',emoji:'🛴',nm:'Patinete SN-100',price:'R$ 2.890',specs:{Velocidade:'25 km/h',Autonomia:'30 km',Carga:'120 kg',Bateria:'4-5h'},new:false},
+  {id:'sn200',cat:'Patinetes',emoji:'🛴',nm:'Patinete SN-200',price:'R$ 3.490',specs:{Velocidade:'32 km/h',Autonomia:'47 km',Carga:'120 kg',Bateria:'5-6h'},new:false},
+  {id:'si2',  cat:'Segway',  emoji:'🤖',nm:'Segway i2',       price:'Consultar',specs:{Velocidade:'20 km/h',Autonomia:'80 km',Carga:'120 kg',Bateria:'7h'},new:false},
+  {id:'sx2',  cat:'Segway',  emoji:'🤖',nm:'Segway X2',       price:'Consultar',specs:{Velocidade:'20 km/h',Autonomia:'56 km',Carga:'118 kg',Bateria:'7h'},new:false},
+  {id:'c3',   cat:'Triciclos',emoji:'🚲',nm:'Triciclo C-3',   price:'Consultar',specs:{Velocidade:'25 km/h',Autonomia:'30 km',Carga:'200 kg',Bateria:'6h'},new:false},
+  {id:'joan', cat:'Triciclos',emoji:'🚕',nm:'Joaninha',        price:'Consultar',specs:{Velocidade:'40 km/h',Autonomia:'60 km',Carga:'300 kg',Bateria:'8h'},new:false},
+  {id:'bes',  cat:'Triciclos',emoji:'🐛',nm:'Besouro Coletor', price:'Consultar',specs:{Velocidade:'25 km/h',Autonomia:'40 km',Carga:'400 kg',Bateria:'7h'},new:false},
+  {id:'fg3',  cat:'Triciclos',emoji:'🚛',nm:'Formigão G3',     price:'Consultar',specs:{Velocidade:'25 km/h',Autonomia:'50 km',Carga:'500 kg',Bateria:'8h'},new:true},
+  {id:'fbau', cat:'Triciclos',emoji:'📦',nm:'Formigão Baú',    price:'Consultar',specs:{Velocidade:'25 km/h',Autonomia:'50 km',Carga:'500 kg',Bateria:'8h'},new:false},
+  {id:'gir',  cat:'Triciclos',emoji:'🦒',nm:'Girafa',          price:'Consultar',specs:{Velocidade:'25 km/h',Autonomia:'45 km',Carga:'350 kg',Bateria:'7h'},new:false},
+  {id:'moto', cat:'Motos',   emoji:'🏍️',nm:'Mini Max Moto',    price:'Consultar',specs:{Velocidade:'45 km/h',Autonomia:'70 km',Carga:'150 kg',Bateria:'6h'},new:false},
+  {id:'fiat', cat:'Especiais',emoji:'⭐',nm:'FIAT Elétrico Leve',price:'Consultar',specs:{Velocidade:'45 km/h',Autonomia:'80 km',Carga:'200 kg',Bateria:'7h'},new:true},
+];
+
+const BIRTHDAYS = [
+  {nm:'Leandro Ponciano',  in:'LP', day:3,  dept:'Oficina'},
+  {nm:'Bruna Marciano',    in:'BM', day:15, dept:'Financeiro'},
+  {nm:'Sarah Hounsell',    in:'SH', day:22, dept:'Marketing'},
+  {nm:'Carmelino E. Filho',in:'CE', day:28, dept:'Pós-Vendas'},
+];
+
+const STOCK = [
+  {modelo:'Patinete SN-100',  cat:'Patinetes',  qtd:8,  loc:'SP — Vila Leopoldina', status:'ok'},
+  {modelo:'Patinete SN-200',  cat:'Patinetes',  qtd:3,  loc:'SP — Vila Leopoldina', status:'low'},
+  {modelo:'Segway i2',        cat:'Segway',     qtd:2,  loc:'SP — Vila Leopoldina', status:'low'},
+  {modelo:'Segway X2',        cat:'Segway',     qtd:0,  loc:'—',                    status:'out'},
+  {modelo:'Triciclo C-3',     cat:'Triciclos',  qtd:6,  loc:'SP + MG',              status:'ok'},
+  {modelo:'Joaninha',         cat:'Triciclos',  qtd:2,  loc:'SP — Granja Viana',    status:'low'},
+  {modelo:'Besouro Coletor',  cat:'Triciclos',  qtd:4,  loc:'SP — Granja Viana',    status:'ok'},
+  {modelo:'Formigão G3',      cat:'Triciclos',  qtd:1,  loc:'SP — Granja Viana',    status:'low'},
+  {modelo:'Formigão Baú',     cat:'Triciclos',  qtd:3,  loc:'SP — Granja Viana',    status:'ok'},
+  {modelo:'Girafa',           cat:'Triciclos',  qtd:0,  loc:'—',                    status:'out'},
+  {modelo:'Mini Max Moto',    cat:'Motos',      qtd:5,  loc:'SP — Vila Leopoldina', status:'ok'},
+  {modelo:'FIAT Elétrico Leve',cat:'Especiais', qtd:1,  loc:'SP — Vila Leopoldina', status:'low'},
+  {modelo:'Trikke T78',       cat:'Trikke',     qtd:4,  loc:'SP — Vila Leopoldina', status:'ok'},
+  {modelo:'Trikke T67',       cat:'Trikke',     qtd:0,  loc:'—',                    status:'out'},
+];
+
+const LQ_QUESTIONS = [
+  {id:'q1',txt:'Qual o segmento do cliente?',
+   opts:[{l:'Shopping / Mall',v:20},{l:'Segurança / Rondas',v:18},{l:'Logística / Last Mile',v:18},
+         {l:'Facilities / Condomínio',v:15},{l:'Outro',v:8}]},
+  {id:'q2',txt:'Tamanho da frota desejada?',
+   opts:[{l:'1 a 3 veículos',v:8},{l:'4 a 9 veículos',v:16},{l:'10 a 20 veículos',v:22},{l:'Mais de 20',v:25}]},
+  {id:'q3',txt:'Orçamento definido?',
+   opts:[{l:'Sim, aprovado pela diretoria',v:20},{l:'Em discussão / em aprovação',v:12},{l:'Ainda não',v:4}]},
+  {id:'q4',txt:'Modalidade preferida?',
+   opts:[{l:'Compra à vista',v:15},{l:'Parcelamento',v:12},{l:'Locação mensal',v:10}]},
+  {id:'q5',txt:'Prazo de decisão estimado?',
+   opts:[{l:'Menos de 30 dias',v:20},{l:'Entre 30 e 90 dias',v:13},{l:'Mais de 90 dias',v:5}]},
+];
+
+const OBJECTIONS = [
+  {id:'o1', cat:'p', tag:'Preço',   q:'"É muito caro para o nosso orçamento"',
+   a:'O custo operacional de um veículo elétrico CicloWay é até 90% menor que um veículo a combustão. Calculamos o TCO (Total Cost of Ownership) em conjunto: considere combustível, manutenção e emissões. A maioria dos clientes recupera o investimento em menos de 18 meses.'},
+  {id:'o2', cat:'p', tag:'Preço',   q:'"Um concorrente me ofereceu mais barato"',
+   a:'Pedimos que compare especificações equivalentes. A CicloWay é a única fabricante nacional licenciada com produção em Manaus — o que garante suporte técnico próximo, peças disponíveis e garantia nacional. Produto importado mais barato geralmente tem suporte deficiente.'},
+  {id:'o3', cat:'p', tag:'Preço',   q:'"Qual é o ROI real dessa compra?"',
+   a:'Temos um calculador interno de ROI. Em média, para uma frota de segurança de 5 patinetes substituindo 2 carros: economia de R$ 3.200/mês em combustível e manutenção. Posso preparar um levantamento específico para o perfil de uso de vocês.'},
+  {id:'o4', cat:'p', tag:'Preço',   q:'"Não temos budget aprovado para isso agora"',
+   a:'A CicloWay oferece modalidade de locação mensal, que não entra como CAPEX mas como despesa operacional. Isso contorna aprovações de investimento e pode ser começado em 30 dias. Posso apresentar as condições?'},
+  {id:'o5', cat:'c', tag:'Concorrência', q:'"Já usamos outra marca e estamos satisfeitos"',
+   a:'Ótimo — isso já prova que vocês entendem o valor da mobilidade elétrica. Peço apenas 30 minutos para mostrar onde a CicloWay se diferencia: produção nacional, autonomia superior e suporte técnico com SLA definido. Se não agregar, nenhum problema.'},
+  {id:'o6', cat:'c', tag:'Concorrência', q:'"O suporte da outra marca é melhor"',
+   a:'Nossa rede técnica cobre todo o Brasil. Em SP temos técnicos internos com SLA de mesmo dia. Para outros estados, trabalhamos com rede credenciada. Podemos apresentar o nosso SLA por escrito — algo que poucas empresas do setor oferecem.'},
+  {id:'o7', cat:'c', tag:'Concorrência', q:'"Prefiro uma marca mais conhecida no mercado"',
+   a:'A CicloWay opera desde 2005 — é a empresa mais antiga no segmento elétrico leve no Brasil. Mais de 2 milhões de litros de combustível economizados por nossos clientes. Podemos compartilhar cases como iFood, Prosegur e Multiplan.'},
+  {id:'o8', cat:'pr', tag:'Produto', q:'"A autonomia não é suficiente para nossa operação"',
+   a:'Vamos mapear a rotina de uso. A maioria das operações B2B — rondas de segurança em condomínios ou shoppings — percorre entre 20-40 km/dia. Nossa linha cobre até 80 km de autonomia. Qual é a distância diária da sua operação?'},
+  {id:'o9', cat:'pr', tag:'Produto', q:'"E as peças de reposição? É difícil encontrar?"',
+   a:'A CicloWay tem estoque de peças próprio em São Paulo e rede nacional de parceiros. Para clientes B2B com contrato de locação, as manutenções preventivas e peças estão incluídas no contrato. Nunca falta.'},
+  {id:'o10',cat:'pr', tag:'Produto', q:'"A velocidade máxima é muito baixa para nosso uso"',
+   a:'Para operações em ambientes fechados (shoppings, condomínios, galpões industriais), a regulamentação limita velocidade justamente por segurança. Os Segways chegam a 20 km/h e a Joaninha a 40 km/h — adequados para last mile e segurança patrimonial.'},
+  {id:'o11',cat:'s', tag:'Suporte', q:'"Vocês têm assistência técnica na minha cidade?"',
+   a:'Temos rede técnica em todo o Brasil. Em SP, RJ, MG, RS, PE e CE há técnicos credenciados. Para outras cidades, o suporte é feito via diagnóstico remoto + envio de técnico ou peças com custo coberto pelo contrato. Confirmo a cobertura para a sua cidade agora.'},
+  {id:'o12',cat:'s', tag:'Suporte', q:'"E se quebrar? Quem resolve?"',
+   a:'Clientes com contrato de locação têm SLA garantido em contrato: chamado aberto até 24h úteis, atendimento em até 2 dias em SP ou envio de veículo reserva. Para compras, oferecemos plano de manutenção preventiva anual com desconto. Posso detalhar as condições?'},
+];
+
+const JOURNEY_STAGES = [
+  {nm:'Prospecção',  ic:'🔭', color:'#3b82f6', deals:[
+    {co:'iFood',            prod:'5x Patinete SN-200',   val:'R$ 17K'},
+    {co:'Grupo Allada',     prod:'3x Triciclo C-3',       val:'R$ 45K'},
+    {co:'Cond. Alphaville', prod:'2x Segway i2',          val:'Consultar'},
+  ]},
+  {nm:'Qualificação',ic:'🔍', color:'#8b5cf6', deals:[
+    {co:'Prosegur CE',      prod:'8x Patinete SN-200',   val:'R$ 28K'},
+    {co:'Carajás Mining',   prod:'10x Triciclo C-3',      val:'R$ 150K'},
+  ]},
+  {nm:'Proposta',    ic:'📋', color:'#eab308', deals:[
+    {co:'Shopping Iguatemi',prod:'3x Segway i2',          val:'Consultar'},
+    {co:'Pague Menos',      prod:'20x Triciclo C-3',      val:'R$ 300K'},
+  ]},
+  {nm:'Negociação',  ic:'🤝', color:'#f97316', deals:[
+    {co:'Jadlog Logística', prod:'15x Patinete SN-100',  val:'R$ 43K'},
+  ]},
+  {nm:'Fechamento',  ic:'✅', color:'#22c55e', deals:[
+    {co:'Multiplan',        prod:'4x Segway i2',          val:'Consultar'},
+    {co:'Coopercaps',       prod:'5x Triciclo C-3',       val:'R$ 75K'},
+  ]},
+];
+
+const PRICE_SECTIONS = [
+  {id:'tabela',ic:'📊',nm:'Tabela de Preços',
+   body:`<div class="pp-h">📊 Tabela de Preços por Categoria</div>
+<div class="pp-meta">Vigência: Janeiro–Dezembro 2026 · Uso interno — não compartilhar sem autorização</div>
+<div class="pp-txt">
+<h3>Linha Patinetes</h3></div>
+<table class="pp-tbl"><thead><tr><th>Modelo</th><th>Preço Tabela</th><th>Preço Mín. (–15%)</th><th>Locação/mês</th></tr></thead>
+<tbody>
+<tr><td>SN-100</td><td>R$ 2.890</td><td>R$ 2.457</td><td>R$ 290</td></tr>
+<tr><td>SN-200</td><td>R$ 3.490</td><td>R$ 2.967</td><td>R$ 350</td></tr>
+</tbody></table>
+<div class="pp-txt"><h3>Linha Segway</h3></div>
+<table class="pp-tbl"><thead><tr><th>Modelo</th><th>Preço Tabela</th><th>Preço Mín. (–15%)</th><th>Locação/mês</th></tr></thead>
+<tbody>
+<tr><td>Segway i2</td><td>Consultar</td><td>—</td><td>R$ 950</td></tr>
+<tr><td>Segway X2</td><td>Consultar</td><td>—</td><td>R$ 1.100</td></tr>
+</tbody></table>
+<div class="pp-txt"><h3>Linha Triciclos</h3></div>
+<table class="pp-tbl"><thead><tr><th>Modelo</th><th>Preço Tabela</th><th>Preço Mín. (–10%)</th><th>Locação/mês</th></tr></thead>
+<tbody>
+<tr><td>Triciclo C-3</td><td>Consultar</td><td>—</td><td>R$ 1.400</td></tr>
+<tr><td>Joaninha</td><td>Consultar</td><td>—</td><td>R$ 1.900</td></tr>
+<tr><td>Besouro Coletor</td><td>Consultar</td><td>—</td><td>R$ 2.100</td></tr>
+<tr><td>Formigão G3</td><td>Consultar</td><td>—</td><td>R$ 2.400</td></tr>
+</tbody></table>
+<div class="callout-pp">💡 Preços de triciclos e Segways são consultados caso a caso, pois dependem de customizações, volume e prazo. Sempre consulte a Elizabete antes de dar um valor ao cliente.</div>`},
+  {id:'pgto',ic:'💳',nm:'Condições de Pagamento',
+   body:`<div class="pp-h">💳 Condições de Pagamento</div>
+<div class="pp-meta">Vigência: 2026 · Aprovação de crédito necessária para parcelas acima de 6x</div>
+<div class="pp-txt">
+<h3>Venda direta</h3>
+<ul>
+<li>À vista: 5% de desconto adicional sobre o preço mínimo</li>
+<li>Parcelado 2–6x no boleto: sem juros, sem desconto adicional</li>
+<li>Parcelado 7–12x: acréscimo de 1,2% a.m. (Consórcio Magalu)</li>
+<li>Cartão de crédito: somente à vista (taxa absorvida pela empresa até R$ 15K)</li>
+</ul>
+<h3>Locação mensal</h3>
+<ul>
+<li>Contrato mínimo: 12 meses</li>
+<li>Reajuste anual por IPCA ou GPL (o que for maior)</li>
+<li>Manutenção preventiva e corretiva incluída no contrato</li>
+<li>Veículo reserva disponível para contratos acima de 5 unidades</li>
+</ul>
+<h3>Grandes volumes (10+ unidades)</h3>
+<ul>
+<li>Condições especiais negociadas com João Hannud</li>
+<li>Possibilidade de financiamento via FDIC ou FINEP para órgãos públicos</li>
+</ul>
+<div class="callout-pp">⚠️ Qualquer condição fora desta tabela deve ser aprovada por João Hannud. Não formalize nenhum acordo verbal sem confirmação por escrito.</div></div>`},
+  {id:'desconto',ic:'🏷️',nm:'Política de Descontos',
+   body:`<div class="pp-h">🏷️ Política de Descontos</div>
+<div class="pp-meta">Vigência: 2026 · Uso interno e confidencial</div>
+<div class="pp-txt">
+<h3>Limites por cargo</h3>
+<table class="pp-tbl"><thead><tr><th>Cargo</th><th>Desconto máximo</th><th>Aprovação</th></tr></thead>
+<tbody>
+<tr><td>Representante Comercial</td><td>até 8%</td><td>Autônomo</td></tr>
+<tr><td>Coordenadora Comercial</td><td>até 12%</td><td>Autônoma</td></tr>
+<tr><td>Diretor (João)</td><td>até 20%</td><td>Autônomo</td></tr>
+<tr><td>Acima de 20%</td><td>—</td><td>Reunião de diretoria</td></tr>
+</tbody></table>
+<h3>Regras gerais</h3>
+<ul>
+<li>Desconto nunca é dado antes de apresentar a proposta formal ao cliente</li>
+<li>Não revelar o percentual de desconto — sempre apresentar como "condição especial"</li>
+<li>Descontos progressivos para volume: 5+ unidades = 3% adicional; 10+ = 5% adicional</li>
+<li>Desconto para órgãos públicos: negociado caso a caso com João</li>
+</ul>
+<div class="callout-pp">🔒 Esta tabela é confidencial. Não compartilhe com clientes, fornecedores ou pessoas de fora do time comercial.</div></div>`},
+  {id:'locacao',ic:'📝',nm:'Contratos de Locação',
+   body:`<div class="pp-h">📝 Contratos de Locação</div>
+<div class="pp-meta">Vigência: 2026 · Elaborar com suporte da Ingrid</div>
+<div class="pp-txt">
+<h3>O que está incluído</h3>
+<ul>
+<li>Manutenção preventiva semestral (troca de freios, bateria, revisão geral)</li>
+<li>Manutenção corretiva sem custo (exceto dano por mau uso)</li>
+<li>Seguro básico incluído para frotas acima de 5 unidades</li>
+<li>Suporte técnico com SLA definido em contrato</li>
+</ul>
+<h3>Reajuste e renovação</h3>
+<ul>
+<li>Reajuste anual automático por IPCA (publicado em julho)</li>
+<li>Renovação automática por mais 12 meses salvo comunicação com 60 dias de antecedência</li>
+<li>Devolução antecipada: multa de 3 meses do valor do contrato</li>
+</ul>
+<h3>Responsabilidades do cliente</h3>
+<ul>
+<li>Uso correto dos veículos conforme manual entregue no ato da instalação</li>
+<li>Comunicar avarias em até 24h via chamado no Produtivo ou WhatsApp</li>
+<li>Não realizar manutenções ou modificações sem autorização da CicloWay</li>
+</ul></div>`},
+];
+
+const CASES = [
+  {emoji:'🛵',title:'iFood',sub:'Delivery · Last Mile',
+   desc:'15 patinetes SN-200 para entregas de última milha em São Paulo. Redução de 72% no custo operacional de entrega em raio de 3km.',
+   tags:['Delivery','Patinetes','SP'],file:'case-ifood.pdf'},
+  {emoji:'🛡️',title:'Prosegur',sub:'Segurança Patrimonial',
+   desc:'22 Segways i2 em 8 shoppings de todo o Brasil. Cobertura 40% maior por vigia com redução de incidentes.',
+   tags:['Segurança','Segway','Nacional'],file:'case-prosegur.pdf'},
+  {emoji:'🏬',title:'Multiplan',sub:'Shopping Centers',
+   desc:'12 Segways para patrulhamento em 3 empreendimentos. Implantação em 45 dias com treinamento in-house.',
+   tags:['Shopping','Segway','Frota'],file:'case-multiplan.pdf'},
+  {emoji:'♻️',title:'Coopercaps',sub:'Coleta Seletiva',
+   desc:'8 Besouros Coletores para coleta seletiva em São Bernardo do Campo. Projeto premiado pelo MMA.',
+   tags:['Coleta','Triciclo','ESG'],file:'case-coopercaps.pdf'},
+  {emoji:'💊',title:'Pague Menos',sub:'Delivery Farmacêutico',
+   desc:'30 Triciclos C-3 para entrega de medicamentos em 6 cidades. Entregas em até 60 min no raio de 5km.',
+   tags:['Farmácia','Triciclo','Saúde'],file:'case-paguemenos.pdf'},
+  {emoji:'📦',title:'Jadlog',sub:'Logística Expressa',
+   desc:'20 Formigões Baú para distribuição urbana em SP. Redução de 35% no prazo de entrega last mile.',
+   tags:['Logística','Formigão','SP'],file:'case-jadlog.pdf'},
+];
+
+const CONTRACTS = [
+  {emoji:'📑',title:'Locação — Patinetes (B2B)',sub:'Contrato padrão para locação de patinetes',desc:'Contrato mensal com cláusulas de manutenção, SLA e seguro para frota de patinetes elétricos.',tags:['Locação','Patinetes'],file:'contrato-locacao-patinetes.docx'},
+  {emoji:'📑',title:'Locação — Segways e Triciclos',sub:'Contrato para veículos pesados e Segways',desc:'Versão do contrato de locação adaptada para veículos maiores com cláusulas específicas de operação.',tags:['Locação','Segway','Triciclos'],file:'contrato-locacao-pesados.docx'},
+  {emoji:'🤝',title:'Venda Direta — Frota B2B',sub:'Contrato de compra e venda em frota',desc:'Contrato de venda com garantia estendida, condições especiais e termos de suporte pós-venda.',tags:['Venda','B2B'],file:'contrato-venda-b2b.docx'},
+  {emoji:'🏛️',title:'Contrato Público — Prefeituras',sub:'Modelo para licitações e órgãos públicos',desc:'Adaptado às exigências da Lei 14.133/21 (nova Lei de Licitações) com cláusulas de FIAT e ICMS Manaus.',tags:['Público','Prefeitura'],file:'contrato-publico.docx'},
+  {emoji:'🔧',title:'Manutenção Preventiva Anual',sub:'Contrato de serviço de manutenção',desc:'Plano anual de manutenção preventiva para frotas adquiridas. Inclui 2 revisões e peças básicas.',tags:['Serviço','Manutenção'],file:'contrato-manutencao.docx'},
+  {emoji:'🤝',title:'Parceria Comercial (Representante)',sub:'Contrato de representação comercial',desc:'Contrato de representante comercial PJ com metas, comissões e área de atuação.',tags:['Parceria','Comercial'],file:'contrato-representante.docx'},
+  {emoji:'🔒',title:'NDA — Acordo de Confidencialidade',sub:'Modelo de NDA para negociações',desc:'NDA padrão para negociações estratégicas, due diligence e apresentação de projetos.',tags:['NDA','Jurídico'],file:'nda-cicloway.docx'},
+  {emoji:'🏭',title:'Contrato de Fornecimento — Produção',sub:'Compra de insumos e componentes',desc:'Contrato com fornecedores de componentes elétricos para a linha de produção de Manaus.',tags:['Fornecedor','Produção'],file:'contrato-fornecimento.docx'},
+];
+
+const PROPOSALS = [
+  {emoji:'🏬',title:'Proposta — Shopping Centers',sub:'Patrulhamento e mobilidade interna',desc:'Template para shoppings e empreendimentos comerciais: Segways para segurança e patinetes para staff.',tags:['Shopping','Segway'],file:'proposta-shopping.pptx'},
+  {emoji:'🛡️',title:'Proposta — Segurança Patrimonial',sub:'Frotas para rondas e vigilância',desc:'Proposta para empresas de segurança: Segways com mochila de equipamentos e rastreamento.',tags:['Segurança','Segway'],file:'proposta-seguranca.pptx'},
+  {emoji:'📦',title:'Proposta — Logística Last Mile',sub:'Entregas urbanas e distribuição',desc:'Template para operações de delivery: Formigão Baú e patinetes com capacidade de carga.',tags:['Logística','Last Mile'],file:'proposta-logistica.pptx'},
+  {emoji:'♻️',title:'Proposta — Coleta Seletiva',sub:'Prefeituras e cooperativas de reciclagem',desc:'Proposta para licitações de coleta seletiva com Besouro Coletor e Formigão G3.',tags:['Coleta','ESG'],file:'proposta-coleta.pptx'},
+  {emoji:'🏭',title:'Proposta — Pátios Industriais',sub:'Mobilidade em grandes plantas',desc:'Template para indústrias e galpões: triciclos e patinetes para movimentação interna.',tags:['Industrial','Frota'],file:'proposta-industrial.pptx'},
+  {emoji:'💊',title:'Proposta — Saúde e Farmácias',sub:'Entrega de medicamentos e equipamentos',desc:'Proposta para redes farmacêuticas: Triciclo C-3 para entrega rápida em até 5km.',tags:['Saúde','Triciclo'],file:'proposta-saude.pptx'},
+  {emoji:'🏛️',title:'Proposta — Poder Público',sub:'Prefeituras, autarquias e órgãos federais',desc:'Template para licitações públicas com alinhamento à Lei 14.133/21 e argumentos de ESG.',tags:['Público','Licitação'],file:'proposta-publico.pptx'},
+];
+
+/* ═══════════════════════════════════════════════
+   AUTH
+═══════════════════════════════════════════════ */
+let CU = null; // current user (perfil vindo do Supabase)
+
+// Mostra/oculta erro no formulário de login
+function loginError(msg){
+  const el = document.getElementById('l-err');
+  el.textContent = msg || 'E-mail ou senha incorretos.';
+  el.style.display = 'block';
+}
+
+// Deriva iniciais a partir do nome (fallback quando não há no perfil)
+function iniciaisDe(nome){
+  if(!nome) return '?';
+  const p = nome.trim().split(/\s+/);
+  return ((p[0]?.[0]||'') + (p.length>1 ? p[p.length-1][0] : '')).toUpperCase();
+}
+
+// Carrega o perfil do usuário autenticado a partir da tabela `profiles`
+async function carregarPerfil(user){
+  const { data, error } = await sb
+    .from('profiles')
+    .select('nome,iniciais,role,dept')
+    .eq('id', user.id)
+    .single();
+  if(error || !data){
+    // Autenticou mas ainda não tem perfil cadastrado
+    console.warn('Perfil não encontrado:', error);
+    return {
+      id: user.id, email: user.email,
+      nm: user.email, in: iniciaisDe(user.email), role: 'employee', dept: '—'
+    };
+  }
+  return {
+    id: user.id, email: user.email,
+    nm: data.nome, in: data.iniciais || iniciaisDe(data.nome),
+    role: data.role || 'employee', dept: data.dept || '—'
+  };
+}
+
+async function doLogin(){
+  const btn = document.querySelector('.l-btn');
+  const em = document.getElementById('l-em').value.trim().toLowerCase();
+  const pw = document.getElementById('l-pw').value;
+  if(!sb){ loginError('Sistema ainda não configurado (config.js). Fale com o admin.'); return; }
+  if(!em || !pw){ loginError('Preencha e-mail e senha.'); return; }
+  document.getElementById('l-err').style.display='none';
+  if(btn){ btn.disabled = true; btn.textContent = 'Entrando…'; }
+
+  const { data, error } = await sb.auth.signInWithPassword({ email: em, password: pw });
+
+  if(btn){ btn.disabled = false; btn.textContent = 'Entrar'; }
+  if(error){
+    loginError(error.message === 'Invalid login credentials'
+      ? 'E-mail ou senha incorretos.'
+      : 'Não foi possível entrar. Tente novamente.');
+    return;
+  }
+  CU = await carregarPerfil(data.user);
+  showApp();
+}
+
+async function doLogout(){
+  await sb.auth.signOut();
+  CU = null;
+  document.getElementById('app').classList.remove('on');
+  document.getElementById('login').style.display='flex';
+  document.getElementById('l-em').value='';
+  document.getElementById('l-pw').value='';
+}
+
+function showApp(){
+  document.getElementById('login').style.display='none';
+  document.getElementById('app').classList.add('on');
+  document.getElementById('h-av').textContent = CU.in;
+  document.getElementById('h-nm').textContent = CU.nm;
+  document.getElementById('h-rl').textContent = CU.role==='admin' ? 'Administrador · '+CU.dept : CU.dept;
+  initHome();
+  initOrg();
+  initTraining();
+  initOnboarding();
+  initPractices();
+  initProducts();
+  initStock();
+  initLeads();
+  initObjections();
+  initJourney();
+  initPrice();
+  initKPIs();
+  initCases();
+  initContracts();
+  initProposals();
+}
+
+// Enter key on login
+document.getElementById('l-pw').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+document.getElementById('l-em').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('l-pw').focus();});
+
+/* ═══════════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════════ */
+let curPage = 'home';
+
+document.querySelectorAll('.nav-it[data-p]').forEach(btn=>{
+  btn.addEventListener('click',()=>navigate(btn.dataset.p));
+});
+
+function navigate(p){
+  document.querySelectorAll('.nav-it').forEach(b=>b.classList.remove('on'));
+  document.querySelector(`.nav-it[data-p="${p}"]`).classList.add('on');
+  document.querySelectorAll('.pg').forEach(x=>x.classList.remove('on'));
+  document.getElementById('pg-'+p).classList.add('on');
+  curPage = p;
+}
+
+/* ═══════════════════════════════════════════════
+   HOME — CALENDAR
+═══════════════════════════════════════════════ */
+const DAYS = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+let calOffset = 0; // weeks from current
+
+function getMonday(d){
+  const day = d.getDay();
+  const diff = (day===0)?-6:1-day;
+  const m = new Date(d);
+  m.setDate(d.getDate()+diff);
+  m.setHours(0,0,0,0);
+  return m;
+}
+
+function fmt(d){ return d.toISOString().slice(0,10); }
+
+function wk(dir){
+  if(dir===0){ calOffset=0; } else { calOffset+=dir; }
+  renderCal();
+}
+
+function renderCal(){
+  const today = new Date();
+  const monday = getMonday(today);
+  monday.setDate(monday.getDate() + calOffset*7);
+  const sunday = new Date(monday); sunday.setDate(monday.getDate()+6);
+
+  document.getElementById('cal-wl').textContent =
+    `${monday.getDate()} de ${MONTHS[monday.getMonth()]} — ${sunday.getDate()} de ${MONTHS[sunday.getMonth()]} ${sunday.getFullYear()}`;
+
+  const grid = document.getElementById('cal-grid');
+  grid.innerHTML = '';
+  const todayStr = fmt(new Date());
+
+  for(let i=0;i<7;i++){
+    const d = new Date(monday); d.setDate(monday.getDate()+i);
+    const ds = fmt(d);
+    const isToday = ds===todayStr;
+    const isWknd = d.getDay()===0||d.getDay()===6;
+    const dayEvs = EVENTS.filter(e=>e.dt===ds);
+
+    const el = document.createElement('div');
+    el.className = 'cal-day'+(isToday?' today':'')+(isWknd?' wknd':'');
+    el.innerHTML = `<div class="cal-dn">${DAYS[d.getDay()]}</div><div class="cal-dd">${d.getDate()}</div>`;
+    dayEvs.forEach(ev=>{
+      const e = document.createElement('div');
+      e.className = 'cal-ev ev-'+ev.tp;
+      e.title = ev.nm + (ev.tm ? ' · '+ev.tm : '');
+      e.textContent = ev.nm;
+      el.appendChild(e);
+    });
+    grid.appendChild(el);
+  }
+  renderUpcoming();
+}
+
+function renderUpcoming(){
+  const today = fmt(new Date());
+  const future = EVENTS.filter(e=>e.dt>=today).sort((a,b)=>a.dt.localeCompare(b.dt)).slice(0,5);
+  const ul = document.getElementById('upc-list');
+  ul.innerHTML = '';
+  if(!future.length){ ul.innerHTML='<div class="empty">Sem eventos próximos.</div>'; return; }
+  future.forEach(ev=>{
+    const d = new Date(ev.dt+'T12:00:00');
+    const li = document.createElement('div');
+    li.className = 'ev-item';
+    li.innerHTML = `<div class="ev-dot ${ev.tp}"></div>
+      <div class="ev-text">
+        <div class="ev-name">${ev.nm}</div>
+        <div class="ev-meta">${d.getDate()} de ${MONTHS[d.getMonth()]}${ev.tm?' · '+ev.tm:' · Dia todo'}</div>
+      </div>`;
+    ul.appendChild(li);
+  });
+}
+
+function initHome(){
+  const h = new Date().getHours();
+  const greet = h<12?'Bom dia':h<18?'Boa tarde':'Boa noite';
+  const firstName = CU.nm.split(' ')[0];
+  document.getElementById('greet').textContent = `${greet}, ${firstName}!`;
+  const d = new Date();
+  document.getElementById('h-dt').textContent =
+    `${DAYS[d.getDay()]}, ${d.getDate()} de ${MONTHS[d.getMonth()]} de ${d.getFullYear()}`;
+  renderBirthdays();
+  renderCal();
+}
+
+function renderBirthdays(){
+  const today = new Date().getDate();
+  const row = document.getElementById('bday-row');
+  row.innerHTML = '';
+  BIRTHDAYS.forEach(b=>{
+    const isToday = b.day === today;
+    const card = document.createElement('div');
+    card.className = 'bday-card'+(isToday?' today':'');
+    card.innerHTML = `
+      <div class="bday-av">${b.in}</div>
+      <div>
+        <div class="bday-nm">${b.nm}</div>
+        <div class="bday-dt">Dia ${b.day} · ${b.dept}</div>
+        ${isToday?'<div class="bday-today">🎉 Hoje!</div>':''}
+      </div>`;
+    row.appendChild(card);
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   ORGANOGRAMA
+═══════════════════════════════════════════════ */
+let orgDept = 'Todos';
+
+function initOrg(){
+  const depts = ['Todos',...new Set(PEOPLE.map(p=>p.dept))];
+  const row = document.getElementById('dept-row');
+  row.innerHTML='';
+  depts.forEach(d=>{
+    const b = document.createElement('button');
+    b.className = 'fchip'+(d===orgDept?' on':'');
+    b.textContent = d;
+    b.onclick = ()=>{ orgDept=d; document.querySelectorAll('#dept-row .fchip').forEach(x=>x.classList.remove('on')); b.classList.add('on'); renderOrg(); };
+    row.appendChild(b);
+  });
+  renderOrg();
+}
+
+function renderOrg(){
+  const q = document.getElementById('org-q').value.toLowerCase();
+  const grid = document.getElementById('pgrid');
+  grid.innerHTML = '';
+  let shown = 0;
+  PEOPLE.forEach(p=>{
+    const matchDept = orgDept==='Todos' || p.dept===orgDept;
+    const matchQ = !q || p.nm.toLowerCase().includes(q) || p.tt.toLowerCase().includes(q);
+    if(!matchDept||!matchQ) return;
+    shown++;
+    const av = (p.ct==='PJ'?'pj':p.ct==='CEO'?'ceo':'');
+    const badge = p.ct==='CLT'?'b-clt':p.ct==='PJ'?'b-pj':p.ct==='CEO'?'b-ceo':'b-ext';
+    const card = document.createElement('div');
+    card.className = 'pcard';
+    card.innerHTML = `
+      <div class="pc-top">
+        <div class="pc-av ${av}">${p.in}</div>
+        <div><div class="pc-nm">${p.nm}</div><div class="pc-tt">${p.tt}</div></div>
+      </div>
+      <div class="pc-ft">
+        <span class="badge ${badge}">${p.ct}</span>
+        <span class="badge b-dept">${p.dept}</span>
+      </div>`;
+    card.onclick = ()=>openModal(p);
+    grid.appendChild(card);
+  });
+  if(!shown) grid.innerHTML = '<div class="empty">Nenhum colaborador encontrado.</div>';
+}
+
+function filterOrg(){ renderOrg(); }
+
+/* ═══════════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════════ */
+function openModal(p){
+  document.getElementById('m-nm').textContent = p.nm;
+  document.getElementById('m-tt').textContent = p.tt;
+  const ct = p.ct==='CLT'?'mt-gr':p.ct==='PJ'?'mt-ye':p.ct==='CEO'?'mt-bl':'mt-mu';
+  document.getElementById('m-tags').innerHTML =
+    `<span class="mtag ${ct}">${p.ct}</span>
+     <span class="mtag mt-bl">${p.dept}</span>
+     <span class="mtag mt-mu">Desde ${p.since}</span>`;
+  document.getElementById('m-sum').textContent = p.sum;
+  document.getElementById('m-resp').innerHTML = p.resp.map(r=>`<li>${r}</li>`).join('');
+  document.getElementById('m-tools').innerHTML = p.tools.map(t=>`<li>${t}</li>`).join('');
+  document.getElementById('modal').classList.add('on');
+}
+
+function closeMod(e){
+  if(!e || e.target===document.getElementById('modal'))
+    document.getElementById('modal').classList.remove('on');
+}
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeMod(); });
+
+/* ═══════════════════════════════════════════════
+   TRAINING
+═══════════════════════════════════════════════ */
+let trainCat = 'Todos';
+
+function tKey(tid){ return `inciclo_t_${CU.id}_${tid}`; }
+function isDone(tid){ return localStorage.getItem(tKey(tid))==='1'; }
+function toggleDone(tid, btn){
+  const done = isDone(tid);
+  if(done){ localStorage.removeItem(tKey(tid)); }
+  else { localStorage.setItem(tKey(tid),'1'); }
+  btn.className = 'vstatus '+(done?'pend':'done');
+  btn.textContent = done ? 'Marcar concluído' : '✓ Concluído';
+}
+
+function initTraining(){
+  const cats = ['Todos',...new Set(TRAININGS.map(t=>t.cat))];
+  const row = document.getElementById('cat-row');
+  row.innerHTML='';
+  cats.forEach(c=>{
+    const b = document.createElement('button');
+    b.className = 'fchip'+(c===trainCat?' on':'');
+    b.textContent = c;
+    b.onclick=()=>{ trainCat=c; document.querySelectorAll('#cat-row .fchip').forEach(x=>x.classList.remove('on')); b.classList.add('on'); renderTraining(); };
+    row.appendChild(b);
+  });
+  renderTraining();
+}
+
+function renderTraining(){
+  const grid = document.getElementById('tgrid');
+  grid.innerHTML='';
+  const list = trainCat==='Todos' ? TRAININGS : TRAININGS.filter(t=>t.cat===trainCat);
+  list.forEach(t=>{
+    const done = isDone(t.id);
+    const card = document.createElement('div');
+    card.className = 'vcard';
+    card.innerHTML = `
+      <div class="vthumb">${t.emoji}<div class="vplay"><div class="vplay-ic">▶</div></div></div>
+      <div class="vinfo">
+        <div class="vcat">${t.cat}</div>
+        <div class="vtitle">${t.nm}</div>
+        <div class="vdesc">${t.desc}</div>
+        <div class="vft">
+          <span class="vdur">⏱ ${t.dur}</span>
+          <button class="vstatus ${done?'done':'pend'}" onclick="toggleDone('${t.id}',this)">${done?'✓ Concluído':'Marcar concluído'}</button>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   ONBOARDING
+═══════════════════════════════════════════════ */
+function obKey(){ return `inciclo_ob_${CU.id}`; }
+function obChecks(stepIdx){ return `inciclo_ob_ck_${CU.id}_${stepIdx}`; }
+
+function getObStep(){ return parseInt(localStorage.getItem(obKey())||'0'); }
+function setObStep(s){ localStorage.setItem(obKey(), s); }
+
+function getChecks(idx){
+  try { return JSON.parse(localStorage.getItem(obChecks(idx))||'[]'); }
+  catch(e){ return []; }
+}
+function setChecks(idx, arr){ localStorage.setItem(obChecks(idx), JSON.stringify(arr)); }
+
+function initOnboarding(){ renderOb(); }
+
+function renderOb(){
+  const cur = getObStep();
+  const prog = document.getElementById('ob-prog');
+  prog.innerHTML='';
+  ONBOARDING.forEach((s,i)=>{
+    if(i>0){
+      const ln = document.createElement('div');
+      ln.className = 'ob-line'+(i<=cur?' done':'');
+      prog.appendChild(ln);
+    }
+    const dot = document.createElement('div');
+    dot.className = 'ob-dot'+(i<cur?' done':i===cur?' cur':'');
+    dot.textContent = i<cur ? '✓' : (i+1);
+    dot.title = s.nm;
+    if(i<=cur){ dot.style.cursor='pointer'; dot.onclick=()=>{ setObStep(i); renderOb(); }; }
+    prog.appendChild(dot);
+  });
+
+  const s = ONBOARDING[cur];
+  const checks = getChecks(cur);
+  const allDone = s.items.every((_,i)=>checks.includes(i));
+
+  const card = document.getElementById('ob-card');
+  card.innerHTML = `
+    <div class="ob-sn">Passo ${cur+1} de ${ONBOARDING.length}</div>
+    <div class="ob-st">${s.nm}</div>
+    <div class="ob-sd">${s.desc}</div>
+    <ul class="ob-cl">
+      ${s.items.map((it,i)=>`
+        <li class="ob-ci${checks.includes(i)?' ck':''}" data-i="${i}">
+          <div class="ob-cb">${checks.includes(i)?'✓':''}</div>
+          <span class="ob-ct">${it}</span>
+        </li>`).join('')}
+    </ul>
+    <div class="ob-act">
+      ${cur>0?`<button class="btn-sec" onclick="obBack()">← Anterior</button>`:''}
+      ${cur<ONBOARDING.length-1
+        ? `<button class="btn-bl" ${allDone?'':'disabled'} onclick="obNext()">Próximo passo →</button>`
+        : `<div style="color:var(--green);font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px">🎉 Onboarding concluído!</div>`
+      }
+    </div>`;
+
+  card.querySelectorAll('.ob-ci').forEach(li=>{
+    li.onclick=()=>{
+      const idx = parseInt(li.dataset.i);
+      const cur2 = getObStep();
+      const cks = getChecks(cur2);
+      const pos = cks.indexOf(idx);
+      if(pos>-1){ cks.splice(pos,1); } else { cks.push(idx); }
+      setChecks(cur2, cks);
+      renderOb();
+    };
+  });
+}
+
+function obNext(){ const c=getObStep(); if(c<ONBOARDING.length-1){ setObStep(c+1); renderOb(); } }
+function obBack(){ const c=getObStep(); if(c>0){ setObStep(c-1); renderOb(); } }
+
+/* ═══════════════════════════════════════════════
+   BOAS PRÁTICAS
+═══════════════════════════════════════════════ */
+let curPrac = PRACTICES[0].id;
+
+function initPractices(){
+  const nav = document.getElementById('bp-nav');
+  const body = document.getElementById('bp-body');
+  nav.innerHTML=''; body.innerHTML='';
+  PRACTICES.forEach((p,i)=>{
+    const ni = document.createElement('div');
+    ni.className = 'bp-ni'+(p.id===curPrac?' on':'');
+    ni.innerHTML = `<span>${p.ic}</span>${p.nm}`;
+    ni.onclick=()=>{
+      curPrac=p.id;
+      document.querySelectorAll('.bp-ni').forEach(x=>x.classList.remove('on'));
+      ni.classList.add('on');
+      document.querySelectorAll('.bp-sec').forEach(x=>x.classList.remove('on'));
+      document.getElementById('bps-'+p.id).classList.add('on');
+    };
+    nav.appendChild(ni);
+    const sec = document.createElement('div');
+    sec.className = 'bp-sec'+(p.id===curPrac?' on':'');
+    sec.id = 'bps-'+p.id;
+    sec.innerHTML = `<div class="bp-h">${p.ic} ${p.nm}</div><div class="bp-meta">Cultura CicloWay · Atualizado em Junho 2026</div><div class="bp-txt">${p.body}</div>`;
+    body.appendChild(sec);
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   PRODUTOS
+═══════════════════════════════════════════════ */
+let prodCat = 'Todos';
+
+function initProducts(){
+  const cats = ['Todos',...new Set(PRODUCTS.map(p=>p.cat))];
+  const row = document.getElementById('prod-row');
+  row.innerHTML='';
+  cats.forEach(c=>{
+    const b = document.createElement('button');
+    b.className = 'fchip'+(c===prodCat?' on':'');
+    b.textContent = c;
+    b.onclick=()=>{ prodCat=c; document.querySelectorAll('#prod-row .fchip').forEach(x=>x.classList.remove('on')); b.classList.add('on'); renderProducts(); };
+    row.appendChild(b);
+  });
+  renderProducts();
+}
+
+function renderProducts(){
+  const grid = document.getElementById('prodgrid');
+  grid.innerHTML='';
+  const list = prodCat==='Todos' ? PRODUCTS : PRODUCTS.filter(p=>p.cat===prodCat);
+  list.forEach(p=>{
+    const card = document.createElement('div');
+    card.className = 'prcard';
+    const specsHtml = Object.entries(p.specs).map(([k,v])=>`<div class="spec"><div class="sp-l">${k}</div><div class="sp-v">${v}</div></div>`).join('');
+    const isConsult = p.price==='Consultar';
+    card.innerHTML = `
+      <div class="pr-img">${p.emoji}</div>
+      <div class="pr-body">
+        <div class="pr-cat">${p.cat}</div>
+        <div class="pr-nm">${p.nm}${p.new?'<span class="pr-new">Novo</span>':''}</div>
+        <div class="pr-specs">${specsHtml}</div>
+        <div class="pr-price ${isConsult?'consult':''}">${p.price}</div>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   STOCK
+═══════════════════════════════════════════════ */
+let stkCat = 'Todos';
+
+function initStock(){
+  const cats = ['Todos',...new Set(STOCK.map(s=>s.cat))];
+  const row = document.getElementById('stk-filter');
+  row.innerHTML='';
+  cats.forEach(c=>{
+    const b=document.createElement('button');
+    b.className='fchip'+(c===stkCat?' on':'');
+    b.textContent=c;
+    b.onclick=()=>{stkCat=c;document.querySelectorAll('#stk-filter .fchip').forEach(x=>x.classList.remove('on'));b.classList.add('on');renderStock();};
+    row.appendChild(b);
+  });
+  // summary
+  const ok=STOCK.filter(s=>s.status==='ok').length;
+  const low=STOCK.filter(s=>s.status==='low').length;
+  const out=STOCK.filter(s=>s.status==='out').length;
+  document.getElementById('stk-sum').innerHTML=
+    `<div class="stk-sc"><div class="stk-sc-v" style="color:var(--green)">${ok}</div><div class="stk-sc-l">Em estoque</div></div>
+     <div class="stk-sc"><div class="stk-sc-v" style="color:var(--yellow)">${low}</div><div class="stk-sc-l">Estoque baixo</div></div>
+     <div class="stk-sc"><div class="stk-sc-v" style="color:var(--red)">${out}</div><div class="stk-sc-l">Indisponível</div></div>`;
+  renderStock();
+}
+
+function renderStock(){
+  const list = stkCat==='Todos'?STOCK:STOCK.filter(s=>s.cat===stkCat);
+  const tbody = document.getElementById('stk-body');
+  tbody.innerHTML='';
+  list.forEach(s=>{
+    const badge = s.status==='ok'?'<span class="sk-badge sk-ok">✓ Em estoque</span>'
+                 :s.status==='low'?'<span class="sk-badge sk-low">⚠ Estoque baixo</span>'
+                 :'<span class="sk-badge sk-out">✕ Indisponível</span>';
+    const qtdColor = s.status==='ok'?'var(--green)':s.status==='low'?'var(--yellow)':'var(--red)';
+    const tr = document.createElement('tr');
+    tr.innerHTML=`<td>${s.modelo}</td><td>${s.cat}</td>
+      <td style="font-weight:700;color:${qtdColor}">${s.qtd}</td>
+      <td>${s.loc}</td><td>${badge}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   LEAD QUALIFICATION
+═══════════════════════════════════════════════ */
+let lqAnswers = {};
+
+function initLeads(){
+  const form = document.getElementById('lq-form');
+  form.innerHTML='';
+  LQ_QUESTIONS.forEach((q,qi)=>{
+    const sec = document.createElement('div');
+    sec.className='lq-item';
+    sec.innerHTML=`<div class="lq-sec-t">${qi+1} de ${LQ_QUESTIONS.length}</div>
+      <div class="lq-q">${q.txt}</div>
+      <div class="lq-opts">
+        ${q.opts.map((o,oi)=>`
+          <label class="lq-opt" data-qid="${q.id}" data-val="${o.v}">
+            <input type="radio" name="${q.id}" value="${o.v}" onchange="lqUpdate()"/>
+            ${o.l}
+          </label>`).join('')}
+      </div>`;
+    form.appendChild(sec);
+  });
+  lqUpdate();
+}
+
+function lqUpdate(){
+  let score=0;
+  document.querySelectorAll('.lq-opt input').forEach(inp=>{
+    const lbl=inp.closest('.lq-opt');
+    if(inp.checked){score+=parseInt(inp.value);lbl.classList.add('sel');}
+    else lbl.classList.remove('sel');
+  });
+  document.getElementById('lq-num').textContent=score;
+  const bar=document.getElementById('lq-bar');
+  const tmp=document.getElementById('lq-temp');
+  const act=document.getElementById('lq-action');
+  bar.style.width=score+'%';
+  if(score>=75){
+    bar.style.background='var(--red)';
+    tmp.className='lq-temp temp-hot';tmp.textContent='🔥 Lead Quente';
+    act.textContent='Alta prioridade! Envie proposta formal em até 24h e agende reunião de apresentação com a Elizabete.';
+  } else if(score>=45){
+    bar.style.background='var(--yellow)';
+    tmp.className='lq-temp temp-warm';tmp.textContent='🌤️ Lead Morno';
+    act.textContent='Potencial médio. Aprofunde o diagnóstico de necessidades e envie material educativo antes da proposta.';
+  } else {
+    bar.style.background='var(--text2)';
+    tmp.className='lq-temp temp-cold';tmp.textContent='❄️ Lead Frio';
+    act.textContent='Prioridade baixa no momento. Mantenha em nurturing e retorne em 60 dias com novidades de produtos.';
+  }
+}
+
+function resetLeads(){
+  document.querySelectorAll('.lq-opt input').forEach(i=>i.checked=false);
+  document.querySelectorAll('.lq-opt').forEach(l=>l.classList.remove('sel'));
+  lqUpdate();
+}
+
+/* ═══════════════════════════════════════════════
+   OBJECTIONS
+═══════════════════════════════════════════════ */
+let objFilter = 'Todos';
+
+function initObjections(){
+  const tags=['Todos','Preço','Concorrência','Produto','Suporte'];
+  const row=document.getElementById('obj-tags');
+  row.innerHTML='';
+  tags.forEach(t=>{
+    const b=document.createElement('button');
+    b.className='fchip'+(t===objFilter?' on':'');
+    b.textContent=t;
+    b.onclick=()=>{objFilter=t;document.querySelectorAll('#obj-tags .fchip').forEach(x=>x.classList.remove('on'));b.classList.add('on');renderObj();};
+    row.appendChild(b);
+  });
+  renderObj();
+}
+
+function renderObj(){
+  const q=document.getElementById('obj-q').value.toLowerCase();
+  const catMap={'p':'Preço','c':'Concorrência','pr':'Produto','s':'Suporte'};
+  const grid=document.getElementById('obj-grid');
+  grid.innerHTML='';
+  OBJECTIONS.filter(o=>{
+    const catOk=objFilter==='Todos'||catMap[o.cat]===objFilter;
+    const qOk=!q||o.q.toLowerCase().includes(q)||o.a.toLowerCase().includes(q);
+    return catOk&&qOk;
+  }).forEach(o=>{
+    const tagCls='ot-'+o.cat;
+    const card=document.createElement('div');
+    card.className='obj-card';
+    card.innerHTML=`<div class="obj-tag ${tagCls}">${catMap[o.cat]}</div>
+      <div class="obj-q">${o.q}</div>
+      <div class="obj-ans">${o.a}</div>`;
+    card.onclick=()=>card.classList.toggle('open');
+    grid.appendChild(card);
+  });
+  if(!grid.children.length) grid.innerHTML='<div class="empty">Nenhuma objeção encontrada.</div>';
+}
+
+function filterObj(){ renderObj(); }
+
+/* ═══════════════════════════════════════════════
+   JOURNEY
+═══════════════════════════════════════════════ */
+function initJourney(){
+  const pipe=document.getElementById('jrn-pipe');
+  pipe.innerHTML='';
+  JOURNEY_STAGES.forEach(st=>{
+    const div=document.createElement('div');
+    div.className='jrn-stage';
+    div.style.borderTopColor=st.color;
+    const totalVal=st.deals.filter(d=>d.val!=='Consultar').length;
+    div.innerHTML=`<div class="jrn-ic">${st.ic}</div>
+      <div class="jrn-nm" style="color:${st.color}">${st.nm}</div>
+      <div class="jrn-cnt">${st.deals.length}</div>
+      <div class="jrn-val">${st.deals.length===1?'1 negócio':st.deals.length+' negócios'}</div>
+      <ul class="jrn-items">
+        ${st.deals.map(d=>`<li class="jrn-item">
+          <div class="jrn-co">${d.co}</div>
+          <div class="jrn-prod">${d.prod}</div>
+          <div class="jrn-val-sm">${d.val}</div>
+        </li>`).join('')}
+      </ul>`;
+    pipe.appendChild(div);
+  });
+  const total=JOURNEY_STAGES.reduce((a,s)=>a+s.deals.length,0);
+  const fechados=JOURNEY_STAGES[4].deals.length;
+  document.getElementById('j-conv').innerHTML=`
+    <div class="j-cv"><div class="j-cv-v">${total}</div><div class="j-cv-l">Negócios ativos</div></div>
+    <div class="j-cv"><div class="j-cv-v">R$ 75K+</div><div class="j-cv-l">Em pipeline</div></div>
+    <div class="j-cv"><div class="j-cv-v">${Math.round(fechados/total*100)}%</div><div class="j-cv-l">Taxa de fechamento</div></div>
+    <div class="j-cv"><div class="j-cv-v">34d</div><div class="j-cv-l">Ciclo médio</div></div>`;
+}
+
+/* ═══════════════════════════════════════════════
+   PRICE POLICY
+═══════════════════════════════════════════════ */
+let curPP = PRICE_SECTIONS[0].id;
+
+function initPrice(){
+  const toc=document.getElementById('pp-toc');
+  const doc=document.getElementById('pp-doc');
+  toc.innerHTML='';doc.innerHTML='';
+  PRICE_SECTIONS.forEach(s=>{
+    const ti=document.createElement('div');
+    ti.className='pp-ti'+(s.id===curPP?' on':'');
+    ti.innerHTML=`<span>${s.ic}</span>${s.nm}`;
+    ti.onclick=()=>{
+      curPP=s.id;
+      document.querySelectorAll('.pp-ti').forEach(x=>x.classList.remove('on'));ti.classList.add('on');
+      document.querySelectorAll('.pp-sec').forEach(x=>x.classList.remove('on'));
+      document.getElementById('pps-'+s.id).classList.add('on');
+    };
+    toc.appendChild(ti);
+    const sec=document.createElement('div');
+    sec.className='pp-sec'+(s.id===curPP?' on':'');
+    sec.id='pps-'+s.id;
+    sec.innerHTML=s.body;
+    doc.appendChild(sec);
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   KPI v2 — DASHBOARD COMPLETO
+═══════════════════════════════════════════════ */
+function kpiMainTab(id){
+  document.querySelectorAll('.kmt').forEach(b=>b.classList.remove('on'));
+  document.querySelector(`.kmt[data-kp="${id}"]`).classList.add('on');
+  document.querySelectorAll('.kpanel').forEach(p=>p.classList.remove('on'));
+  document.getElementById('kpanel-'+id).classList.add('on');
+}
+
+/* helpers */
+function ks(t,h){ return `<div class="ks"><div class="ks-t">${t}</div>${h}</div>`; }
+function kmrow(a){ return `<div class="km-row">${a.join('')}</div>`; }
+function ktrow(a){ return `<div class="kt-row">${a.join('')}</div>`; }
+function km(l,v,m,d,dc){ return `<div class="km"><div class="km-l">${l}</div><div class="km-v">${v}</div>${m?`<div class="km-m">${m}</div>`:''}${d?`<div class="km-d ${dc||''}">${d}</div>`:''}</div>`; }
+function kt(l,curr,target,color){
+  const pct=Math.min(100,Math.round(curr/target*100));
+  const auto=pct>=90?'var(--green)':pct>=70?'var(--yellow)':'var(--red)';
+  return `<div class="kt"><div class="kt-hd"><span class="kt-l">${l}</span><span class="kt-vv">${curr} / ${target}</span></div>
+    <div class="kt-bar"><div class="kt-fill" style="width:${pct}%;background:${color||auto}"></div></div>
+    <div class="kt-bot">${pct}% da meta atingida</div></div>`;
+}
+function kfn(stages){
+  const max=stages[0].n;
+  return `<div class="kfunnel">${stages.map((s,i)=>{
+    const pct=Math.round(s.n/max*100);
+    const conv=i>0?Math.round(s.n/stages[i-1].n*100)+'%':'—';
+    return `<div class="kfn"><div class="kfn-l">${s.nm}</div>
+      <div class="kfn-wrap"><div class="kfn-bar" style="width:${pct}%;background:${s.color||'var(--blue)'};">${pct>28?s.n:''}</div></div>
+      <div class="kfn-n">${s.n}</div><div class="kfn-c">${conv}</div></div>`;
+  }).join('')}</div>`;
+}
+function ktbl(hdrs,rows){
+  return `<div style="overflow-x:auto"><table class="ktbl"><thead><tr>${hdrs.map(h=>`<th>${h}</th>`).join('')}</tr></thead>
+    <tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+}
+
+function initKPIs(){
+
+  /* ── EXECUTIVO ── */
+  document.getElementById('kpanel-exec').innerHTML=
+    ks('💼 Comercial — Resumo jun/2026', kmrow([
+      km('Pipeline Total','R$ 1,8M','todos os segmentos','↑ 23% vs. mai','kd-ok'),
+      km('MRR Locação','R$ 187K','meta: R$ 200K','↓ 6,5%','kd-warn'),
+      km('Contratos Fechados','8','jun/2026','34,8% conversão','kd-ok'),
+      km('Demos Realizadas','6','meta: 10/mês','↑ 2 vs. mai','kd-warn'),
+    ]))+
+    ks('📣 Marketing — Resumo jun/2026', kmrow([
+      km('Leads Gerados','78','jun/2026','↑ 14% vs. mai','kd-ok'),
+      km('CPL Médio','R$ 142','todos os canais','↓ 8%','kd-ok'),
+      km('CAC Médio','R$ 1.840','todos segmentos','','kd-warn'),
+      km('ROI Geral','3,2×','investimento total','↑ 0,4×','kd-ok'),
+    ]))+
+    `<div class="kpi-2g">`+
+      ks('🔧 Pós-Venda — Resumo', kmrow([
+        km('SLA','91%','meta: 95%','↓ 4pp','kd-warn'),
+        km('NPS','8,4','meta: 8,5','–0,1','kd-warn'),
+        km('Chamados Abertos','12','total ativo','','kd-warn'),
+      ]))+
+      ks('🏭 Produção — Resumo', kmrow([
+        km('Veículos Entregues','14','jun/2026','↑ 2 vs. mai','kd-ok'),
+        km('OPs em Aberto','7','jun/2026','','kd-warn'),
+        km('Eficiência da linha','77%','meta: 85%','↓ 8pp','kd-warn'),
+      ]))+
+    `</div>`+
+    ks('🎯 Projetos Estratégicos',
+      `<div class="kstrat">${[
+        ['📦','Amazon — Piloto de frota','🟡 Em negociação','kd-warn'],
+        ['♻️','Besouro — Licitação MMA','🟡 Em andamento','kd-warn'],
+        ['✅','ISO 9001 — Certificação','🔴 Atrasado 2 meses','kd-bad'],
+        ['🏛️','GOV — 50% municípios','🟠 7,7% atingido','kd-bad'],
+        ['🤖','Segway — 100 locações','🟡 47% concluído','kd-warn'],
+        ['🔬','FINEP — R$ 5M','🟢 Em aprovação final','kd-ok'],
+      ].map(([ic,nm,st,sc])=>`<div class="kst-item"><div class="kst-ic">${ic}</div><div><div class="kst-nm">${nm}</div><div class="kst-st ${sc}">${st}</div></div></div>`).join('')}</div>`);
+
+  /* ── SEGWAY ── */
+  document.getElementById('kpanel-seg').innerHTML=
+    ks('🎯 Meta: 100 equipamentos locados em 2026', ktrow([
+      kt('Equipamentos locados no ano',47,100),
+      kt('Meta do mês — jul/2026',8,10),
+      kt('Taxa de ocupação da frota',78,90,'var(--blue)'),
+    ]))+
+    ks('📊 Indicadores de Resultado', kmrow([
+      km('MRR','R$ 187K','meta: R$ 200K','↓ 6,5%','kd-warn'),
+      km('Receita média/cliente','R$ 8.130','23 clientes ativos','','kd-ok'),
+      km('Equipamentos locados','47','ano 2026','↑ 12 vs. mai','kd-ok'),
+      km('Churn rate','2,1%','meta: <3%','✓ Ok','kd-ok'),
+      km('LTV médio estimado','R$ 97.560','','','kd-ok'),
+    ]))+
+    ks('🏪 Base Atual — Cross-Sell', kmrow([
+      km('Clientes ativos','23','contratos vigentes','','kd-ok'),
+      km('Clientes abordados','18','de 23 ativos (78%)','','kd-ok'),
+      km('Com proposta','7','de 18 abordados','38,9%','kd-warn'),
+      km('Convertidos','2','de 7 com proposta','28,6%','kd-warn'),
+      km('Receita Cross-Sell','R$ 12,4K','acum. 2026','','kd-ok'),
+    ]))+
+    ks('🆕 Novos Mercados — Funil de Conversão', kfn([
+      {nm:'Leads gerados',n:31,color:'var(--blue)'},
+      {nm:'Reuniões realizadas',n:18,color:'#6366f1'},
+      {nm:'Demonstrações',n:9,color:'var(--yellow)'},
+      {nm:'Propostas emitidas',n:7,color:'#f97316'},
+      {nm:'Contratos fechados',n:3,color:'var(--green)'},
+    ]))+
+    ks('📈 Receita por Segmento', ktbl(
+      ['Segmento','Contratos','MRR','% do Total'],
+      [['Shopping / Mall','8','R$ 62K','33%'],['Segurança / Rondas','6','R$ 48K','26%'],['Facilities','5','R$ 34K','18%'],['Outros','4','R$ 43K','23%']]
+    ))+
+    ks('📐 CAC e LTV por Segmento', ktbl(
+      ['Segmento','CAC','LTV estimado','Payback médio'],
+      [['Shopping','R$ 1.200','R$ 89.400','10,8m'],['Segurança','R$ 1.500','R$ 105.600','11,4m'],['Facilities','R$ 980','R$ 74.200','10,0m'],['Novos mercados','R$ 2.100','R$ 112.000','14,2m']]
+    ));
+
+  /* ── GOV ── */
+  document.getElementById('kpanel-gov').innerHTML=
+    ks('🎯 Objetivo: Maior base de relacionamento com prefeituras do Brasil (meta: 50% dos municípios)', ktrow([
+      kt('Municípios cadastrados',423,2783),
+      kt('Seguidores Gov no LinkedIn',312,1000,'var(--blue)'),
+      kt('Downloads de materiais técnicos',236,500,'var(--yellow)'),
+    ]))+
+    ks('👥 LinkedIn — Audiência Gov', kmrow([
+      km('Seguidores totais','2.847','CicloWay LinkedIn','↑ 312/mês','kd-ok'),
+      km('Seguidores Gov','312','prefeituras + órgãos','↑ 47/mês','kd-ok'),
+      km('% Audiência Gov','11,0%','de todos os seguidores','','kd-warn'),
+      km('Alcance médio/post','4.230','últimos 30 dias','','kd-ok'),
+    ]))+
+    ks('📝 Blog — Conteúdo Técnico', kmrow([
+      km('Visitas/mês','4.230','','↑ 18% vs. mai','kd-ok'),
+      km('Tempo médio na página','3m 42s','por visita','','kd-ok'),
+      km('Downloads gerados','187','e-books + cartilhas','','kd-ok'),
+      km('Leads via blog','23','jun/2026','','kd-ok'),
+    ]))+
+    ks('📋 Base de Contatos Gov', ktrow([
+      kt('Total de contatos cadastrados',1840,5000),
+      kt('Municípios',423,2783),
+      kt('Secretários',312,1000,'var(--yellow)'),
+      kt('Prefeitos',89,500,'var(--green)'),
+    ]))+
+    ks('📥 Materiais Técnicos — Downloads Acum. 2026', kmrow([
+      km('E-books','94','acum. 2026','','kd-ok'),
+      km('Cartilhas técnicas','71','acum. 2026','','kd-ok'),
+      km('Modelos de edital','43','acum. 2026','','kd-ok'),
+      km('Estudos técnicos','28','acum. 2026','','kd-ok'),
+    ]))+
+    ks('🏛️ Funil GOV', kfn([
+      {nm:'Municípios impactados',n:423,color:'var(--blue)'},
+      {nm:'Municípios contatados',n:87,color:'#6366f1'},
+      {nm:'Reuniões realizadas',n:31,color:'var(--yellow)'},
+      {nm:'Licitações monitoradas',n:12,color:'#f97316'},
+      {nm:'Licitações participadas',n:4,color:'#ef4444'},
+      {nm:'Licitações vencidas',n:1,color:'var(--green)'},
+    ]))+
+    ks('💰 Receita GOV', kmrow([
+      km('Valor total disputado','R$ 2,1M','4 licitações participadas','','kd-ok'),
+      km('Valor total ganho','R$ 420K','1 licitação vencida','','kd-ok'),
+      km('Taxa de sucesso','25%','1 de 4 licitações','','kd-warn'),
+    ]));
+
+  /* ── TRICICLOS B2B ── */
+  document.getElementById('kpanel-tri').innerHTML=
+    ks('🎯 Meta: 5 demonstrações/mês — transformar demos em pedidos', ktrow([
+      kt('Demonstrações no mês (jun)',3,5),
+      kt('Pilotos em andamento',2,4,'var(--blue)'),
+      kt('Contratos fechados no mês',1,3),
+    ]))+
+    ks('📊 Indicadores Principais', kmrow([
+      km('Pipeline total','R$ 1,2M','todos os segmentos','','kd-ok'),
+      km('Pipeline ponderado','R$ 430K','estimativa conversão','','kd-ok'),
+      km('Ticket médio','R$ 85K','por contrato','','kd-ok'),
+      km('Ciclo médio de venda','42d','meta: 30d','↑ 12d','kd-warn'),
+      km('Pilotos concluídos','3','acum. 2026','','kd-ok'),
+    ]))+
+    ks('🔀 Funil B2B Triciclos', kfn([
+      {nm:'Leads gerados',n:24,color:'var(--blue)'},
+      {nm:'Reuniões realizadas',n:14,color:'#6366f1'},
+      {nm:'Demonstrações',n:6,color:'var(--yellow)'},
+      {nm:'Pilotos iniciados',n:3,color:'#f97316'},
+      {nm:'Propostas emitidas',n:5,color:'#ef4444'},
+      {nm:'Contratos fechados',n:2,color:'var(--green)'},
+    ]))+
+    ks('📦 Pipeline por Segmento', ktbl(
+      ['Segmento','Leads','Pipeline','% Prob. Conv.'],
+      [['Logística','7','R$ 420K','38%'],['Resíduos','5','R$ 280K','42%'],['Segurança','4','R$ 180K','28%'],['Facilities','3','R$ 140K','35%'],['Indústria','3','R$ 110K','25%'],['Alimentação','2','R$ 70K','30%']]
+    ))+
+    ks('🏢 Contas Estratégicas', ktbl(
+      ['Empresa','Segmento','Produto','Valor Est.','Status'],
+      [
+        ['Amazon','Logística','Formigão Baú × 20','R$ 480K','🟡 Em negociação'],
+        ['Mercado Livre','Logística','Patinete SN-200 × 30','R$ 105K','🟠 Prospecção'],
+        ['JTI','Indústria','Triciclo C-3 × 8','R$ 320K','🟡 Demonstração'],
+        ['Nestlé','Alimentação','Formigão G3 × 5','R$ 120K','🟠 Prospecção'],
+        ['Ambipar','Resíduos','Besouro Coletor × 4','R$ 200K','🟡 Piloto'],
+        ['Loga','Resíduos','Besouro Coletor × 6','R$ 300K','🟢 Proposta enviada'],
+      ]
+    ));
+
+  /* ── MARKETING ── */
+  document.getElementById('kpanel-mkt').innerHTML=
+    ks('📊 Aquisição por Canal — Jun/2026',
+      ktbl(['Canal','Visitantes','Leads','Conv.','CPL'],[
+        ['Site Orgânico','4.820','23','0,48%','R$ 89'],
+        ['LinkedIn','2.140','18','0,84%','R$ 124'],
+        ['Google Ads','1.890','21','1,11%','R$ 187'],
+        ['Eventos','—','8','—','R$ 240'],
+        ['Indicações','—','5','—','R$ 0'],
+        ['Landing Pages','620','3','0,48%','R$ 210'],
+      ])+
+      `<div style="margin-top:12px">`+kmrow([
+        km('Leads Totais','78','jun/2026','↑ 14%','kd-ok'),
+        km('CPL Médio','R$ 142','todos os canais','↓ 8%','kd-ok'),
+        km('Visitantes Únicos','9.470','todos os canais','↑ 21%','kd-ok'),
+      ])+`</div>`)+
+    ks('🔀 Funil de Conversão por Segmento', ktbl(
+      ['Etapa','Segway','GOV','B2B Triciclos'],
+      [
+        ['Leads','31','23','24'],
+        ['Reuniões','18 (58%)','12 (52%)','14 (58%)'],
+        ['Demos / Apresentações','9 (50%)','4 (33%)','6 (43%)'],
+        ['Propostas','7 (78%)','4 (100%)','5 (83%)'],
+        ['Contratos','3 (43%)','1 (25%)','2 (40%)'],
+      ]
+    ))+
+    ks('💰 Indicadores Financeiros de Marketing', kmrow([
+      km('Investimento Total','R$ 11.076','jun/2026','','kd-warn'),
+      km('CAC Médio','R$ 1.840','todos segmentos','','kd-warn'),
+      km('Receita Atribuída','R$ 35.400','contratos fechados','','kd-ok'),
+      km('ROI','3,2×','receita / invest.','↑ 0,4×','kd-ok'),
+      km('Payback médio','3,2 meses','estimado','','kd-ok'),
+    ])+
+    `<div style="margin-top:12px">`+ktbl(
+      ['Segmento','Investimento','CAC','Receita Atrib.','ROI'],
+      [['Segway','R$ 4.200','R$ 1.400','R$ 18.000','4,3×'],['GOV','R$ 3.800','R$ 3.800','R$ 7.400','1,9×'],['B2B Triciclos','R$ 3.076','R$ 1.538','R$ 10.000','3,2×']]
+    )+`</div>`)+
+    ks('📝 Conteúdo — Jun/2026', kmrow([
+      km('Artigos publicados','4','jun/2026','','kd-ok'),
+      km('Downloads totais','93','e-books + cartilhas','↑ 22%','kd-ok'),
+      km('Leads via conteúdo','27','de 78 totais (34,6%)','','kd-ok'),
+      km('Receita atrib. conteúdo','R$ 8.400','estimado','','kd-ok'),
+    ]));
+
+  /* ── PÓS-VENDA ── */
+  document.getElementById('kpanel-pv').innerHTML=
+    ks('📋 Chamados — Jun/2026', kmrow([
+      km('Chamados abertos','12','total ativo','','kd-warn'),
+      km('Chamados encerrados','89','no mês','↑ 3 vs. mai','kd-ok'),
+      km('Dentro do SLA','81','de 89 encerrados','91,0%','kd-warn'),
+      km('Fora do SLA','8','de 89 encerrados','9,0%','kd-warn'),
+      km('NPS','8,4','meta: 8,5','–0,1','kd-warn'),
+    ])+`<div style="margin-top:10px">`+ktrow([
+      kt('SLA atingido',91,95),
+      kt('Taxa de resolução no prazo',81,89,'var(--blue)'),
+    ])+`</div>`)+
+    ks('⏱ Tempos de Atendimento', kmrow([
+      km('Tempo médio de resposta','1h 47m','meta: <2h','✓ Ok','kd-ok'),
+      km('Tempo médio de resolução','2d 5h','meta: 2d','↑ 5h','kd-warn'),
+      km('Taxa de reincidência','4,5%','meta: <5%','✓ Ok','kd-ok'),
+      km('Chamados > 5 dias abertos','4','requer atenção','','kd-bad'),
+    ]))+
+    ks('🚗 Disponibilidade da Frota Locada', kmrow([
+      km('Dias de aluguel perdidos','47','jun/2026','','kd-bad'),
+      km('Valor financeiro perdido','R$ 14.100','47d × R$ 300/dia','','kd-bad'),
+      km('Disponibilidade','94,2%','meta: 97%','↓ 2,8pp','kd-warn'),
+    ])+`<div style="margin-top:10px">`+ktrow([
+      kt('Disponibilidade da frota',94,97,'var(--yellow)'),
+    ])+`</div>`)+
+    ks('🔧 Chamados por Causa', ktbl(
+      ['Causa','Qtd','%','Trend'],
+      [['Bateria','28','31,5%','↑ +3'],['Mecânica','24','27,0%','→ estável'],['Elétrica','18','20,2%','↓ –2'],['Mau uso','12','13,5%','↑ +4'],['Acidente','5','5,6%','→ estável'],['Treinamento','2','2,2%','↓ –1']]
+    ));
+
+  /* ── OPERAÇÃO ── */
+  document.getElementById('kpanel-op').innerHTML=
+    ks('📋 Ordens de Serviço — Jun/2026', kmrow([
+      km('OS abertas','18','total ativo','','kd-warn'),
+      km('OS concluídas','89','no mês','↑ 3 vs. mai','kd-ok'),
+      km('Tempo médio de execução','3h 40m','meta: 3h','↑ 40m','kd-warn'),
+      km('SLA interno','87%','meta: 90%','↓ 3pp','kd-warn'),
+      km('Eficiência operacional','84%','meta: 90%','↓ 6pp','kd-warn'),
+    ])+`<div style="margin-top:10px">`+ktrow([
+      kt('Eficiência operacional',84,90),
+      kt('SLA interno atingido',87,90,'var(--yellow)'),
+    ])+`</div>`)+
+    ks('👷 Desempenho por Técnico', ktbl(
+      ['Técnico','OS Realizadas','Horas Reg.','Tempo Médio/OS','Retrabalho'],
+      [
+        ['Leandro Ponciano','24','96h','4h00','0'],
+        ['Roberth Plácido','21','88h','4h11','1'],
+        ['Alessandro Ponciano','18','76h','4h13','1'],
+        ['Rafael Justino','14','62h','4h25','2'],
+        ['Renan Oliveira','12','52h','4h20','0'],
+      ]
+    ))+
+    ks('⚠️ Backlog e Gargalos', kmrow([
+      km('Backlog atual','18 OS','serviços em fila','','kd-warn'),
+      km('OS > 5 dias sem fechar','4','requer atenção imediata','','kd-bad'),
+      km('Retrabalho total','4','de 89 finalizadas (4,5%)','','kd-warn'),
+    ]));
+
+  /* ── PRODUÇÃO ── */
+  document.getElementById('kpanel-prod').innerHTML=
+    ks('📊 Ordens de Produção — Jun/2026', kmrow([
+      km('OP abertas','7','em produção','','kd-warn'),
+      km('OP concluídas','11','no mês','↑ 1 vs. mai','kd-ok'),
+      km('OP atrasadas','2','de 11 concluídas','','kd-bad'),
+      km('Tempo médio produção','18d','meta: 15d','↑ 3d','kd-warn'),
+      km('Eficiência da linha','77%','meta: 85%','↓ 8pp','kd-warn'),
+    ])+`<div style="margin-top:10px">`+ktrow([
+      kt('Veículos entregues no prazo',12,14),
+      kt('Eficiência da linha produtiva',77,85,'var(--yellow)'),
+    ])+`</div>`)+
+    ks('🚗 Produção por Categoria', ktbl(
+      ['Categoria','Produzidos','Entregues','Tempo Médio','Ocorrências'],
+      [['Triciclos','8','7','22d','1'],['Patinetes','4','4','8d','0'],['Segways','2','2','6d','0'],['Especiais / P&D','0','1','—','0']]
+    ))+
+    ks('👷 Produtividade Individual', ktbl(
+      ['Colaborador','OPs Executadas','Horas Trabalhadas','Retrabalho'],
+      [['Wilson Yope','5','180h','0'],['Ulisses Yope','4','160h','0'],['Hermes José Santos','6','200h','1'],['Cristiano Limoli','3','120h','0'],['Tony Oliveira','3','115h','1']]
+    ))+
+    ks('⚠️ Gargalos de Produção', kmrow([
+      km('Estação mais lenta','Montagem Elétrica','tempo médio: 8h/unidade','','kd-bad'),
+      km('Tempo parado no mês','14h','falta peças / planejamento','','kd-warn'),
+      km('Paradas por falta de peça','3','eventos no mês','','kd-warn'),
+      km('Itens em P&D','3','Formigão G3 · FIAT · adapt.','','kd-ok'),
+    ]));
+
+  /* ── QUALIDADE ── */
+  document.getElementById('kpanel-qual').innerHTML=
+    ks('🎯 Não Conformidades — Jun/2026', kmrow([
+      km('Total NCs abertas','8','jun/2026','↓ 2 vs. mai','kd-ok'),
+      km('Taxa de conformidade','94,2%','meta: 96%','↓ 1,8pp','kd-warn'),
+      km('NCs críticas','1','de 8 abertas','','kd-bad'),
+      km('NCs encerradas','6','de 8 abertas (75%)','','kd-ok'),
+    ])+`<div style="margin-top:10px">`+ktrow([
+      kt('Taxa de conformidade geral',94,96),
+      kt('Auditorias realizadas no ano',2,4,'var(--blue)'),
+      kt('Pendências encerradas',7,10,'var(--green)'),
+    ])+`</div>`)+
+    ks('📋 NCs por Tipo e Origem', ktbl(
+      ['Tipo','Origem','Qtd','Prioridade','Status'],
+      [
+        ['Acabamento','Produção','3','Média','🟡 Em tratamento'],
+        ['Dimensional','Produção','2','Alta','🟠 Aguardando peça'],
+        ['Elétrica','Pós-Venda','1','Crítica','🔴 Em investigação'],
+        ['Documentação','Comercial','1','Baixa','🟢 Encerrada'],
+        ['Atendimento','Operação','1','Média','🟡 Em tratamento'],
+      ]
+    ))+
+    ks('🔨 Retrabalho', kmrow([
+      km('Qtd de retrabalhos','9','jun/2026','↓ 3 vs. mai','kd-ok'),
+      km('Horas consumidas','27h','','↓ 6h vs. mai','kd-ok'),
+      km('Custo estimado','R$ 1.890','27h × R$ 70/h','','kd-warn'),
+      km('% OPs com retrabalho','5,2%','meta: <5%','↑ 0,2pp','kd-warn'),
+    ]))+
+    ks('🛡️ Garantias — Acum. 2026', kmrow([
+      km('Acionamentos','14','acum. 2026','','kd-warn'),
+      km('Custo de garantia','R$ 12.600','acum. 2026','','kd-warn'),
+      km('Principal causa','Bateria','28,6% dos casos','','kd-warn'),
+    ]))+
+    ks('✅ ISO 9001 — Indicadores por Área',
+      `<div style="margin-bottom:12px">`+ktrow([
+        kt('Taxa de conformidade geral',94,96),
+        kt('Auditorias realizadas',2,4,'var(--blue)'),
+        kt('Pendências encerradas',7,10,'var(--green)'),
+      ])+`</div>`+
+      ktbl(['Área','Taxa Conformidade','NCs Abertas','Trend'],[
+        ['Produção','93,1%','5','↓ –1,2pp'],
+        ['Pós-Venda','95,5%','2','↑ +0,8pp'],
+        ['Operação','94,8%','1','→ estável'],
+        ['Comercial','98,2%','0','↑ +2,1pp'],
+      ]));
+}
+
+/* ═══════════════════════════════════════════════
+   DOWNLOAD CARDS (Cases, Contratos, Propostas)
+═══════════════════════════════════════════════ */
+function showToast(){
+  const t=document.getElementById('dl-toast');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+function makeDLCards(data, containerId){
+  const grid=document.getElementById(containerId);
+  grid.innerHTML='';
+  data.forEach(d=>{
+    const card=document.createElement('div');
+    card.className='dl-card';
+    card.innerHTML=`
+      <div class="dl-hd">
+        <div class="dl-emoji">${d.emoji}</div>
+        <div class="dl-title">${d.title}</div>
+        <div class="dl-sub">${d.sub}</div>
+      </div>
+      <div class="dl-bd">
+        <div class="dl-desc">${d.desc}</div>
+        <div class="dl-meta">${d.tags.map(t=>`<span class="dl-tag">${t}</span>`).join('')}</div>
+        <button class="btn-dl" onclick="showToast()">⬇ Baixar ${d.file.split('.').pop().toUpperCase()}</button>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+function initCases(){ makeDLCards(CASES,'cases-grid'); }
+function initContracts(){ makeDLCards(CONTRACTS,'contracts-grid'); }
+function initProposals(){ makeDLCards(PROPOSALS,'proposals-grid'); }
+
+/* ═══════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════ */
+(async function init(){
+  if(!sb) return; // Supabase ainda não configurado (config.js)
+  // O Supabase mantém a sessão salva com segurança; ao recarregar, restauramos.
+  const { data: { session } } = await sb.auth.getSession();
+  if(session?.user){
+    CU = await carregarPerfil(session.user);
+    showApp();
+  }
+})();
+</script>
+</body>
+</html>
