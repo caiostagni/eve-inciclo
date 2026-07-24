@@ -1,0 +1,20 @@
+{
+  "name": "inciclo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "InCiclo — Portal interno da CicloWay (login por colaborador, Neon + Vercel)",
+  "type": "module",
+  "scripts": {
+    "criar-usuario": "node scripts/create-user.mjs",
+    "init-db": "node scripts/init-db.mjs",
+    "dev": "vercel dev"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^0.10.4",
+    "bcryptjs": "^2.4.3",
+    "jose": "^5.9.6"
+  },
+  "devDependencies": {
+    "dotenv": "^16.4.7"
+  }
+}

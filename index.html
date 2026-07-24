@@ -6,9 +6,6 @@
 <title>InCiclo — CicloWay</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
-<!-- Supabase (autenticação + banco). O client é criado em config.js -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js"></script>
 <style>
 /* ── RESET & VARS ──────────────────────────────── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -1242,7 +1239,7 @@ const PROPOSALS = [
 /* ═══════════════════════════════════════════════
    AUTH
 ═══════════════════════════════════════════════ */
-let CU = null; // current user (perfil vindo do Supabase)
+let CU = null; // usuário logado (perfil vindo do backend /api/*)
 
 // Mostra/oculta erro no formulário de login
 function loginError(msg){
@@ -1251,59 +1248,37 @@ function loginError(msg){
   el.style.display = 'block';
 }
 
-// Deriva iniciais a partir do nome (fallback quando não há no perfil)
-function iniciaisDe(nome){
-  if(!nome) return '?';
-  const p = nome.trim().split(/\s+/);
-  return ((p[0]?.[0]||'') + (p.length>1 ? p[p.length-1][0] : '')).toUpperCase();
-}
-
-// Carrega o perfil do usuário autenticado a partir da tabela `profiles`
-async function carregarPerfil(user){
-  const { data, error } = await sb
-    .from('profiles')
-    .select('nome,iniciais,role,dept')
-    .eq('id', user.id)
-    .single();
-  if(error || !data){
-    // Autenticou mas ainda não tem perfil cadastrado
-    console.warn('Perfil não encontrado:', error);
-    return {
-      id: user.id, email: user.email,
-      nm: user.email, in: iniciaisDe(user.email), role: 'employee', dept: '—'
-    };
-  }
-  return {
-    id: user.id, email: user.email,
-    nm: data.nome, in: data.iniciais || iniciaisDe(data.nome),
-    role: data.role || 'employee', dept: data.dept || '—'
-  };
-}
-
 async function doLogin(){
   const btn = document.querySelector('.l-btn');
   const em = document.getElementById('l-em').value.trim().toLowerCase();
   const pw = document.getElementById('l-pw').value;
-  if(!sb){ loginError('Sistema ainda não configurado (config.js). Fale com o admin.'); return; }
   if(!em || !pw){ loginError('Preencha e-mail e senha.'); return; }
   document.getElementById('l-err').style.display='none';
   if(btn){ btn.disabled = true; btn.textContent = 'Entrando…'; }
-
-  const { data, error } = await sb.auth.signInWithPassword({ email: em, password: pw });
-
-  if(btn){ btn.disabled = false; btn.textContent = 'Entrar'; }
-  if(error){
-    loginError(error.message === 'Invalid login credentials'
-      ? 'E-mail ou senha incorretos.'
-      : 'Não foi possível entrar. Tente novamente.');
-    return;
+  try{
+    const r = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: em, password: pw })
+    });
+    if(!r.ok){
+      loginError(r.status === 401
+        ? 'E-mail ou senha incorretos.'
+        : 'Não foi possível entrar. Tente novamente.');
+      return;
+    }
+    const { profile } = await r.json();
+    CU = profile;               // { id, email, nm, in, role, dept }
+    showApp();
+  }catch(e){
+    loginError('Falha de conexão com o servidor. Tente novamente.');
+  }finally{
+    if(btn){ btn.disabled = false; btn.textContent = 'Entrar'; }
   }
-  CU = await carregarPerfil(data.user);
-  showApp();
 }
 
 async function doLogout(){
-  await sb.auth.signOut();
+  try{ await fetch('/api/logout', { method: 'POST' }); }catch(e){}
   CU = null;
   document.getElementById('app').classList.remove('on');
   document.getElementById('login').style.display='flex';
@@ -2347,13 +2322,15 @@ function initProposals(){ makeDLCards(PROPOSALS,'proposals-grid'); }
    INIT
 ═══════════════════════════════════════════════ */
 (async function init(){
-  if(!sb) return; // Supabase ainda não configurado (config.js)
-  // O Supabase mantém a sessão salva com segurança; ao recarregar, restauramos.
-  const { data: { session } } = await sb.auth.getSession();
-  if(session?.user){
-    CU = await carregarPerfil(session.user);
-    showApp();
-  }
+  // Restaura a sessão a partir do cookie httpOnly (validado no servidor por /api/me).
+  try{
+    const r = await fetch('/api/me');
+    if(r.ok){
+      const { profile } = await r.json();
+      CU = profile;
+      showApp();
+    }
+  }catch(e){ /* sem servidor / não logado: mostra tela de login */ }
 })();
 </script>
 </body>
