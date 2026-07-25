@@ -268,6 +268,7 @@ body{font-family:'Poppins',-apple-system,sans-serif;background:var(--bg);color:v
 .bday-nm{font-size:12px;font-weight:600;line-height:1.3}
 .bday-dt{font-size:11px;color:var(--muted)}
 .bday-today{font-size:10px;font-weight:700;color:var(--yellow);margin-top:1px}
+.bday-empty{font-size:12px;color:var(--muted);padding:6px 2px}
 
 /* ── STOCK ──────────────────────────────────────── */
 .stk-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden}
@@ -1012,11 +1013,55 @@ const PRODUCTS = [
   {id:'fiat', cat:'Especiais',emoji:'⭐',nm:'FIAT Elétrico Leve',price:'Consultar',specs:{Velocidade:'45 km/h',Autonomia:'80 km',Carga:'200 kg',Bateria:'7h'},new:true},
 ];
 
+// Aniversariantes (mês/dia) — fonte: planilha ANIVERSARIANTES 2026 (CLTs + PJs)
 const BIRTHDAYS = [
-  {nm:'Leandro Ponciano',  in:'LP', day:3,  dept:'Oficina'},
-  {nm:'Bruna Marciano',    in:'BM', day:15, dept:'Financeiro'},
-  {nm:'Sarah Hounsell',    in:'SH', day:22, dept:'Marketing'},
-  {nm:'Carmelino E. Filho',in:'CE', day:28, dept:'Pós-Vendas'},
+  {nm:'Guilherme Weippert Portella', in:'GP', month:1,  day:5,  dept:'Oficina'},
+  {nm:'Bruno Karan',                 in:'BK', month:1,  day:12, dept:'Comercial'},
+  {nm:'Ramon Matos Araújo',          in:'RA', month:2,  day:8,  dept:'Financeiro'},
+  {nm:'Hermes José dos Santos',      in:'HS', month:2,  day:20, dept:'P&D'},
+  {nm:'Marcelo de Jesus de Campos',  in:'MC', month:3,  day:25, dept:'Financeiro'},
+  {nm:'Ingrid Ferreira Dantas',      in:'ID', month:3,  day:29, dept:'Comercial'},
+  {nm:"Diógenes D'Almeida",          in:'DA', month:3,  day:30, dept:'Pós-Vendas'},
+  {nm:'Elizabete Marciano',          in:'EM', month:4,  day:1,  dept:'Comercial'},
+  {nm:'Luciano Mendes Pacheco',      in:'LM', month:4,  day:1,  dept:'Oficina'},
+  {nm:'Wellingthon Soares Marques',  in:'WM', month:4,  day:6,  dept:'Oficina'},
+  {nm:'Bruna Figueiredo Marciano',   in:'BM', month:4,  day:22, dept:'Financeiro'},
+  {nm:'Camila de Oliveira',          in:'CO', month:4,  day:27, dept:'Pós-Vendas'},
+  {nm:'Cristiano Limoli',            in:'CL', month:5,  day:8,  dept:'P&D'},
+  {nm:'Samuel José Pereira',         in:'SP', month:5,  day:11, dept:'Oficina'},
+  {nm:'Roberth M. S. Plácido',       in:'RP', month:5,  day:12, dept:'Oficina'},
+  {nm:'Fábio Alencar dos Santos',    in:'FS', month:5,  day:17, dept:'Financeiro'},
+  {nm:'Renan Leal Oliveira',         in:'RO', month:5,  day:19, dept:'Oficina'},
+  {nm:'Paulo V. Barros Pereira',     in:'PP', month:5,  day:21, dept:'Produção'},
+  {nm:'Altair Benedito da Silva',    in:'AS', month:5,  day:22, dept:'T.I.'},
+  {nm:'Guilherme F. P. de Oliveira', in:'GO', month:5,  day:24, dept:'Oficina'},
+  {nm:'Rafael Justino da Conceição', in:'RC', month:5,  day:26, dept:'Oficina'},
+  {nm:'Eduardo Ghisleni',            in:'EG', month:5,  day:26, dept:'Comercial'},
+  {nm:'Denilson Ferreira de Carvalho',in:'DC',month:6,  day:1,  dept:'Oficina'},
+  {nm:'Celso Matoba',                in:'CM', month:6,  day:4,  dept:'Oficina'},
+  {nm:'Rafaela I. M. Pereira',       in:'RP', month:6,  day:9,  dept:'Pós-Vendas'},
+  {nm:'Jodson de Souza Santos',      in:'JS', month:7,  day:11, dept:'Oficina'},
+  {nm:'Tiago de Jesus',              in:'TJ', month:8,  day:1,  dept:'Comercial'},
+  {nm:'Gustavo Henrique da Silva',   in:'GS', month:8,  day:6,  dept:'Pós-Vendas'},
+  {nm:'Cíntia Ribeiro dos Reis',     in:'CR', month:9,  day:3,  dept:'Financeiro'},
+  {nm:'Alessandro Ponciano Alves',   in:'AP', month:9,  day:3,  dept:'P&D'},
+  {nm:'Sarah Hounsell Barros',       in:'SH', month:9,  day:12, dept:'Marketing'},
+  {nm:'Natan de Brito Bernardo',     in:'NB', month:9,  day:23, dept:'P&D'},
+  {nm:'Leandro Ponciano Alves',      in:'LP', month:10, day:11, dept:'Oficina'},
+  {nm:'Guilherme Hannud Filho',      in:'GH', month:10, day:20, dept:'Comercial'},
+  {nm:'Pedro Augusto de C. Gouvea',  in:'PG', month:10, day:22, dept:'Oficina'},
+  {nm:'Wilson Yope',                 in:'WY', month:11, day:1,  dept:'P&D'},
+  {nm:'Danilo Rodrigues dos Santos', in:'DS', month:11, day:7,  dept:'Oficina'},
+  {nm:'Lucas Lopes',                 in:'LL', month:11, day:16, dept:'Financeiro'},
+  {nm:'Erika C. de Oliveira Pedroso',in:'EP', month:11, day:17, dept:'Oficina'},
+  {nm:'Sandra Henriques dos Santos', in:'SS', month:11, day:26, dept:'RH'},
+  {nm:'Sergio Santos Ferreira',      in:'SF', month:11, day:28, dept:'Oficina'},
+  {nm:'Carmelino E. da Silva Filho', in:'CE', month:12, day:10, dept:'Pós-Vendas'},
+  {nm:'Alessandro G. M. de Farias',  in:'AF', month:12, day:16, dept:'Oficina'},
+  {nm:'Victor Paladino Alves',       in:'VP', month:12, day:18, dept:'Financeiro'},
+  {nm:'Deborah C. Benetti',          in:'DB', month:12, day:25, dept:'Marketing'},
+  {nm:'Luiz Felipe O. dos Santos',   in:'LS', month:12, day:30, dept:'Oficina'},
+  {nm:'Raquel I. M. Pereira',        in:'RQ', month:12, day:31, dept:'Pós-Vendas'},
 ];
 
 const STOCK = [
@@ -1421,10 +1466,17 @@ function initHome(){
 }
 
 function renderBirthdays(){
-  const today = new Date().getDate();
+  const now = new Date();
+  const curMonth = now.getMonth()+1;
+  const today = now.getDate();
   const row = document.getElementById('bday-row');
   row.innerHTML = '';
-  BIRTHDAYS.forEach(b=>{
+  const doMes = BIRTHDAYS.filter(b=>b.month===curMonth).sort((a,b)=>a.day-b.day);
+  if(doMes.length===0){
+    row.innerHTML = `<div class="bday-empty">Nenhum aniversariante em ${MONTHS[curMonth-1]}.</div>`;
+    return;
+  }
+  doMes.forEach(b=>{
     const isToday = b.day === today;
     const card = document.createElement('div');
     card.className = 'bday-card'+(isToday?' today':'');
