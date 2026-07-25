@@ -165,6 +165,10 @@ body{font-family:'Poppins',-apple-system,sans-serif;background:var(--bg);color:v
 .mcls:hover{color:var(--text)}
 .mbdy{padding:18px 22px 22px}
 .mtags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.minfo{display:flex;flex-direction:column;gap:6px;margin-bottom:4px}
+.minfo-row{display:flex;gap:10px;font-size:13px}
+.minfo-row span{color:var(--muted);min-width:80px}
+.minfo-row b{font-weight:600;color:var(--text)}
 .mtag{font-size:11px;font-weight:600;padding:2px 8px;border-radius:5px}
 .mt-bl{background:var(--bl);color:var(--blue-t);border:1px solid var(--bm)}
 .mt-gr{background:var(--gl);color:var(--green)}
@@ -723,6 +727,7 @@ body{font-family:'Poppins',-apple-system,sans-serif;background:var(--bg);color:v
     </div>
     <div class="mbdy">
       <div class="mtags" id="m-tags"></div>
+      <div class="minfo" id="m-info"></div>
       <div class="msec"><h3>Resumo</h3><p id="m-sum"></p></div>
       <div class="msec" id="m-resp-sec"><h3>Responsabilidades</h3><ul class="mlist" id="m-resp"></ul></div>
       <div class="msec" id="m-tools-sec"><h3>Ferramentas</h3><ul class="mlist" id="m-tools"></ul></div>
@@ -743,43 +748,43 @@ const PEOPLE = [
   {id:'joao',    in:'JH',nm:'João G. Z. Hannud',          tt:'CEO / Diretor',                          dept:'Diretoria',  ct:'CEO',since:'Fundador',
    sum:'Lidera a transição estratégica da CicloWay para o mercado B2B/B2G. Conduz negociações de grandes contas (Amazon, prefeituras), estruturação societária para captação via FDIC e o projeto FINEP (R$5M).',
    resp:['Definir e executar a estratégia B2B e B2G','Liderar negociações com Amazon e prefeituras','Estruturar a cisão societária (Montadora / Locadora / Arrendatária)','Supervisionar o projeto FINEP','Aprovar contratos, orçamentos e parcerias estratégicas'],
-   tools:['ChatGPT (agente de contratos)','Sankia (ERP)','Google Workspace']},
+   tools:['ChatGPT (agente de contratos)','Sankhya (ERP)','Google Workspace']},
   {id:'lucas',   in:'LL',nm:'Lucas Lopes',                 tt:'Gerente Financeiro',                     dept:'Financeiro', ct:'PJ', since:'Set/2018',
    sum:'Gerente financeiro consultivo. Responsável pelo DRE mensal, Power BI e planejamento financeiro.',
    resp:['Elaborar DRE mensal por unidade de negócio','Fechar o mês financeiro até o dia 1','Desenvolver dashboards no Power BI','Treinar Marcelo e Bruna'],
-   tools:['Power BI','Google Sheets','Extrato bancário Itaú','Sankia']},
+   tools:['Power BI','Google Sheets','Extrato bancário Itaú','Sankhya']},
   {id:'marcelo', in:'MC',nm:'Marcelo de Jesus de Campos',  tt:'Coordenador Financeiro / Fiscal',         dept:'Financeiro', ct:'CLT',since:'Jun/2016',
-   sum:'Quase 10 anos de empresa. Inteligência fiscal da CicloWay no Sankia. Pós-graduação em Gestão Tributária (USP).',
-   resp:['Parametrizar TOPs no Sankia para todas as operações','Garantir conformidade fiscal (ICMS, IPI, ST, CFOP)','Monitorar portais SEFAZ estaduais 1-2x/semana'],
-   tools:['Sankia (módulo fiscal)','SEFAZ / eCAC','Google Sheets']},
+   sum:'Quase 10 anos de empresa. Inteligência fiscal da CicloWay no Sankhya. Pós-graduação em Gestão Tributária (USP).',
+   resp:['Parametrizar TOPs no Sankhya para todas as operações','Garantir conformidade fiscal (ICMS, IPI, ST, CFOP)','Monitorar portais SEFAZ estaduais 1-2x/semana'],
+   tools:['Sankhya (módulo fiscal)','SEFAZ / eCAC','Google Sheets']},
   {id:'bruna',   in:'BM',nm:'Bruna Figueiredo Marciano',   tt:'Analista de Contas a Pagar',              dept:'Financeiro', ct:'CLT',since:'Set/2019',
    sum:'~600 lançamentos/mês. Controla o fluxo de caixa diário, concilia a fatura do cartão corporativo (~100 itens) e gerencia a frota de 200+ veículos.',
    resp:['Lançar e classificar todos os documentos de contas a pagar','Conciliar fatura do cartão corporativo linha a linha','Gerir frota de 200+ veículos (IPVA, licenciamento, multas)'],
-   tools:['Google Sheets (fluxo de caixa)','Sankia','Inflate (gestão de frota)']},
+   tools:['Google Sheets (fluxo de caixa)','Sankhya','Inflate (gestão de frota)']},
   {id:'fabio',   in:'FA',nm:'Fábio Alencar dos Santos',    tt:'Analista Financeiro — Contas a Receber',  dept:'Financeiro', ct:'CLT',since:'Out/2019',
    sum:'Responsável por contas a receber: arquivos remessa/retorno Itaú, conciliação bancária, controle de comissões.',
    resp:['Processar arquivos remessa/retorno Itaú','Realizar conciliação bancária diária','Controlar comissões do time comercial'],
-   tools:['Sankia','Portal Itaú','Google Sheets']},
+   tools:['Sankhya','Portal Itaú','Google Sheets']},
   {id:'ramon',   in:'RA',nm:'Ramon Matos Araújo',          tt:'Analista de Faturamento',                 dept:'Financeiro', ct:'CLT',since:'Jul/2019',
    sum:'Emite praticamente todas as NFs da empresa. Faturamento de contratos de locação entre os dias 1-10 de cada mês.',
    resp:['Emitir NFs de venda, serviço, locação e importação','Processar faturamento mensal de todos os contratos de locação'],
-   tools:['Sankia (módulo NF-e)','Google Sheets']},
+   tools:['Sankhya (módulo NF-e)','Google Sheets']},
   {id:'cintia',  in:'CR',nm:'Cíntia Ribeiro dos Reis',     tt:'Compradora Jr',                          dept:'Financeiro', ct:'CLT',since:'Nov/2025',
    sum:'Responsável pelas compras de insumos para oficina e P&D.',
    resp:['Receber solicitações de compra das áreas','Realizar cotações com mínimo 3 fornecedores','Finalizar compras rotineiras com cartão corporativo'],
-   tools:['Google Workspace','Sankia','WhatsApp']},
-  {id:'elizabete',in:'EM',nm:'Elizabete F. X. M. Marciano',tt:'Coordenadora Comercial',                  dept:'Comercial',  ct:'CLT',since:'Ago/2015',
-   sum:'Quase 11 anos de empresa. Ponto de convergência entre o cliente e todas as áreas internas.',
-   resp:['Gerenciar carteira de clientes de locação','Negociar preços e fechar contratos B2B','Gerenciar reajustes (IPCA/GPL) de toda a carteira'],
-   tools:['RD Station (CRM)','Sankia','ChatGPT','Google Workspace']},
+   tools:['Google Workspace','Sankhya','WhatsApp']},
+  {id:'elizabete',in:'EM',nm:'Elizabete Figueiredo Xavier Martins Marciano',tt:'Coordenadora Comercial',                  dept:'Comercial',  ct:'CLT',since:'Ago/2015',
+   sum:'Quase 11 anos de empresa. Ponto de convergência entre o cliente e as áreas internas: aciona pós-vendas, produção e financeiro para garantir as entregas (solicita apoio, não coordena esses departamentos).',
+   resp:['Gerenciar carteira de clientes de locação','Negociar preços e fechar contratos B2B','Gerenciar reajustes (IPCA/GPL) de toda a carteira','Acionar pós-vendas, produção e financeiro para viabilizar as entregas'],
+   tools:['RD Station (CRM)','Sankhya','ChatGPT','Google Workspace']},
   {id:'tiago-j', in:'TJ',nm:'Tiago de Jesus',              tt:'Representante Comercial (Triciclos)',     dept:'Comercial',  ct:'PJ', since:'Dez/2024',
    sum:'Background KPMG (12 anos). Foco em triciclos e grandes contas. Intraempreendedor.',
    resp:['Prospectar e qualificar leads de triciclos','Responder todos os leads até 9h30 diariamente','Follow-up estruturado até fechamento'],
    tools:['RD Station','ChatGPT','WhatsApp']},
   {id:'ingrid',  in:'ID',nm:'Ingrid Ferreira Dantas',      tt:'Assistente Comercial',                   dept:'Comercial',  ct:'CLT',since:'Jun/2024',
-   sum:'Opera RD Station, Sankia e chatbot. Triagem de leads, elaboração de propostas, análise de crédito.',
+   sum:'Opera RD Station, Sankhya e chatbot. Triagem de leads, elaboração de propostas, análise de crédito.',
    resp:['Qualificar leads via chatbot do RD Station','Elaborar propostas e confeccionar contratos','Coordenar ciclo de entrega com pós-vendas e oficina'],
-   tools:['RD Station (CRM + chatbot)','Sankia','Serasa','Autentique']},
+   tools:['RD Station (CRM + chatbot)','Sankhya','Serasa','Autentique']},
   {id:'deborah', in:'DC',nm:'Déborah C. Benetti',          tt:'Coordenadora de Marketing',              dept:'Marketing',  ct:'PJ', since:'Mar/2022',
    sum:'Define estratégia de marketing digital, coordena Tagon e Sarah. Jornalismo + pós em Data-Driven Marketing.',
    resp:['Definir estratégia de marketing digital','Elaborar briefings para Tagon e Sarah','Coordenar produção de manuais técnicos'],
@@ -792,22 +797,22 @@ const PEOPLE = [
    sum:'Agência parceira responsável por site, mídia paga e newsletter da CicloWay.',
    resp:['Gerir o site cicloway.com.br','Gerenciar mídia paga (Google Ads, Meta)','Produzir e enviar newsletter'],
    tools:['Google Ads','Meta Ads','Webflow']},
-  {id:'sandra',  in:'SS',nm:'Sandra de F. H. dos Santos',  tt:'Analista de RH Sênior',                 dept:'RH',         ct:'CLT',since:'Fev/2022',
+  {id:'sandra',  in:'SS',nm:'Sandra de Fátima Henriques dos Santos',  tt:'Analista de RH Sênior',                 dept:'RH',         ct:'CLT',since:'Fev/2022',
    sum:'Única pessoa de RH e DP. Cuida sozinha de todo o ciclo: recrutamento, admissão, ponto, folha, benefícios, desligamento.',
-   resp:['Recrutar e selecionar candidatos','Processar folha de pagamento até o dia 5','Fechar ponto mensal e ajustar apontamentos'],
-   tools:['Sankia (RH + eSocial)','Ponto Seco','Excel','ChatGPT','Catho / LinkedIn']},
+   resp:['Recrutar e selecionar candidatos','Processar folha de pagamento até o dia 5','Fechar ponto mensal e ajustar apontamentos','Controlar férias e períodos aquisitivos','Administrar atestados, afastamentos e licenças','Controlar exames admissionais, periódicos e demissionais','Acompanhar contratos de experiência e vencimentos','Organizar e manter documentos trabalhistas atualizados','Fazer interface com contabilidade, medicina ocupacional e benefícios','Monitorar conformidade com a legislação trabalhista','Apoiar treinamentos, integrações e desenvolvimento de equipes','Elaborar relatórios gerenciais de pessoal','Apoiar a comunicação interna e o engajamento'],
+   tools:['Sankhya (RH + eSocial)','Ponto Secullum','Excel','ChatGPT','Catho / LinkedIn']},
   {id:'altair',  in:'AB',nm:'Altair Benedito da Silva',    tt:'Analista de Suporte T.I.',               dept:'T.I.',       ct:'CLT',since:'Dez/2020',
-   sum:'Único profissional de TI. Desde 2023, ~90% do tempo é dedicado ao Sankia. Evangelizador de IA. Está desenvolvendo integração API entre Produtivo e Sankia.',
-   resp:['Suportar infraestrutura de TI','Ser ponto focal interno do Sankia','Desenvolver integração API entre Produtivo e Sankia','Promover uso de IA nas rotinas'],
-   tools:['Sankia','Google Workspace','Gemini','Produtivo']},
+   sum:'Único profissional de TI. Desde 2023, ~90% do tempo é dedicado ao Sankhya. Evangelizador de IA. Está desenvolvendo integração API entre Produtivo e Sankhya.',
+   resp:['Suportar infraestrutura de TI','Ser ponto focal interno do Sankhya','Desenvolver integração API entre Produtivo e Sankhya','Promover uso de IA nas rotinas'],
+   tools:['Sankhya','Google Workspace','Gemini','Produtivo']},
   {id:'diogenes',in:'DA',nm:"Diógenes D'Almeida",         tt:'Gerente de Pós-Vendas',                  dept:'Pós-Vendas', ct:'CLT',since:'Ago/2015',
    sum:'10 anos de empresa. Gerencia pós-vendas e estoque. SLA: mesmo dia/dia seguinte em SP, até 5 dias fora.',
-   resp:['Coordenar atendimento de pós-vendas para todo o Brasil','Supervisionar Carmelino, Camila e Gustavo','Coordenar rede de técnicos externos'],
-   tools:['Produtivo','Sankia (módulo OS)','Google Sheets','WhatsApp']},
+   resp:['Coordenar atendimento de pós-vendas para todo o Brasil','Supervisionar a equipe de pós-vendas (Carmelino, Camila, Gustavo)','Supervisionar a equipe de estoque (Rafaela, Alessandro e Raquel)','Coordenar rede de técnicos externos'],
+   tools:['Produtivo','Sankhya (módulo OS)','Google Sheets','WhatsApp']},
   {id:'carmelino',in:'CE',nm:'Carmelino E. da Silva Filho',tt:'Analista Administrativo I — Pesados',    dept:'Pós-Vendas', ct:'CLT',since:'Jun/2019',
    sum:'Analista de pós-vendas com foco em veículos pesados (triciclos).',
    resp:['Receber e registrar chamados de pesados','Acionar e coordenar técnicos','Garantir registro no Produtivo'],
-   tools:['Produtivo','Sankia','WhatsApp']},
+   tools:['Produtivo','Sankhya','WhatsApp']},
   {id:'camila',  in:'CO',nm:'Camila de Oliveira',          tt:'Auxiliar Administrativo — Leves',       dept:'Pós-Vendas', ct:'CLT',since:'Mar/2026',
    sum:'Auxiliar administrativa com foco em pós-vendas de veículos leves (Segways e patinetes).',
    resp:['Atender clientes do segmento de veículos leves','Registrar e acompanhar chamados no Produtivo'],
@@ -819,42 +824,41 @@ const PEOPLE = [
   {id:'rafaela', in:'RP',nm:'Rafaela I. M. Pereira',       tt:'Assistente Administrativo III',         dept:'Pós-Vendas', ct:'CLT',since:'Mai/2024',
    sum:'Assistente administrativa sênior no setor de pós-vendas.',
    resp:['Apoiar a gestão administrativa do setor de pós-vendas','Manter fluxo de informações entre pós-vendas, estoque e oficina'],
-   tools:['Produtivo','Sankia','Google Workspace']},
+   tools:['Produtivo','Sankhya','Google Workspace']},
   {id:'raquel',  in:'RQ',nm:'Raquel I. M. Pereira',        tt:'Jovem Aprendiz',                         dept:'Pós-Vendas', ct:'CLT',since:'Fev/2026',
    sum:'Jovem aprendiz em transição para o setor de pós-vendas/administrativo.',
    resp:['Apoiar nas atividades administrativas','Auxiliar no registro e organização de documentos'],
    tools:['Google Workspace','Produtivo (em aprendizado)']},
-  {id:'paulo-pcp',in:'PB',nm:'Paulo V. Barros Pereira',    tt:'Assistente de PCP',                      dept:'Produção',   ct:'CLT',since:'Mar/2023',
-   sum:'Único responsável pelo PCP. Lança OPs no Sankia, monta BOM e coordena líderes de produção.',
-   resp:['Lançar Ordens de Produção no Sankia','Montar BOM (chassi + motor + bateria)','Coordenar Wilson (GV) e Roberth (SP) até a entrega'],
-   tools:['Sankia (OP e BOM)','Google Sheets','WhatsApp','ChatGPT']},
+  {id:'paulo-pcp',in:'PB',nm:'Paulo Vinicius Barros Pereira',    tt:'Assistente de PCP',                      dept:'Produção',   ct:'CLT',since:'Mar/2023',
+   sum:'Único responsável pelo PCP. Lança OPs no Sankhya, monta BOM e coordena líderes de produção.',
+   resp:['Lançar Ordens de Produção no Sankhya','Montar BOM (chassi + motor + bateria)','Coordenar Wilson (GV) e Roberth (SP) até a entrega'],
+   tools:['Sankhya (OP e BOM)','Google Sheets','WhatsApp','ChatGPT']},
   {id:'leandro', in:'LP',nm:'Leandro Ponciano Alves',      tt:'Líder Técnico II — Segways / Leves',     dept:'Oficina',    ct:'CLT',since:'Mar/2016',
    sum:'11 anos de empresa. Maior especialista em Segways. Detém planilha proprietária de 14-15 erros resolvidos sem RST.',
    resp:['Liderar equipe técnica de veículos leves','Coordenar rede nacional de técnicos externos','Manter planilha proprietária de erros'],
    tools:['Produtivo','WhatsApp (diagnóstico remoto)','Planilha de erros proprietária']},
-  {id:'roberth', in:'RP',nm:'Roberth M. S. Plácido',       tt:'Líder Técnico I — Pesados / Triciclos',  dept:'Oficina',    ct:'CLT',since:'Dez/2023',
+  {id:'roberth', in:'RP',nm:'Roberth Marley Sacramento Plácido',       tt:'Líder Técnico I — Pesados / Triciclos',  dept:'Oficina',    ct:'CLT',since:'Dez/2023',
    sum:'Liderança técnica com foco nos veículos pesados (triciclos elétricos).',
    resp:['Liderar equipe de técnicos de pesados em SP','Coordenar atendimentos e manutenções de triciclos'],
-   tools:['Produtivo','WhatsApp','Sankia']},
+   tools:['Produtivo','WhatsApp','Sankhya']},
   {id:'alexo-ponciano',in:'AP',nm:'Alessandro Ponciano Alves',tt:'Técnico de Desenvolvimento III',     dept:'Oficina',    ct:'CLT',since:'Out/2023',sum:'Técnico especializado com alto nível de senioridade.',resp:['Manutenção corretiva e preventiva','Treinar técnicos juniores'],tools:['Produtivo','Ferramentas de diagnóstico']},
   {id:'rafael-jc',in:'RJ',nm:'Rafael Justino da Conceição', tt:'Técnico V.E. II',                        dept:'Oficina',    ct:'CLT',since:'Set/2024',sum:'Técnico de veículos elétricos nível intermediário.',resp:['Manutenção corretiva e preventiva','Diagnósticos de maior complexidade'],tools:['Produtivo','Ferramentas de diagnóstico']},
   {id:'renan',   in:'RO',nm:'Renan Leal Oliveira',          tt:'Técnico V.E. I',                         dept:'Oficina',    ct:'CLT',since:'Mai/2022',sum:'Técnico de veículos elétricos com mais de 4 anos de empresa.',resp:['Manutenção corretiva e preventiva','Apoiar técnicos mais novos'],tools:['Produtivo','Ferramentas de diagnóstico']},
   {id:'sergio',  in:'SF',nm:'Sergio Santos Ferreira',       tt:'Técnico V.E. I',                         dept:'Oficina',    ct:'CLT',since:'Dez/2021',sum:'Técnico de veículos elétricos com mais de 4 anos de empresa.',resp:['Manutenção corretiva e preventiva','Diagnósticos técnicos'],tools:['Produtivo','Ferramentas de diagnóstico']},
-  {id:'wellingthon',in:'WS',nm:'Wellingthon Soares Marques',tt:'Técnico V.E. I',                        dept:'Oficina',    ct:'CLT',since:'Dez/2021',sum:'Técnico de veículos elétricos com mais de 4 anos de empresa.',resp:['Manutenção corretiva e preventiva'],tools:['Produtivo','Ferramentas de diagnóstico']},
+  {id:'wellingthon',in:'WS',nm:'Wellingthon Soares Marques da Silva',tt:'Técnico V.E. I',                        dept:'Oficina',    ct:'CLT',since:'Dez/2021',sum:'Técnico de veículos elétricos com mais de 4 anos de empresa.',resp:['Manutenção corretiva e preventiva'],tools:['Produtivo','Ferramentas de diagnóstico']},
   {id:'denilson',in:'DF',nm:'Denilson Ferreira de Carvalho',tt:'Técnico V.E. I',                        dept:'Oficina',    ct:'CLT',since:'Jul/2025',sum:'Técnico de veículos elétricos em desenvolvimento.',resp:['Manutenção corretiva','Registrar atendimentos no Produtivo'],tools:['Produtivo','Ferramentas de diagnóstico']},
   {id:'jodson',  in:'JS',nm:'Jodson de Souza Santos',       tt:'Técnico V.E. I',                         dept:'Oficina',    ct:'CLT',since:'Jan/2025',sum:'Técnico de veículos elétricos em desenvolvimento.',resp:['Manutenção corretiva','Registrar diagnósticos'],tools:['Produtivo','Ferramentas de diagnóstico']},
-  {id:'luiz-fe', in:'LF',nm:'Luiz Felipe O. dos Santos',   tt:'Técnico V.E. I',                         dept:'Oficina',    ct:'CLT',since:'Out/2024',sum:'Técnico de veículos elétricos em desenvolvimento.',resp:['Manutenção corretiva','Apoiar nas manutenções preventivas'],tools:['Produtivo','Ferramentas de diagnóstico']},
-  {id:'samuel',  in:'SP',nm:'Samuel José Pereira',          tt:'Assistente Operacional III',             dept:'Oficina',    ct:'CLT',since:'Abr/2016',sum:'Um dos colaboradores mais antigos (desde 2016). Assistente operacional sênior.',resp:['Apoiar as operações da oficina','Controlar ferramentas e equipamentos'],tools:['Google Workspace','WhatsApp']},
-  {id:'alexo-farias',in:'AG',nm:'Alessandro G. M. de Farias',tt:'Assistente de Estoque II',             dept:'Oficina',    ct:'CLT',since:'Jul/2024',sum:'Responsável pelo controle e movimentação de estoque de peças e veículos.',resp:['Controlar entrada e saída de peças','Manter organização física do estoque'],tools:['Sankia','Google Sheets','WhatsApp']},
-  {id:'g-pacheco',in:'GF',nm:'Guilherme F. P. de Oliveira', tt:'Assistente Técnico',                     dept:'Oficina',    ct:'CLT',since:'Abr/2025',sum:'Assistente técnico em desenvolvimento.',resp:['Apoiar técnicos nas manutenções','Auxiliar na organização da oficina'],tools:['Ferramentas de oficina','WhatsApp']},
-  {id:'tony-v',  in:'TV',nm:'Tony P. de Campos Vergueiro',  tt:'Assistente Técnico',                     dept:'Oficina',    ct:'CLT',since:'Jul/2025',sum:'Assistente técnico apoiando operações da oficina.',resp:['Apoiar técnicos nas manutenções','Aprender procedimentos técnicos'],tools:['Ferramentas de oficina','WhatsApp']},
-  {id:'luciano', in:'LM',nm:'Luciano Mendes Pacheco',       tt:'Auxiliar Técnico',                       dept:'Oficina',    ct:'CLT',since:'Mar/2026',sum:'Auxiliar técnico com foco em suporte às operações da oficina.',resp:['Auxiliar a equipe técnica','Apoiar na organização do estoque'],tools:['Ferramentas de oficina']},
+  {id:'luiz-fe', in:'LF',nm:'Luiz Felipe Oliveira dos Santos',   tt:'Técnico V.E. I',                         dept:'Oficina',    ct:'CLT',since:'Out/2024',sum:'Técnico de veículos elétricos em desenvolvimento.',resp:['Manutenção corretiva','Apoiar nas manutenções preventivas'],tools:['Produtivo','Ferramentas de diagnóstico']},
+  {id:'samuel',  in:'SP',nm:'Samuel José Pereira',          tt:'Assistente Operacional III',             dept:'Oficina',    ct:'CLT',since:'Abr/2016',sum:'Um dos colaboradores mais antigos (desde 2016). Exerce as mesmas atividades técnicas de Rafael Justino e Luiz Felipe.',resp:['Executar manutenção corretiva e preventiva de veículos elétricos','Realizar montagem, ajustes e testes','Apoiar as operações da oficina'],tools:['Google Workspace','WhatsApp']},
+  {id:'alexo-farias',in:'AG',nm:'Alessandro Gonçalves Muniz de Farias',tt:'Assistente de Estoque II',             dept:'Oficina',    ct:'CLT',since:'Jul/2024',sum:'Responsável pelo controle e movimentação de estoque de peças e veículos.',resp:['Controlar entrada e saída de peças','Manter organização física do estoque'],tools:['Sankhya','Google Sheets','WhatsApp']},
+  {id:'g-pacheco',in:'GF',nm:'Guilherme Francisco Pacheco de Oliveira', tt:'Assistente Técnico',                     dept:'Oficina',    ct:'CLT',since:'Abr/2025',sum:'Assistente técnico em desenvolvimento.',resp:['Apoiar técnicos nas manutenções','Auxiliar na organização da oficina'],tools:['Ferramentas de oficina','WhatsApp']},
+  {id:'tony-v',  in:'TV',nm:'Tony Pereira de Campos Vergueiro',  tt:'Assistente Técnico',                     dept:'Oficina',    ct:'CLT',since:'Jul/2025',sum:'Assistente técnico apoiando operações da oficina.',resp:['Apoiar técnicos nas manutenções','Aprender procedimentos técnicos'],tools:['Ferramentas de oficina','WhatsApp']},
+  {id:'luciano', in:'LM',nm:'Luciano Mendes Pacheco da Silva',       tt:'Auxiliar Técnico',                       dept:'Oficina',    ct:'CLT',since:'Mar/2026',sum:'Auxiliar técnico com foco em suporte às operações da oficina.',resp:['Auxiliar a equipe técnica'],tools:['Ferramentas de oficina']},
   {id:'g-weippert',in:'GW',nm:'Guilherme Weippert Portella',tt:'Auxiliar Técnico',                       dept:'Oficina',    ct:'CLT',since:'Mai/2026',sum:'Auxiliar técnico recém-contratado, em fase inicial de integração.',resp:['Auxiliar a equipe técnica','Realizar tarefas operacionais'],tools:['Ferramentas de oficina']},
-  {id:'paulo-aux',in:'PO',nm:'Paulo Vinicius de Moraes',    tt:'Auxiliar Técnico',                       dept:'Oficina',    ct:'CLT',since:'Mai/2026',sum:'Auxiliar técnico recém-contratado.',resp:['Auxiliar a equipe técnica','Realizar tarefas operacionais'],tools:['Ferramentas de oficina']},
   {id:'celso',   in:'CM',nm:'Celso Matoba',                  tt:'Analista de Logística',                  dept:'Oficina',    ct:'CLT',since:'Mar/2015',
    sum:'Um dos mais antigos (desde 2015). Responsável pela logística de envio/recebimento de veículos e peças.',
    resp:['Coordenar logística de envio e recebimento','Negociar com transportadoras','Emitir CT-e e DANFE'],
-   tools:['Sankia','Portais de transportadoras','Google Workspace']},
+   tools:['Sankhya','Portais de transportadoras','Google Workspace']},
   {id:'wilson',  in:'WY',nm:'Wilson Yope',                   tt:'Líder de P&D / Produção (Granja Viana)', dept:'P&D',        ct:'PJ', since:'Fev/2020',
    sum:'Lidera a operação de produção e P&D na unidade da Granja Viana. Coordena montagem de veículos pesados.',
    resp:['Liderar equipe de produção e P&D na Granja Viana','Coordenar a montagem de veículos pesados'],
@@ -864,7 +868,6 @@ const PEOPLE = [
    resp:['Liderar equipe de serralheria','Fabricar estruturas metálicas para novos veículos'],
    tools:['Ferramentas de serralheria','Equipamentos de solda e corte']},
   {id:'hermes',  in:'HJ',nm:'Hermes José dos Santos',        tt:'Técnico de Preparação e Acabamento III', dept:'P&D',        ct:'CLT',since:'Out/2023',sum:'Técnico sênior de preparação e acabamento.',resp:['Acabamento de alta qualidade em veículos','Orientar técnicos juniores'],tools:['Ferramentas de acabamento e pintura']},
-  {id:'tony-s',  in:'TO',nm:'Tony Oliveira T. da Silva',     tt:'Técnico de Preparação e Acabamento I',   dept:'P&D',        ct:'CLT',since:'Ago/2025',sum:'Técnico de preparação e acabamento em nível inicial.',resp:['Auxiliar no acabamento de veículos'],tools:['Ferramentas de acabamento']},
   {id:'cristiano',in:'CL',nm:'Cristiano Limoli',             tt:'Técnico de Desenvolvimento I',            dept:'P&D',        ct:'CLT',since:'Set/2025',sum:'Técnico de P&D em nível inicial, apoiando o desenvolvimento de novos veículos.',resp:['Apoiar no desenvolvimento de adaptações','Executar testes e validações'],tools:['Ferramentas de P&D','Google Workspace']},
   {id:'tiago-l', in:'TL',nm:'Tiago Augusto de Lima',         tt:'Consultor de Importação',                 dept:'Importação', ct:'PJ', since:'Out/2022',
    sum:'Consultor externo responsável por todo o processo de importação: trâmite aduaneiro, documentação, desembaraço e entrega.',
@@ -891,7 +894,7 @@ const TRAININGS = [
   {id:'t3',emoji:'🛤️',cat:'Operação',  nm:'Operação do Segway i2',                    dur:'18 min',desc:'Como operar e orientar clientes no uso correto do Segway i2.'},
   {id:'t4',emoji:'🔧',cat:'Operação',  nm:'Calibração e Ajuste de Freios',            dur:'27 min',desc:'Procedimento de calibração de freios em veículos pesados e leves.'},
   {id:'t5',emoji:'💻',cat:'Sistemas',  nm:'Uso do Produtivo — Chamados Técnicos',     dur:'22 min',desc:'Como abrir, acompanhar e fechar chamados técnicos no Produtivo.'},
-  {id:'t6',emoji:'📊',cat:'Sistemas',  nm:'Sankia — Módulo de Vendas e Contratos',    dur:'28 min',desc:'Cadastro de clientes, propostas e contratos no ERP Sankia.'},
+  {id:'t6',emoji:'📊',cat:'Sistemas',  nm:'Sankhya — Módulo de Vendas e Contratos',    dur:'28 min',desc:'Cadastro de clientes, propostas e contratos no ERP Sankhya.'},
   {id:'t7',emoji:'⚠️',cat:'Segurança', nm:'Segurança no Trabalho — Oficina',          dur:'15 min',desc:'Normas de segurança para trabalho em oficina de veículos elétricos.'},
   {id:'t8',emoji:'🚛',cat:'Produtos',  nm:'Formigão G3 — Visão Geral',                dur:'20 min',desc:'Apresentação completa do Formigão G3 (2025): specs, montagem e diferenciais.'},
   {id:'t9',emoji:'🤝',cat:'Comercial', nm:'Atendimento ao Cliente B2B',               dur:'25 min',desc:'Boas práticas no atendimento a clientes corporativos da CicloWay.'},
@@ -903,9 +906,9 @@ const ONBOARDING = [
   {num:2,nm:'Conheça o Time',desc:'Familiarize-se com o organograma e identifique as pessoas-chave da sua área e das áreas com as quais você vai se relacionar.',
    items:['Explore o Organograma no InCiclo e leia o JD do seu cargo','Identifique seu gestor direto e colegas de área','Conecte-se com as pessoas no WhatsApp','Agende um café/papo rápido com pelo menos 3 colegas de outra área']},
   {num:3,nm:'Sistemas e Ferramentas',desc:'Configure suas contas nos sistemas que você vai usar no dia a dia. Se tiver dúvidas, o Altair (T.I.) é sua referência.',
-   items:['Configure seu e-mail @cicloway.com.br no Google Workspace','Acesse o Sankia com suas credenciais','Acesse o Produtivo e leia o treinamento de chamados','Entre no grupo de WhatsApp da sua área']},
+   items:['Configure seu e-mail @cicloway.com.br no Google Workspace','Acesse o Sankhya com suas credenciais','Acesse o Produtivo e leia o treinamento de chamados','Entre no grupo de WhatsApp da sua área']},
   {num:4,nm:'Treinamentos Obrigatórios',desc:'Assista aos módulos de treinamento relevantes para sua área. Você pode marcar cada um como concluído na tela de Treinamentos.',
-   items:['Assista: Segurança no Trabalho — Oficina','Assista: Uso do Produtivo — Chamados Técnicos','Assista: Sankia — Módulo de Vendas e Contratos','Complete ao menos 1 módulo da sua área específica']},
+   items:['Assista: Segurança no Trabalho — Oficina','Assista: Uso do Produtivo — Chamados Técnicos','Assista: Sankhya — Módulo de Vendas e Contratos','Complete ao menos 1 módulo da sua área específica']},
   {num:5,nm:'Primeiros 30 Dias',desc:'Objetivos e entregas esperadas no primeiro mês. Pequenos progressos constantes são mais importantes do que grandes entregas no início.',
    items:['Agende um 1:1 com seu gestor na primeira semana','Participe da reunião semanal da sua área','Anote pelo menos 3 dúvidas ou melhorias que você identificou','Tire dúvidas sobre processos com os colegas mais experientes']},
 ];
@@ -927,7 +930,7 @@ const PRACTICES = [
 <p>Somos uma empresa de médio porte com agilidade de startup. Isso significa que as decisões são tomadas rápido, as hierarquias são diretas e cada pessoa tem impacto real no resultado. A contrapartida é que esperamos autonomia, proatividade e responsabilidade de todos.</p>`},
   {id:'comunicacao',ic:'💬',nm:'Comunicação',
    body:`<h3>Comunicação interna</h3>
-<p>A CicloWay usa principalmente <strong>WhatsApp</strong> para comunicação rápida e <strong>Google Workspace (e-mail)</strong> para comunicações formais e documentação. O ERP Sankia é o sistema de registro para tudo que precisa deixar rastro.</p>
+<p>A CicloWay usa principalmente <strong>WhatsApp</strong> para comunicação rápida e <strong>Google Workspace (e-mail)</strong> para comunicações formais e documentação. O ERP Sankhya é o sistema de registro para tudo que precisa deixar rastro.</p>
 <h3>Boas práticas de WhatsApp</h3>
 <ul>
 <li>Mensagens profissionais durante o horário comercial (8h às 18h)</li>
@@ -965,13 +968,13 @@ const PRACTICES = [
    body:`<h3>Sistemas principais</h3>
 <p>A CicloWay opera com um conjunto definido de sistemas. Conhecer bem cada um é parte do trabalho:</p>
 <ul>
-<li><strong>Sankia (ERP)</strong> — O coração da operação. NFs, contratos, estoque, financeiro, RH. Dúvidas: Altair (T.I.) ou Marcelo (Financeiro)</li>
+<li><strong>Sankhya (ERP)</strong> — O coração da operação. NFs, contratos, estoque, financeiro, RH. Dúvidas: Altair (T.I.) ou Marcelo (Financeiro)</li>
 <li><strong>Produtivo</strong> — Gestão de chamados técnicos de pós-vendas e oficina. Referência: Diógenes</li>
 <li><strong>RD Station (CRM)</strong> — Pipeline comercial, leads e comunicação com clientes. Referência: Elizabete e Ingrid</li>
 <li><strong>Google Workspace</strong> — E-mail, Drive, Docs, Sheets. Padrão de colaboração documental</li>
 </ul>
 <h3>Integrações em desenvolvimento</h3>
-<p>O Altair está desenvolvendo a integração API entre Produtivo e Sankia para eliminar o lançamento duplo de chamados técnicos. Quando estiver pronto, vai economizar horas por semana da equipe de pós-vendas.</p>
+<p>O Altair está desenvolvendo a integração API entre Produtivo e Sankhya para eliminar o lançamento duplo de chamados técnicos. Quando estiver pronto, vai economizar horas por semana da equipe de pós-vendas.</p>
 <div class="callout">🤖 A CicloWay incentiva o uso de IA (ChatGPT, Gemini) para aumentar produtividade. Não para substituir julgamento humano — para amplificar o que cada pessoa já faz bem.</div>
 <h3>Segurança digital</h3>
 <ul>
@@ -1024,17 +1027,17 @@ const BIRTHDAYS = [
   {nm:"Diógenes D'Almeida",          in:'DA', month:3,  day:30, dept:'Pós-Vendas'},
   {nm:'Elizabete Marciano',          in:'EM', month:4,  day:1,  dept:'Comercial'},
   {nm:'Luciano Mendes Pacheco',      in:'LM', month:4,  day:1,  dept:'Oficina'},
-  {nm:'Wellingthon Soares Marques',  in:'WM', month:4,  day:6,  dept:'Oficina'},
+  {nm:'Wellingthon Soares Marques da Silva',  in:'WM', month:4,  day:6,  dept:'Oficina'},
   {nm:'Bruna Figueiredo Marciano',   in:'BM', month:4,  day:22, dept:'Financeiro'},
   {nm:'Camila de Oliveira',          in:'CO', month:4,  day:27, dept:'Pós-Vendas'},
   {nm:'Cristiano Limoli',            in:'CL', month:5,  day:8,  dept:'P&D'},
   {nm:'Samuel José Pereira',         in:'SP', month:5,  day:11, dept:'Oficina'},
-  {nm:'Roberth M. S. Plácido',       in:'RP', month:5,  day:12, dept:'Oficina'},
+  {nm:'Roberth Marley Sacramento Plácido',       in:'RP', month:5,  day:12, dept:'Oficina'},
   {nm:'Fábio Alencar dos Santos',    in:'FS', month:5,  day:17, dept:'Financeiro'},
   {nm:'Renan Leal Oliveira',         in:'RO', month:5,  day:19, dept:'Oficina'},
-  {nm:'Paulo V. Barros Pereira',     in:'PP', month:5,  day:21, dept:'Produção'},
+  {nm:'Paulo Vinicius Barros Pereira',     in:'PP', month:5,  day:21, dept:'Produção'},
   {nm:'Altair Benedito da Silva',    in:'AS', month:5,  day:22, dept:'T.I.'},
-  {nm:'Guilherme F. P. de Oliveira', in:'GO', month:5,  day:24, dept:'Oficina'},
+  {nm:'Guilherme Francisco Pacheco de Oliveira', in:'GO', month:5,  day:24, dept:'Oficina'},
   {nm:'Rafael Justino da Conceição', in:'RC', month:5,  day:26, dept:'Oficina'},
   {nm:'Eduardo Ghisleni',            in:'EG', month:5,  day:26, dept:'Comercial'},
   {nm:'Denilson Ferreira de Carvalho',in:'DC',month:6,  day:1,  dept:'Oficina'},
@@ -1057,10 +1060,10 @@ const BIRTHDAYS = [
   {nm:'Sandra Henriques dos Santos', in:'SS', month:11, day:26, dept:'RH'},
   {nm:'Sergio Santos Ferreira',      in:'SF', month:11, day:28, dept:'Oficina'},
   {nm:'Carmelino E. da Silva Filho', in:'CE', month:12, day:10, dept:'Pós-Vendas'},
-  {nm:'Alessandro G. M. de Farias',  in:'AF', month:12, day:16, dept:'Oficina'},
+  {nm:'Alessandro Gonçalves Muniz de Farias',  in:'AF', month:12, day:16, dept:'Oficina'},
   {nm:'Victor Paladino Alves',       in:'VP', month:12, day:18, dept:'Financeiro'},
   {nm:'Deborah C. Benetti',          in:'DB', month:12, day:25, dept:'Marketing'},
-  {nm:'Luiz Felipe O. dos Santos',   in:'LS', month:12, day:30, dept:'Oficina'},
+  {nm:'Luiz Felipe Oliveira dos Santos',   in:'LS', month:12, day:30, dept:'Oficina'},
   {nm:'Raquel I. M. Pereira',        in:'RQ', month:12, day:31, dept:'Pós-Vendas'},
 ];
 
@@ -1544,6 +1547,33 @@ function filterOrg(){ renderOrg(); }
 /* ═══════════════════════════════════════════════
    MODAL
 ═══════════════════════════════════════════════ */
+// Hierarquia (reporta a) e formação — fonte: doc "Ajuste Organograma"
+const ORG_EXTRA = {
+  leandro:          {report:'CEO', form:'Não informada'},
+  roberth:          {report:'CEO', form:'Não informada'},
+  'alexo-ponciano': {report:'Wilson Yope', form:'Não informada'},
+  celso:            {report:'Roberth Plácido', form:'Não informada'},
+  denilson:         {report:'Roberth Plácido', form:'Não informada'},
+  renan:            {report:'Leandro Ponciano', form:'Não informada'},
+  sergio:           {report:'Roberth Plácido', form:'Não informada'},
+  wellingthon:      {report:'Leandro Ponciano', form:'Não informada'},
+  jodson:           {report:'Roberth Plácido', form:'Não informada'},
+  'luiz-fe':        {report:"Diógenes D'Almeida", form:'Não informada'},
+  'rafael-jc':      {report:"Diógenes D'Almeida", form:'Não informada'},
+  samuel:           {report:"Diógenes D'Almeida", form:'Não informada'},
+  'g-pacheco':      {report:'Leandro Ponciano', form:'Não informada'},
+  'g-weippert':     {report:'Leandro Ponciano', form:'Tecnologia em Automação Industrial'},
+  luciano:          {report:'Roberth Plácido', form:'Não informada'},
+  'tony-v':         {report:'Roberth Plácido', form:'Não informada'},
+  'alexo-farias':   {report:"Diógenes D'Almeida", form:'Não informada'},
+  carmelino:        {report:"Diógenes D'Almeida"},
+  camila:           {report:"Diógenes D'Almeida"},
+  gustavo:          {report:"Diógenes D'Almeida"},
+  rafaela:          {report:"Diógenes D'Almeida"},
+  raquel:           {report:"Diógenes D'Almeida"},
+  diogenes:         {report:'CEO'},
+};
+
 function openModal(p){
   document.getElementById('m-nm').textContent = p.nm;
   document.getElementById('m-tt').textContent = p.tt;
@@ -1552,6 +1582,11 @@ function openModal(p){
     `<span class="mtag ${ct}">${p.ct}</span>
      <span class="mtag mt-bl">${p.dept}</span>
      <span class="mtag mt-mu">Desde ${p.since}</span>`;
+  const ex = ORG_EXTRA[p.id] || {};
+  let info = '';
+  if(ex.report) info += `<div class="minfo-row"><span>Reporta a</span><b>${ex.report}</b></div>`;
+  info += `<div class="minfo-row"><span>Formação</span><b>${ex.form||'Não informada'}</b></div>`;
+  document.getElementById('m-info').innerHTML = info;
   document.getElementById('m-sum').textContent = p.sum;
   document.getElementById('m-resp').innerHTML = p.resp.map(r=>`<li>${r}</li>`).join('');
   document.getElementById('m-tools').innerHTML = p.tools.map(t=>`<li>${t}</li>`).join('');
