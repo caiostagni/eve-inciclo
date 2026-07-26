@@ -252,7 +252,10 @@ body{font-family:'Poppins',-apple-system,sans-serif;background:var(--bg);color:v
 .prodgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
 .prcard{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color .15s}
 .prcard:hover{border-color:var(--bm)}
-.pr-img{height:156px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:54px;border-bottom:1px solid var(--border)}
+.pr-img{height:156px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:54px;border-bottom:1px solid var(--border);overflow:hidden}
+.pr-img img{width:100%;height:100%;object-fit:cover}
+.pr-ficha{display:inline-flex;align-items:center;gap:6px;margin-top:12px;font-size:12px;font-weight:600;color:var(--blue-t);text-decoration:none;border:1px solid var(--border);padding:7px 10px;border-radius:7px;transition:border-color .15s}
+.pr-ficha:hover{border-color:var(--blue-t)}
 .pr-body{padding:14px}
 .pr-cat{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--blue-t);margin-bottom:3px}
 .pr-nm{font-size:14px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px}
@@ -1004,12 +1007,15 @@ const PRACTICES = [
 const PRODUCTS = [
   {id:'sn100',cat:'Patinetes',emoji:'🛴',nm:'Patinete SN-100',price:'R$ 2.890',specs:{Velocidade:'25 km/h',Autonomia:'30 km',Carga:'120 kg',Bateria:'4-5h'},new:false},
   {id:'sn200',cat:'Patinetes',emoji:'🛴',nm:'Patinete SN-200',price:'R$ 3.490',specs:{Velocidade:'32 km/h',Autonomia:'47 km',Carga:'120 kg',Bateria:'5-6h'},new:false},
-  {id:'si2',  cat:'Segway',  emoji:'🤖',nm:'Segway i2',       price:'Consultar',specs:{Velocidade:'20 km/h',Autonomia:'80 km',Carga:'120 kg',Bateria:'7h'},new:false},
-  {id:'sx2',  cat:'Segway',  emoji:'🤖',nm:'Segway X2',       price:'Consultar',specs:{Velocidade:'20 km/h',Autonomia:'56 km',Carga:'118 kg',Bateria:'7h'},new:false},
+  {id:'si2',  cat:'Segway',  emoji:'🤖',nm:'Segway i2',       price:'Consultar',specs:{Velocidade:'20 km/h',Autonomia:'40 km',Carga:'120 kg',Bateria:'73,3V 12Ah'},img:'assets/produtos/si2.jpg',ficha:'assets/fichas/segway-i2.pdf',new:false},
+  {id:'sx2',  cat:'Segway',  emoji:'🤖',nm:'Segway X2',       price:'Consultar',specs:{Velocidade:'19 km/h',Autonomia:'20 km',Carga:'120 kg',Bateria:'73,3V 12Ah'},img:'assets/produtos/sx2.jpg',ficha:'assets/fichas/segway-x2.pdf',new:false},
   {id:'c3',   cat:'Triciclos',emoji:'🚲',nm:'Triciclo C-3',   price:'Consultar',specs:{Velocidade:'25 km/h',Autonomia:'30 km',Carga:'200 kg',Bateria:'6h'},new:false},
-  {id:'joan', cat:'Triciclos',emoji:'🚕',nm:'Joaninha',        price:'Consultar',specs:{Velocidade:'40 km/h',Autonomia:'60 km',Carga:'300 kg',Bateria:'8h'},new:false},
-  {id:'bes',  cat:'Triciclos',emoji:'🐛',nm:'Besouro Coletor', price:'Consultar',specs:{Velocidade:'25 km/h',Autonomia:'40 km',Carga:'400 kg',Bateria:'7h'},new:false},
-  {id:'fg3',  cat:'Triciclos',emoji:'🚛',nm:'Formigão G3',     price:'Consultar',specs:{Velocidade:'25 km/h',Autonomia:'50 km',Carga:'500 kg',Bateria:'8h'},new:true},
+  {id:'joan', cat:'Triciclos',emoji:'🚕',nm:'Joaninha G2',     price:'Consultar',specs:{Velocidade:'40 km/h',Autonomia:'80 km',Carga:'350 kg',Bateria:'60V 50Ah'},img:'assets/produtos/joan.jpg',ficha:'assets/fichas/joaninha-g2.pdf',new:false},
+  {id:'bes',  cat:'Triciclos',emoji:'🐛',nm:'Besouro Coletor', price:'Consultar',specs:{Velocidade:'45 km/h',Autonomia:'120 km',Carga:'1500 kg',Bateria:'72V 230Ah'},img:'assets/produtos/bes.jpg',ficha:'assets/fichas/besouro-coletor.pdf',new:false},
+  {id:'bescolt',cat:'Triciclos',emoji:'🐛',nm:'Besouro Coletor T',price:'Consultar',specs:{Velocidade:'45 km/h',Autonomia:'120 km',Carga:'1500 kg',Bateria:'72V 230Ah'},img:'assets/produtos/bescolt.jpg',ficha:'assets/fichas/besouro-coletor-t.pdf',new:false},
+  {id:'besl', cat:'Triciclos',emoji:'🐛',nm:'Besouro L',       price:'Consultar',specs:{Velocidade:'45 km/h',Autonomia:'120 km',Carga:'1200 kg',Bateria:'72V 230Ah'},img:'assets/produtos/besl.jpg',ficha:'assets/fichas/besouro-l.pdf',new:false},
+  {id:'besdel',cat:'Triciclos',emoji:'📦',nm:'Besouro Delivery',price:'Consultar',specs:{Velocidade:'45 km/h',Autonomia:'150 km',Carga:'1300 kg',Bateria:'72V 230Ah'},img:'assets/produtos/besdel.jpg',ficha:'assets/fichas/besouro-delivery.pdf',new:true},
+  {id:'fg3',  cat:'Triciclos',emoji:'🚛',nm:'Formigão G3',     price:'Consultar',specs:{Velocidade:'55 km/h',Autonomia:'100 km',Carga:'250 kg',Bateria:'72V 120Ah'},img:'assets/produtos/fg3.jpg',ficha:'assets/fichas/formigao-g3.pdf',new:true},
   {id:'fbau', cat:'Triciclos',emoji:'📦',nm:'Formigão Baú',    price:'Consultar',specs:{Velocidade:'25 km/h',Autonomia:'50 km',Carga:'500 kg',Bateria:'8h'},new:false},
   {id:'gir',  cat:'Triciclos',emoji:'🦒',nm:'Girafa',          price:'Consultar',specs:{Velocidade:'25 km/h',Autonomia:'45 km',Carga:'350 kg',Bateria:'7h'},new:false},
   {id:'moto', cat:'Motos',   emoji:'🏍️',nm:'Mini Max Moto',    price:'Consultar',specs:{Velocidade:'45 km/h',Autonomia:'70 km',Carga:'150 kg',Bateria:'6h'},new:false},
@@ -1783,13 +1789,16 @@ function renderProducts(){
     card.className = 'prcard';
     const specsHtml = Object.entries(p.specs).map(([k,v])=>`<div class="spec"><div class="sp-l">${k}</div><div class="sp-v">${v}</div></div>`).join('');
     const isConsult = p.price==='Consultar';
+    const imgHtml = p.img ? `<img src="${p.img}" alt="${p.nm}" loading="lazy">` : p.emoji;
+    const fichaHtml = p.ficha ? `<a class="pr-ficha" href="${p.ficha}" target="_blank" rel="noopener">📄 Baixar ficha técnica</a>` : '';
     card.innerHTML = `
-      <div class="pr-img">${p.emoji}</div>
+      <div class="pr-img">${imgHtml}</div>
       <div class="pr-body">
         <div class="pr-cat">${p.cat}</div>
         <div class="pr-nm">${p.nm}${p.new?'<span class="pr-new">Novo</span>':''}</div>
         <div class="pr-specs">${specsHtml}</div>
         <div class="pr-price ${isConsult?'consult':''}">${p.price}</div>
+        ${fichaHtml}
       </div>`;
     grid.appendChild(card);
   });

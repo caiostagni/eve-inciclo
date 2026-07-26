@@ -6,3 +6,6 @@ node_modules/
 .env
 .env*.local
 .vercel
+
+# fichas técnicas ficam versionadas (para download)
+!assets/fichas/*.pdf
