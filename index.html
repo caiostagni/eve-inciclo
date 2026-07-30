@@ -256,6 +256,28 @@ body{font-family:'Poppins',-apple-system,sans-serif;background:var(--bg);color:v
 .pr-img img{width:100%;height:100%;object-fit:cover}
 .pr-ficha{display:inline-flex;align-items:center;gap:6px;margin-top:12px;font-size:12px;font-weight:600;color:var(--blue-t);text-decoration:none;border:1px solid var(--border);padding:7px 10px;border-radius:7px;transition:border-color .15s}
 .pr-ficha:hover{border-color:var(--blue-t)}
+/* Configurações */
+.set-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;align-items:start}
+.set-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px}
+.set-h{font-size:15px;font-weight:700;margin-bottom:16px}
+.set-btn{width:100%;padding:11px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;transition:opacity .15s;margin-top:6px}
+.set-btn:hover{opacity:.9}
+.set-btn:disabled{opacity:.6;cursor:default}
+.set-msg{font-size:12px;margin:2px 0 8px;min-height:15px}
+.set-msg.ok{color:var(--green)}
+.set-msg.err{color:var(--red)}
+.set-div{height:1px;background:var(--border);margin:18px 0}
+.ag-form{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+select.fi{appearance:none;cursor:pointer}
+.ag-list{display:flex;flex-direction:column;gap:8px}
+.ag-item{display:flex;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+.ag-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.ag-info{flex:1;min-width:0}
+.ag-nm{font-size:13px;font-weight:600}
+.ag-dt2{font-size:11px;color:var(--muted);margin-top:1px}
+.ag-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;padding:2px 7px;border-radius:5px;line-height:1}
+.ag-del:hover{color:var(--red);background:var(--rl)}
+.ag-empty{font-size:12px;color:var(--muted);padding:8px 2px}
 .pr-body{padding:14px}
 .pr-cat{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--blue-t);margin-bottom:3px}
 .pr-nm{font-size:14px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px}
@@ -534,6 +556,8 @@ body{font-family:'Poppins',-apple-system,sans-serif;background:var(--bg);color:v
     <button class="nav-it" data-p="kpis"><span class="ic">📊</span>Dashboard KPIs</button>
     <div class="nav-sec">Catálogo</div>
     <button class="nav-it" data-p="products"><span class="ic">🛒</span>Produtos</button>
+    <div class="nav-sec">Conta</div>
+    <button class="nav-it" data-p="settings"><span class="ic">⚙️</span>Configurações</button>
   </nav>
 
   <!-- Main -->
@@ -715,6 +739,44 @@ body{font-family:'Poppins',-apple-system,sans-serif;background:var(--bg);color:v
       <div class="dl-grid" id="proposals-grid"></div>
     </div>
 
+    <!-- CONFIGURAÇÕES -->
+    <div id="pg-settings" class="pg">
+      <div class="pg-title">Configurações</div>
+      <div class="pg-sub">Sua conta e a agenda da empresa</div>
+      <div class="set-grid">
+        <div class="set-card">
+          <h3 class="set-h">🔒 Alterar senha</h3>
+          <div class="fg"><label class="fl">Senha atual</label><input id="cp-cur" type="password" class="fi" autocomplete="current-password"/></div>
+          <div class="fg"><label class="fl">Nova senha</label><input id="cp-new" type="password" class="fi" autocomplete="new-password"/></div>
+          <div class="fg"><label class="fl">Confirmar nova senha</label><input id="cp-cf" type="password" class="fi" autocomplete="new-password"/></div>
+          <div class="set-msg" id="cp-msg"></div>
+          <button class="set-btn" onclick="doChangePassword()">Salvar nova senha</button>
+        </div>
+        <div class="set-card">
+          <h3 class="set-h">📅 Agenda · Próximos eventos</h3>
+          <div id="ag-adminform" style="display:none">
+            <div class="ag-form">
+              <div class="fg"><label class="fl">Data</label><input id="ag-dt" type="date" class="fi"/></div>
+              <div class="fg"><label class="fl">Hora (opcional)</label><input id="ag-tm" type="time" class="fi"/></div>
+            </div>
+            <div class="fg"><label class="fl">Título</label><input id="ag-nm" type="text" class="fi" placeholder="Ex.: Reunião comercial semanal"/></div>
+            <div class="fg"><label class="fl">Tipo</label>
+              <select id="ag-tp" class="fi">
+                <option value="m">Reunião</option>
+                <option value="e">Evento</option>
+                <option value="t">Treinamento</option>
+                <option value="h">Feriado</option>
+              </select>
+            </div>
+            <div class="set-msg" id="ag-msg"></div>
+            <button class="set-btn" onclick="addEvent()">Adicionar à agenda</button>
+            <div class="set-div"></div>
+          </div>
+          <div class="ag-list" id="ag-list"></div>
+        </div>
+      </div>
+    </div>
+
   </main>
 </div><!-- /app -->
 
@@ -878,18 +940,7 @@ const PEOPLE = [
    tools:['SISCOMEX / portais aduaneiros','Google Workspace','E-mail']},
 ];
 
-const EVENTS = [
-  {dt:'2026-06-01',nm:'Reunião Comercial Semanal',  tm:'09:00',tp:'m'},
-  {dt:'2026-06-03',nm:'Check-in Projeto InCiclo',   tm:'14:00',tp:'m'},
-  {dt:'2026-06-04',nm:'Corpus Christi',             tm:null,   tp:'h'},
-  {dt:'2026-06-05',nm:'Apresentação de Novos Produtos',tm:'10:00',tp:'e'},
-  {dt:'2026-06-10',nm:'Treinamento — Formigão G3',  tm:'13:30',tp:'t'},
-  {dt:'2026-06-12',nm:'Dia dos Namorados',          tm:null,   tp:'h'},
-  {dt:'2026-06-15',nm:'Reunião de Resultados — Q2', tm:'09:00',tp:'m'},
-  {dt:'2026-06-17',nm:'Treinamento Comercial',      tm:'14:00',tp:'t'},
-  {dt:'2026-06-22',nm:'Revisão de Processos InCiclo',tm:'10:00',tp:'m'},
-  {dt:'2026-06-30',nm:'Fechamento do Mês',          tm:'09:00',tp:'m'},
-];
+let EVENTS = []; // carregado do banco via /api/events (gerenciado em Configurações)
 
 const TRAININGS = [
   {id:'t1',emoji:'🛴',cat:'Manutenção',nm:'Manutenção Básica — Patinetes Linha SN',   dur:'32 min',desc:'Procedimentos de revisão preventiva para a linha SN-100 e SN-200.'},
@@ -1362,6 +1413,8 @@ function showApp(){
   initCases();
   initContracts();
   initProposals();
+  initSettings();
+  loadEvents();
 }
 
 // Enter key on login
@@ -2414,6 +2467,89 @@ function makeDLCards(data, containerId){
 function initCases(){ makeDLCards(CASES,'cases-grid'); }
 function initContracts(){ makeDLCards(CONTRACTS,'contracts-grid'); }
 function initProposals(){ makeDLCards(PROPOSALS,'proposals-grid'); }
+
+/* ═══════════════════════════════════════════════
+   CONFIGURAÇÕES · AGENDA + SENHA
+═══════════════════════════════════════════════ */
+const EV_META = {
+  m:{lb:'Reunião',     c:'var(--blue-t)'},
+  e:{lb:'Evento',      c:'var(--green)'},
+  t:{lb:'Treinamento', c:'var(--yellow)'},
+  h:{lb:'Feriado',     c:'var(--red)'},
+};
+
+async function loadEvents(){
+  try{
+    const r = await fetch('/api/events');
+    EVENTS = r.ok ? ((await r.json()).events || []) : [];
+  }catch(e){ EVENTS = []; }
+  if(typeof initHome==='function') initHome(); // atualiza calendário + próximos
+  renderAgendaList();
+}
+
+function initSettings(){
+  const form = document.getElementById('ag-adminform');
+  if(form) form.style.display = (CU && CU.role==='admin') ? 'block' : 'none';
+  renderAgendaList();
+}
+
+function renderAgendaList(){
+  const box = document.getElementById('ag-list');
+  if(!box) return;
+  const today = new Date().toISOString().slice(0,10);
+  const future = EVENTS.filter(e=>e.dt>=today).sort((a,b)=>a.dt.localeCompare(b.dt));
+  const isAdmin = CU && CU.role==='admin';
+  if(future.length===0){ box.innerHTML='<div class="ag-empty">Nenhum evento futuro cadastrado.</div>'; return; }
+  box.innerHTML = future.map(e=>{
+    const m = EV_META[e.tp]||EV_META.e;
+    const [y,mo,d] = e.dt.split('-');
+    const lbl = `${d}/${mo}/${y}${e.tm?' · '+e.tm:''} · ${m.lb}`;
+    return `<div class="ag-item">
+      <span class="ag-dot" style="background:${m.c}"></span>
+      <div class="ag-info"><div class="ag-nm">${e.nm}</div><div class="ag-dt2">${lbl}</div></div>
+      ${isAdmin?`<button class="ag-del" title="Remover" onclick="deleteEvent('${e.id}')">✕</button>`:''}
+    </div>`;
+  }).join('');
+}
+
+async function addEvent(){
+  const msg = document.getElementById('ag-msg'); msg.className='set-msg'; msg.textContent='';
+  const dt = document.getElementById('ag-dt').value;
+  const nm = document.getElementById('ag-nm').value.trim();
+  const tm = document.getElementById('ag-tm').value || null;
+  const tp = document.getElementById('ag-tp').value;
+  if(!dt || !nm){ msg.className='set-msg err'; msg.textContent='Preencha ao menos data e título.'; return; }
+  try{
+    const r = await fetch('/api/events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({dt,nm,tm,tp})});
+    if(!r.ok){ msg.className='set-msg err'; msg.textContent = r.status===403?'Apenas administradores podem adicionar.':'Não foi possível adicionar.'; return; }
+    document.getElementById('ag-nm').value=''; document.getElementById('ag-tm').value='';
+    msg.className='set-msg ok'; msg.textContent='Evento adicionado ✓';
+    await loadEvents();
+  }catch(e){ msg.className='set-msg err'; msg.textContent='Falha de conexão.'; }
+}
+
+async function deleteEvent(id){
+  try{ const r = await fetch('/api/events?id='+encodeURIComponent(id),{method:'DELETE'}); if(r.ok) await loadEvents(); }catch(e){}
+}
+
+async function doChangePassword(){
+  const msg = document.getElementById('cp-msg'); msg.className='set-msg'; msg.textContent='';
+  const cur = document.getElementById('cp-cur').value;
+  const nw  = document.getElementById('cp-new').value;
+  const cf  = document.getElementById('cp-cf').value;
+  if(!cur || !nw){ msg.className='set-msg err'; msg.textContent='Preencha a senha atual e a nova.'; return; }
+  if(nw.length<6){ msg.className='set-msg err'; msg.textContent='A nova senha precisa de ao menos 6 caracteres.'; return; }
+  if(nw!==cf){ msg.className='set-msg err'; msg.textContent='A confirmação não corresponde.'; return; }
+  try{
+    const r = await fetch('/api/change-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({currentPassword:cur,newPassword:nw})});
+    if(r.status===403){ msg.className='set-msg err'; msg.textContent='Senha atual incorreta.'; }
+    else if(!r.ok){ msg.className='set-msg err'; msg.textContent='Não foi possível alterar. Tente novamente.'; }
+    else{
+      msg.className='set-msg ok'; msg.textContent='Senha alterada com sucesso ✓';
+      document.getElementById('cp-cur').value=''; document.getElementById('cp-new').value=''; document.getElementById('cp-cf').value='';
+    }
+  }catch(e){ msg.className='set-msg err'; msg.textContent='Falha de conexão.'; }
+}
 
 /* ═══════════════════════════════════════════════
    INIT

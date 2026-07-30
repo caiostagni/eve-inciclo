@@ -16,3 +16,14 @@ create table if not exists users (
 );
 
 create index if not exists users_email_idx on users (lower(email));
+
+-- Eventos da agenda (Home + calendário). Admin cadastra; todos veem.
+create table if not exists events (
+  id         uuid primary key default gen_random_uuid(),
+  dt         date not null,                       -- data do evento
+  nm         text not null,                       -- título
+  tm         text,                                -- hora "HH:MM" (ou null = dia todo)
+  tp         text not null default 'e' check (tp in ('m','h','e','t')), -- reunião/feriado/evento/treinamento
+  created_at timestamptz not null default now()
+);
+create index if not exists events_dt_idx on events (dt);
