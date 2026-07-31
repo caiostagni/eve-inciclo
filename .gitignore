@@ -9,3 +9,5 @@ node_modules/
 
 # fichas técnicas ficam versionadas (para download)
 !assets/fichas/*.pdf
+!assets/cases/arquivos/*.pdf
+assets/cases/imagens/

@@ -1,0 +1,13 @@
+COMO ADICIONAR UM CASE
+======================
+1) IMAGEM: coloque a imagem do case em  assets/cases/imagens/
+   (nomeie de forma simples, ex.: prefeitura-manaus.jpg)
+
+2) ARQUIVO PARA DOWNLOAD (opcional): coloque o PDF em  assets/cases/arquivos/
+   (ex.: prefeitura-manaus.pdf)
+
+3) TEXTO: para cada case, me passe (no chat ou num .txt aqui):
+   - Título / Cliente
+   - Segmento (ex.: Coleta Seletiva, Delivery, Segurança)
+   - Descrição / resultado (1 a 2 frases)
+   - Público (nome do cliente pode aparecer) ou Anônimo

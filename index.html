@@ -423,6 +423,10 @@ select.fi{appearance:none;cursor:pointer}
 .dl-card:hover{border-color:var(--bm)}
 .dl-hd{padding:18px;border-bottom:1px solid var(--border);background:var(--bg2)}
 .dl-emoji{font-size:26px;margin-bottom:8px}
+.dl-img{height:160px;background:#fff;overflow:hidden;border-bottom:1px solid var(--border)}
+.dl-img img{width:100%;height:100%;object-fit:cover}
+a.btn-dl{text-decoration:none}
+a.btn-dl:hover{border-color:var(--blue-t);color:var(--blue-t)}
 .dl-title{font-size:14px;font-weight:700;margin-bottom:3px}
 .dl-sub{font-size:11px;color:var(--text2)}
 .dl-bd{padding:15px}
@@ -1301,24 +1305,18 @@ const PRICE_SECTIONS = [
 ];
 
 const CASES = [
-  {emoji:'🛵',title:'iFood',sub:'Delivery · Last Mile',
-   desc:'15 patinetes SN-200 para entregas de última milha em São Paulo. Redução de 72% no custo operacional de entrega em raio de 3km.',
-   tags:['Delivery','Patinetes','SP'],file:'case-ifood.pdf'},
-  {emoji:'🛡️',title:'Prosegur',sub:'Segurança Patrimonial',
-   desc:'22 Segways i2 em 8 shoppings de todo o Brasil. Cobertura 40% maior por vigia com redução de incidentes.',
-   tags:['Segurança','Segway','Nacional'],file:'case-prosegur.pdf'},
-  {emoji:'🏬',title:'Multiplan',sub:'Shopping Centers',
-   desc:'12 Segways para patrulhamento em 3 empreendimentos. Implantação em 45 dias com treinamento in-house.',
-   tags:['Shopping','Segway','Frota'],file:'case-multiplan.pdf'},
-  {emoji:'♻️',title:'Coopercaps',sub:'Coleta Seletiva',
-   desc:'8 Besouros Coletores para coleta seletiva em São Bernardo do Campo. Projeto premiado pelo MMA.',
-   tags:['Coleta','Triciclo','ESG'],file:'case-coopercaps.pdf'},
-  {emoji:'💊',title:'Pague Menos',sub:'Delivery Farmacêutico',
-   desc:'30 Triciclos C-3 para entrega de medicamentos em 6 cidades. Entregas em até 60 min no raio de 5km.',
-   tags:['Farmácia','Triciclo','Saúde'],file:'case-paguemenos.pdf'},
-  {emoji:'📦',title:'Jadlog',sub:'Logística Expressa',
-   desc:'20 Formigões Baú para distribuição urbana em SP. Redução de 35% no prazo de entrega last mile.',
-   tags:['Logística','Formigão','SP'],file:'case-jadlog.pdf'},
+  {img:'assets/cases/avra.jpg',title:'Rede Vamos Juntos — Fortaleza',sub:'Mobilidade urbana · Setor público',
+   desc:'Triciclos elétricos (tuk tuks) da CicloWay no transporte gratuito de curta distância em Fortaleza, em parceria com ARVRA e Toyota. Complementam o transporte público com emissão zero e baixo custo operacional.',
+   tags:['+7.000 cadastrados','+5.300 viagens','+1,5t CO₂ evitada'],file:'assets/cases/arquivos/case-avra.docx'},
+  {img:'assets/cases/loga.jpg',title:'Prefeitura de São Paulo',sub:'Coleta de resíduos · Formigão G3',
+   desc:'O Formigão G3 (100% elétrico) alcança vielas e ruas estreitas onde caminhões não chegam, modernizando a limpeza urbana da capital com operação silenciosa e sem poluentes.',
+   tags:['Formigão G3','Áreas de difícil acesso','Limpeza urbana'],file:'assets/cases/arquivos/case-loga.docx'},
+  {img:'assets/cases/bertioga.jpg',title:'Prefeitura de Bertioga',sub:'Coleta Seletiva',
+   desc:'Frota de triciclos elétricos amplia a coleta seletiva em bairros de difícil acesso, conduzida pelas cooperadas da Transformar. Mais cobertura, menor custo e zero emissão — com geração de renda e inclusão social.',
+   tags:['Coleta seletiva','Economia circular','Inclusão social'],file:'assets/cases/arquivos/case-bertioga.docx'},
+  {img:'assets/cases/metro.jpg',title:'Metrô de São Paulo',sub:'Segurança patrimonial',
+   desc:'Segways da CicloWay apoiam as rondas nas estações do Metrô SP: mais cobertura e menor tempo de resposta no intenso fluxo de passageiros, com condução estável e autoequilíbrio.',
+   tags:['50% menos tempo de ronda','Até 3x mais área patrulhada','−58% no trajeto de 3 km'],file:'assets/cases/arquivos/case-metro.docx'},
 ];
 
 const CONTRACTS = [
@@ -2449,16 +2447,22 @@ function makeDLCards(data, containerId){
   data.forEach(d=>{
     const card=document.createElement('div');
     card.className='dl-card';
+    const ext = d.file.split('.').pop().toUpperCase();
+    const real = d.file.startsWith('assets/');
+    const btn = real
+      ? `<a class="btn-dl" href="${d.file}" download>⬇ Baixar ${ext}</a>`
+      : `<button class="btn-dl" onclick="showToast()">⬇ Baixar ${ext}</button>`;
     card.innerHTML=`
+      ${d.img?`<div class="dl-img"><img src="${d.img}" alt="${d.title}" loading="lazy"></div>`:''}
       <div class="dl-hd">
-        <div class="dl-emoji">${d.emoji}</div>
+        ${d.img?'':`<div class="dl-emoji">${d.emoji}</div>`}
         <div class="dl-title">${d.title}</div>
         <div class="dl-sub">${d.sub}</div>
       </div>
       <div class="dl-bd">
         <div class="dl-desc">${d.desc}</div>
         <div class="dl-meta">${d.tags.map(t=>`<span class="dl-tag">${t}</span>`).join('')}</div>
-        <button class="btn-dl" onclick="showToast()">⬇ Baixar ${d.file.split('.').pop().toUpperCase()}</button>
+        ${btn}
       </div>`;
     grid.appendChild(card);
   });
