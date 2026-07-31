@@ -91,6 +91,7 @@ body{font-family:'Poppins',-apple-system,sans-serif;background:var(--bg);color:v
 .nav-it:hover{background:var(--card);color:var(--text)}
 .nav-it.on{background:var(--bl);color:var(--blue-t);font-weight:600}
 .nav-it .ic{font-size:15px;flex-shrink:0;width:20px;text-align:center}
+.nav-demo{margin-left:auto;font-size:11px;opacity:.65}
 
 /* Main */
 #main{margin-left:var(--sw);margin-top:var(--hh);min-height:calc(100vh - var(--hh))}
@@ -278,6 +279,17 @@ select.fi{appearance:none;cursor:pointer}
 .ag-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;padding:2px 7px;border-radius:5px;line-height:1}
 .ag-del:hover{color:var(--red);background:var(--rl)}
 .ag-empty{font-size:12px;color:var(--muted);padding:8px 2px}
+.us-list{display:flex;flex-direction:column;gap:8px}
+.us-item{display:flex;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:9px 12px}
+.us-av{width:30px;height:30px;border-radius:50%;background:var(--bl);border:1.5px solid var(--bm);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--blue-t);flex-shrink:0}
+.us-info{flex:1;min-width:0}
+.us-nm{font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.us-em{font-size:11px;color:var(--muted)}
+.us-badge{font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;text-transform:uppercase}
+.us-badge.adm{background:var(--bl);color:var(--blue-t)}
+.us-badge.off{background:var(--rl);color:var(--red)}
+.us-toggle{background:none;border:1px solid var(--border);color:var(--text2);border-radius:6px;font-size:11px;padding:4px 9px;cursor:pointer;font-family:inherit;transition:all .15s;flex-shrink:0}
+.us-toggle:hover{border-color:var(--blue-t);color:var(--blue-t)}
 .pr-body{padding:14px}
 .pr-cat{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--blue-t);margin-bottom:3px}
 .pr-nm{font-size:14px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px}
@@ -550,14 +562,14 @@ a.btn-dl:hover{border-color:var(--blue-t);color:var(--blue-t)}
     <button class="nav-it" data-p="leads"><span class="ic">🎯</span>Qualificação de Leads</button>
     <button class="nav-it" data-p="objections"><span class="ic">💬</span>Biblioteca de Objeções</button>
     <button class="nav-it" data-p="price"><span class="ic">💰</span>Política de Preço</button>
-    <button class="nav-it" data-p="proposals"><span class="ic">📄</span>Propostas Padrão</button>
+    <button class="nav-it" data-p="proposals"><span class="ic">📄</span>Propostas Padrão<span class="nav-demo" title="Dados de demonstração">⚙️</span></button>
     <div class="nav-sec">Operacional</div>
-    <button class="nav-it" data-p="stock"><span class="ic">📦</span>Estoque</button>
+    <button class="nav-it" data-p="stock"><span class="ic">📦</span>Estoque<span class="nav-demo" title="Dados de demonstração">⚙️</span></button>
     <div class="nav-sec">Documentos</div>
     <button class="nav-it" data-p="cases"><span class="ic">🏆</span>Cases</button>
-    <button class="nav-it" data-p="contracts"><span class="ic">📋</span>Contratos</button>
+    <button class="nav-it" data-p="contracts"><span class="ic">📋</span>Contratos<span class="nav-demo" title="Dados de demonstração">⚙️</span></button>
     <div class="nav-sec">Gestão</div>
-    <button class="nav-it" data-p="kpis"><span class="ic">📊</span>Dashboard KPIs</button>
+    <button class="nav-it" data-p="kpis"><span class="ic">📊</span>Dashboard KPIs<span class="nav-demo" title="Dados de demonstração">⚙️</span></button>
     <div class="nav-sec">Catálogo</div>
     <button class="nav-it" data-p="products"><span class="ic">🛒</span>Produtos</button>
     <div class="nav-sec">Conta</div>
@@ -778,6 +790,26 @@ a.btn-dl:hover{border-color:var(--blue-t);color:var(--blue-t)}
           </div>
           <div class="ag-list" id="ag-list"></div>
         </div>
+      </div>
+
+      <div class="set-card" id="users-card" style="display:none;margin-top:16px">
+        <h3 class="set-h">👥 Usuários · logins de acesso</h3>
+        <div class="ag-form">
+          <div class="fg"><label class="fl">Nome completo</label><input id="us-nome" class="fi" placeholder="Ex.: Maria Silva"/></div>
+          <div class="fg"><label class="fl">E-mail</label><input id="us-email" type="email" class="fi" placeholder="maria@cicloway.com.br"/></div>
+          <div class="fg"><label class="fl">Senha inicial</label><input id="us-senha" type="text" class="fi" placeholder="mín. 6 caracteres"/></div>
+          <div class="fg"><label class="fl">Departamento</label><input id="us-dept" class="fi" placeholder="Ex.: Comercial"/></div>
+        </div>
+        <div class="fg"><label class="fl">Papel</label>
+          <select id="us-role" class="fi">
+            <option value="employee">Colaborador</option>
+            <option value="admin">Administrador</option>
+          </select>
+        </div>
+        <div class="set-msg" id="us-msg"></div>
+        <button class="set-btn" onclick="createUser()">Criar login</button>
+        <div class="set-div"></div>
+        <div class="us-list" id="us-list"></div>
       </div>
     </div>
 
@@ -2492,9 +2524,59 @@ async function loadEvents(){
 }
 
 function initSettings(){
+  const isAdmin = CU && CU.role==='admin';
   const form = document.getElementById('ag-adminform');
-  if(form) form.style.display = (CU && CU.role==='admin') ? 'block' : 'none';
+  if(form) form.style.display = isAdmin ? 'block' : 'none';
+  const uc = document.getElementById('users-card');
+  if(uc) uc.style.display = isAdmin ? 'block' : 'none';
   renderAgendaList();
+  if(isAdmin) loadUsers();
+}
+
+async function loadUsers(){
+  const box = document.getElementById('us-list'); if(!box) return;
+  try{
+    const r = await fetch('/api/users');
+    if(!r.ok){ box.innerHTML='<div class="ag-empty">Sem permissão ou erro ao carregar.</div>'; return; }
+    const { users } = await r.json();
+    box.innerHTML = users.map(u=>`
+      <div class="us-item">
+        <div class="us-av">${u.iniciais||'?'}</div>
+        <div class="us-info">
+          <div class="us-nm">${u.nome}
+            ${u.role==='admin'?'<span class="us-badge adm">admin</span>':''}
+            ${!u.ativo?'<span class="us-badge off">inativo</span>':''}</div>
+          <div class="us-em">${u.email}${u.dept?' · '+u.dept:''}</div>
+        </div>
+        <button class="us-toggle" onclick="toggleUser('${u.id}',${u.ativo})">${u.ativo?'Desativar':'Ativar'}</button>
+      </div>`).join('');
+  }catch(e){ box.innerHTML='<div class="ag-empty">Falha de conexão.</div>'; }
+}
+
+async function createUser(){
+  const msg = document.getElementById('us-msg'); msg.className='set-msg'; msg.textContent='';
+  const nome = document.getElementById('us-nome').value.trim();
+  const email = document.getElementById('us-email').value.trim();
+  const senha = document.getElementById('us-senha').value;
+  const dept = document.getElementById('us-dept').value.trim();
+  const role = document.getElementById('us-role').value;
+  if(!nome || !email || !senha){ msg.className='set-msg err'; msg.textContent='Preencha nome, e-mail e senha.'; return; }
+  if(senha.length<6){ msg.className='set-msg err'; msg.textContent='A senha inicial precisa de ao menos 6 caracteres.'; return; }
+  try{
+    const r = await fetch('/api/users',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nome,email,senha,dept,role})});
+    if(r.status===409){ msg.className='set-msg err'; msg.textContent='Já existe um login com esse e-mail.'; return; }
+    if(!r.ok){ msg.className='set-msg err'; msg.textContent='Não foi possível criar o login.'; return; }
+    msg.className='set-msg ok'; msg.textContent='Login criado: '+email+' ✓';
+    ['us-nome','us-email','us-senha','us-dept'].forEach(id=>document.getElementById(id).value='');
+    loadUsers();
+  }catch(e){ msg.className='set-msg err'; msg.textContent='Falha de conexão.'; }
+}
+
+async function toggleUser(id, ativo){
+  try{
+    const r = await fetch('/api/users',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,ativo:!ativo})});
+    if(r.ok) loadUsers();
+  }catch(e){}
 }
 
 function renderAgendaList(){

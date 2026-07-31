@@ -11,3 +11,4 @@ node_modules/
 !assets/fichas/*.pdf
 !assets/cases/arquivos/*.pdf
 assets/cases/imagens/
+!assets/manuais/*.pdf

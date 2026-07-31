@@ -1,0 +1,10 @@
+Coloque aqui os PDFs dos manuais dos veículos.
+Sugestão de nomes (pra eu associar ao produto certo):
+  joaninha.pdf         -> Joaninha G2
+  formigao-g3.pdf      -> Formigão G3
+  besouro-coletor.pdf  -> Besouro Coletor
+  besouro-coletor-t.pdf-> Besouro Coletor T
+  besouro-l.pdf        -> Besouro L
+  besouro-delivery.pdf -> Besouro Delivery
+  segway.pdf           -> Segway i2 e X2
+(pode manter os nomes originais também; eu identifico e mapeio)
