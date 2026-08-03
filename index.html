@@ -290,6 +290,29 @@ select.fi{appearance:none;cursor:pointer}
 .us-badge.off{background:var(--rl);color:var(--red)}
 .us-toggle{background:none;border:1px solid var(--border);color:var(--text2);border-radius:6px;font-size:11px;padding:4px 9px;cursor:pointer;font-family:inherit;transition:all .15s;flex-shrink:0}
 .us-toggle:hover{border-color:var(--blue-t);color:var(--blue-t)}
+/* Chat InCiclo */
+#chat-fab{position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:50%;background:var(--blue);color:#fff;border:none;font-size:24px;cursor:pointer;z-index:800;box-shadow:0 8px 28px rgba(0,63,222,.4);display:flex;align-items:center;justify-content:center;transition:transform .15s}
+#chat-fab:hover{transform:scale(1.06)}
+#chat-panel{position:fixed;bottom:92px;right:24px;width:380px;max-width:calc(100vw - 32px);height:540px;max-height:calc(100vh - 130px);background:var(--card);border:1px solid var(--border);border-radius:16px;z-index:801;display:none;flex-direction:column;overflow:hidden;box-shadow:0 16px 48px rgba(0,0,0,.55)}
+#chat-panel.on{display:flex}
+.chat-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border);background:var(--bg2)}
+.chat-hd-l{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700}
+.chat-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
+.chat-x{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1}
+.chat-x:hover{color:var(--text)}
+.chat-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:85%;padding:9px 12px;border-radius:12px;font-size:13px;line-height:1.5;white-space:normal;word-wrap:break-word}
+.msg.user{align-self:flex-end;background:var(--blue);color:#fff;border-bottom-right-radius:4px}
+.msg.bot{align-self:flex-start;background:var(--bg2);border:1px solid var(--border);border-bottom-left-radius:4px}
+.msg.bot strong{color:var(--blue-t)}
+.msg.bot ul{margin:6px 0 2px;padding-left:18px}
+.msg.bot li{margin:2px 0}
+.msg.typing{color:var(--muted);font-style:italic}
+.chat-input{display:flex;gap:8px;padding:12px;border-top:1px solid var(--border);align-items:flex-end}
+#chat-in{flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:9px 11px;font-size:13px;font-family:inherit;resize:none;outline:none;max-height:96px}
+#chat-in:focus{border-color:var(--blue-t)}
+#chat-send{background:var(--blue);color:#fff;border:none;border-radius:10px;width:38px;height:38px;font-size:15px;cursor:pointer;flex-shrink:0}
+#chat-send:disabled{opacity:.5;cursor:default}
 .pr-body{padding:14px}
 .pr-cat{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--blue-t);margin-bottom:3px}
 .pr-nm{font-size:14px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px}
@@ -814,6 +837,20 @@ a.btn-dl:hover{border-color:var(--blue-t);color:var(--blue-t)}
     </div>
 
   </main>
+
+  <!-- ═══ CHAT INCICLO (assistente IA) ═══ -->
+  <button id="chat-fab" onclick="toggleChat()" title="Assistente InCiclo" aria-label="Abrir assistente">💬</button>
+  <div id="chat-panel">
+    <div class="chat-hd">
+      <div class="chat-hd-l"><span class="chat-dot"></span> Assistente <strong style="color:var(--blue-t)">InCiclo</strong></div>
+      <button class="chat-x" onclick="toggleChat()" aria-label="Fechar">×</button>
+    </div>
+    <div class="chat-body" id="chat-body"></div>
+    <div class="chat-input">
+      <textarea id="chat-in" rows="1" placeholder="Pergunte algo… ex.: qual contrato usar para locação de patinetes?"></textarea>
+      <button id="chat-send" onclick="chatSend()" aria-label="Enviar">➤</button>
+    </div>
+  </div>
 </div><!-- /app -->
 
 <!-- TOAST -->
@@ -2640,6 +2677,82 @@ async function doChangePassword(){
 /* ═══════════════════════════════════════════════
    INIT
 ═══════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════
+   CHAT INCICLO (assistente IA)
+═══════════════════════════════════════════════ */
+let chatHistory = [];
+let chatBusy = false;
+
+function toggleChat(){
+  const p = document.getElementById('chat-panel');
+  const open = p.classList.toggle('on');
+  if(open){
+    if(chatHistory.length===0){
+      const nome = (CU && CU.nm ? CU.nm.split(' ')[0] : '');
+      addChatMsg('bot', `Oi${nome?', '+nome:''}! 👋 Sou o **InCiclo**, seu assistente. Posso ajudar com produtos, qual **contrato** ou **proposta** usar, cases e processos. Como posso ajudar?`);
+    }
+    setTimeout(()=>document.getElementById('chat-in').focus(), 60);
+  }
+}
+
+function fmtChat(t){
+  let s = t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  s = s.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  const lines = s.split('\n'); let out=''; let inList=false;
+  for(const ln of lines){
+    if(/^\s*[-•]\s+/.test(ln)){
+      if(!inList){ out+='<ul>'; inList=true; }
+      out += '<li>'+ln.replace(/^\s*[-•]\s+/,'')+'</li>';
+    } else {
+      if(inList){ out+='</ul>'; inList=false; }
+      out += (ln.trim()? ln+'<br>' : '');
+    }
+  }
+  if(inList) out+='</ul>';
+  return out.replace(/(<br>)+$/,'');
+}
+
+function addChatMsg(role, text){
+  chatHistory.push({ role: role==='bot'?'assistant':'user', content:text });
+  renderChat();
+}
+
+function renderChat(typing){
+  const body = document.getElementById('chat-body');
+  body.innerHTML = chatHistory.map(m=>{
+    const bot = m.role==='assistant';
+    const html = bot ? fmtChat(m.content) : m.content.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+    return `<div class="msg ${bot?'bot':'user'}">${html}</div>`;
+  }).join('') + (typing?'<div class="msg bot typing">InCiclo está digitando…</div>':'');
+  body.scrollTop = body.scrollHeight;
+}
+
+async function chatSend(){
+  const inp = document.getElementById('chat-in');
+  const text = inp.value.trim();
+  if(!text || chatBusy) return;
+  inp.value=''; inp.style.height='auto';
+  addChatMsg('user', text);
+  chatBusy = true; document.getElementById('chat-send').disabled = true;
+  renderChat(true);
+  try{
+    const r = await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:chatHistory})});
+    const d = await r.json().catch(()=>({}));
+    addChatMsg('bot', d.reply || 'Desculpe, não consegui responder agora.');
+  }catch(e){
+    addChatMsg('bot','Falha de conexão. Tente novamente.');
+  }finally{
+    chatBusy=false; document.getElementById('chat-send').disabled=false;
+    renderChat(); inp.focus();
+  }
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  const inp=document.getElementById('chat-in'); if(!inp) return;
+  inp.addEventListener('keydown',e=>{ if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); chatSend(); }});
+  inp.addEventListener('input',()=>{ inp.style.height='auto'; inp.style.height=Math.min(inp.scrollHeight,96)+'px'; });
+});
+
 (async function init(){
   // Restaura a sessão a partir do cookie httpOnly (validado no servidor por /api/me).
   try{
