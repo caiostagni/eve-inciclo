@@ -257,6 +257,22 @@ body{font-family:'Poppins',-apple-system,sans-serif;background:var(--bg);color:v
 .pr-img img{width:100%;height:100%;object-fit:cover}
 .pr-ficha{display:inline-flex;align-items:center;gap:6px;margin-top:12px;font-size:12px;font-weight:600;color:var(--blue-t);text-decoration:none;border:1px solid var(--border);padding:7px 10px;border-radius:7px;transition:border-color .15s}
 .pr-ficha:hover{border-color:var(--blue-t)}
+.pr-sub{font-size:12px;color:var(--text2);margin:-4px 0 10px;line-height:1.4}
+.pr-lines{display:flex;flex-direction:column;gap:5px;margin-bottom:4px}
+.pr-line{display:flex;justify-content:space-between;align-items:center;font-size:12px;gap:8px}
+.pr-line>span{color:var(--muted)}
+.pr-line>b{font-weight:600;text-align:right}
+.stk-ok{color:var(--green)}
+.stk-low{color:var(--yellow)}
+.stk-out{color:var(--red)}
+.stk-consultar{color:var(--text2)}
+.pp-acc{display:flex;flex-direction:column;gap:8px;max-width:820px}
+.pp-item{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.pp-item>summary{cursor:pointer;padding:12px 16px;font-size:14px;font-weight:600;list-style:none;display:flex;align-items:center;gap:8px}
+.pp-item>summary::-webkit-details-marker{display:none}
+.pp-item>summary:hover{background:var(--bg2)}
+.pp-item[open]>summary{border-bottom:1px solid var(--border)}
+.pp-item-body{padding:6px 16px 14px}
 /* Configurações */
 .set-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;align-items:start}
 .set-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px}
@@ -584,10 +600,7 @@ a.btn-dl:hover{border-color:var(--blue-t);color:var(--blue-t)}
     <button class="nav-it" data-p="journey"><span class="ic">🗺️</span>Jornada de Vendas</button>
     <button class="nav-it" data-p="leads"><span class="ic">🎯</span>Qualificação de Leads</button>
     <button class="nav-it" data-p="objections"><span class="ic">💬</span>Biblioteca de Objeções</button>
-    <button class="nav-it" data-p="price"><span class="ic">💰</span>Política de Preço</button>
     <button class="nav-it" data-p="proposals"><span class="ic">📄</span>Propostas Padrão<span class="nav-demo" title="Dados de demonstração">⚙️</span></button>
-    <div class="nav-sec">Operacional</div>
-    <button class="nav-it" data-p="stock"><span class="ic">📦</span>Estoque<span class="nav-demo" title="Dados de demonstração">⚙️</span></button>
     <div class="nav-sec">Documentos</div>
     <button class="nav-it" data-p="cases"><span class="ic">🏆</span>Cases</button>
     <button class="nav-it" data-p="contracts"><span class="ic">📋</span>Contratos<span class="nav-demo" title="Dados de demonstração">⚙️</span></button>
@@ -663,23 +676,12 @@ a.btn-dl:hover{border-color:var(--blue-t);color:var(--blue-t)}
     <!-- PRODUTOS -->
     <div id="pg-products" class="pg">
       <div class="pg-title">Produtos</div>
-      <div class="pg-sub">Catálogo completo de veículos elétricos CicloWay</div>
+      <div class="pg-sub">Catálogo, estoque e preços dos veículos elétricos CicloWay — centralizado</div>
       <div class="frow" id="prod-row"></div>
       <div class="prodgrid" id="prodgrid"></div>
-    </div>
 
-    <!-- ESTOQUE -->
-    <div id="pg-stock" class="pg">
-      <div class="pg-title">Estoque</div>
-      <div class="pg-sub">Posição atual de veículos disponíveis — atualizado Jun/2026</div>
-      <div class="stk-sum" id="stk-sum"></div>
-      <div class="frow" id="stk-filter"></div>
-      <div class="stk-wrap">
-        <table class="stk-table">
-          <thead><tr><th>Modelo</th><th>Categoria</th><th>Qtd disponível</th><th>Localização</th><th>Status</th></tr></thead>
-          <tbody id="stk-body"></tbody>
-        </table>
-      </div>
+      <div class="upc-title" style="margin:28px 0 12px">💼 Política comercial e de preços</div>
+      <div class="pp-acc" id="prod-policy"></div>
     </div>
 
     <!-- QUALIFICAÇÃO DE LEADS -->
@@ -719,16 +721,6 @@ a.btn-dl:hover{border-color:var(--blue-t);color:var(--blue-t)}
       <div class="jrn-pipe" id="jrn-pipe"></div>
       <div class="upc-title" style="margin-bottom:12px">Métricas de Conversão</div>
       <div class="j-conv" id="j-conv"></div>
-    </div>
-
-    <!-- POLÍTICA DE PREÇO -->
-    <div id="pg-price" class="pg">
-      <div class="pg-title">Política de Preço</div>
-      <div class="pg-sub">Tabelas, condições de pagamento e regras de desconto — uso interno</div>
-      <div class="pp-layout">
-        <nav class="pp-toc" id="pp-toc"></nav>
-        <div class="pp-doc" id="pp-doc"></div>
-      </div>
     </div>
 
     <!-- DASHBOARD KPIs -->
@@ -1128,22 +1120,40 @@ const PRACTICES = [
 <p>Qualquer acidente ou quase-acidente deve ser reportado imediatamente ao gestor direto e à Sandra (RH). Registro no eSocial é obrigatório. Não há penalidade por reportar — omitir é que cria problemas.</p>`},
 ];
 
+// Linha oficial CicloWay (8 veículos). Estoque e preço centralizados aqui.
 const PRODUCTS = [
-  {id:'sn100',cat:'Patinetes',emoji:'🛴',nm:'Patinete SN-100',price:'R$ 2.890',specs:{Velocidade:'25 km/h',Autonomia:'30 km',Carga:'120 kg',Bateria:'4-5h'},new:false},
-  {id:'sn200',cat:'Patinetes',emoji:'🛴',nm:'Patinete SN-200',price:'R$ 3.490',specs:{Velocidade:'32 km/h',Autonomia:'47 km',Carga:'120 kg',Bateria:'5-6h'},new:false},
-  {id:'si2',  cat:'Segway',  emoji:'🤖',nm:'Segway i2',       price:'Consultar',specs:{Velocidade:'20 km/h',Autonomia:'40 km',Carga:'120 kg',Bateria:'73,3V 12Ah'},img:'assets/produtos/si2.jpg',ficha:'assets/fichas/segway-i2.pdf',new:false},
-  {id:'sx2',  cat:'Segway',  emoji:'🤖',nm:'Segway X2',       price:'Consultar',specs:{Velocidade:'19 km/h',Autonomia:'20 km',Carga:'120 kg',Bateria:'73,3V 12Ah'},img:'assets/produtos/sx2.jpg',ficha:'assets/fichas/segway-x2.pdf',new:false},
-  {id:'c3',   cat:'Triciclos',emoji:'🚲',nm:'Triciclo C-3',   price:'Consultar',specs:{Velocidade:'25 km/h',Autonomia:'30 km',Carga:'200 kg',Bateria:'6h'},new:false},
-  {id:'joan', cat:'Triciclos',emoji:'🚕',nm:'Joaninha G2',     price:'Consultar',specs:{Velocidade:'40 km/h',Autonomia:'80 km',Carga:'350 kg',Bateria:'60V 50Ah'},img:'assets/produtos/joan.jpg',ficha:'assets/fichas/joaninha-g2.pdf',new:false},
-  {id:'bes',  cat:'Triciclos',emoji:'🐛',nm:'Besouro Coletor', price:'Consultar',specs:{Velocidade:'45 km/h',Autonomia:'120 km',Carga:'1500 kg',Bateria:'72V 230Ah'},img:'assets/produtos/bes.jpg',ficha:'assets/fichas/besouro-coletor.pdf',new:false},
-  {id:'bescolt',cat:'Triciclos',emoji:'🐛',nm:'Besouro Coletor T',price:'Consultar',specs:{Velocidade:'45 km/h',Autonomia:'120 km',Carga:'1500 kg',Bateria:'72V 230Ah'},img:'assets/produtos/bescolt.jpg',ficha:'assets/fichas/besouro-coletor-t.pdf',new:false},
-  {id:'besl', cat:'Triciclos',emoji:'🐛',nm:'Besouro L',       price:'Consultar',specs:{Velocidade:'45 km/h',Autonomia:'120 km',Carga:'1200 kg',Bateria:'72V 230Ah'},img:'assets/produtos/besl.jpg',ficha:'assets/fichas/besouro-l.pdf',new:false},
-  {id:'besdel',cat:'Triciclos',emoji:'📦',nm:'Besouro Delivery',price:'Consultar',specs:{Velocidade:'45 km/h',Autonomia:'150 km',Carga:'1300 kg',Bateria:'72V 230Ah'},img:'assets/produtos/besdel.jpg',ficha:'assets/fichas/besouro-delivery.pdf',new:true},
-  {id:'fg3',  cat:'Triciclos',emoji:'🚛',nm:'Formigão G3',     price:'Consultar',specs:{Velocidade:'55 km/h',Autonomia:'100 km',Carga:'250 kg',Bateria:'72V 120Ah'},img:'assets/produtos/fg3.jpg',ficha:'assets/fichas/formigao-g3.pdf',new:true},
-  {id:'fbau', cat:'Triciclos',emoji:'📦',nm:'Formigão Baú',    price:'Consultar',specs:{Velocidade:'25 km/h',Autonomia:'50 km',Carga:'500 kg',Bateria:'8h'},new:false},
-  {id:'gir',  cat:'Triciclos',emoji:'🦒',nm:'Girafa',          price:'Consultar',specs:{Velocidade:'25 km/h',Autonomia:'45 km',Carga:'350 kg',Bateria:'7h'},new:false},
-  {id:'moto', cat:'Motos',   emoji:'🏍️',nm:'Mini Max Moto',    price:'Consultar',specs:{Velocidade:'45 km/h',Autonomia:'70 km',Carga:'150 kg',Bateria:'6h'},new:false},
-  {id:'fiat', cat:'Especiais',emoji:'⭐',nm:'FIAT Elétrico Leve',price:'Consultar',specs:{Velocidade:'45 km/h',Autonomia:'80 km',Carga:'200 kg',Bateria:'7h'},new:true},
+  {id:'bes', cat:'Coleta', emoji:'🐛', nm:'Besouro Coletor', sub:'Caçamba basculante de 3,8 m³',
+   specs:{Velocidade:'45 km/h',Autonomia:'120 km',Carga:'1.500 kg',Bateria:'72V 230Ah'},
+   img:'assets/produtos/bes.jpg', ficha:'assets/fichas/besouro-coletor.pdf',
+   locacao:'R$ 2.100/mês', venda:'Consultar', estoque:{qtd:4,loc:'SP — Granja Viana',status:'ok'}, new:false},
+  {id:'besl', cat:'Coleta', emoji:'♻️', nm:'Besouro Eco L', sub:'Coletor com elevador de contêiner',
+   specs:{Velocidade:'45 km/h',Autonomia:'120 km',Carga:'1.200 kg',Bateria:'72V 230Ah'},
+   img:'assets/produtos/besl.jpg', ficha:'assets/fichas/besouro-l.pdf',
+   locacao:'Consultar', venda:'Consultar', estoque:{qtd:null,loc:'—',status:'consultar'}, new:false},
+  {id:'bescolt', cat:'Coleta', emoji:'♻️', nm:'Besouro Eco T', sub:'Coletor com elevador e patolas de apoio',
+   specs:{Velocidade:'45 km/h',Autonomia:'120 km',Carga:'1.500 kg',Bateria:'72V 230Ah'},
+   img:'assets/produtos/bescolt.jpg', ficha:'assets/fichas/besouro-coletor-t.pdf',
+   locacao:'Consultar', venda:'Consultar', estoque:{qtd:null,loc:'—',status:'consultar'}, new:false},
+  {id:'besdel', cat:'Carga', emoji:'📦', nm:'Besouro Delivery', sub:'Baú fechado de 3,7 m³ para última milha',
+   specs:{Velocidade:'45 km/h',Autonomia:'150 km',Carga:'1.300 kg',Bateria:'72V 230Ah'},
+   img:'assets/produtos/besdel.jpg', ficha:'assets/fichas/besouro-delivery.pdf',
+   locacao:'Consultar', venda:'Consultar', estoque:{qtd:null,loc:'—',status:'consultar'}, new:true},
+  {id:'fg3', cat:'Carga', emoji:'🚛', nm:'Formigão G3', sub:'Compacto de 2,75 m e 55 km/h',
+   specs:{Velocidade:'55 km/h',Autonomia:'100 km',Carga:'250 kg',Bateria:'72V 120Ah'},
+   img:'assets/produtos/fg3.jpg', ficha:'assets/fichas/formigao-g3.pdf',
+   locacao:'R$ 2.400/mês', venda:'Consultar', estoque:{qtd:1,loc:'SP — Granja Viana',status:'low'}, new:true},
+  {id:'joan', cat:'Passageiros', emoji:'🚕', nm:'Joaninha G2', sub:'Três passageiros, cabine fechada',
+   specs:{Velocidade:'40 km/h',Autonomia:'80 km',Passageiros:'3 pessoas',Carga:'350 kg'},
+   img:'assets/produtos/joan.jpg', ficha:'assets/fichas/joaninha-g2.pdf',
+   locacao:'R$ 1.900/mês', venda:'Consultar', estoque:{qtd:2,loc:'SP — Granja Viana',status:'low'}, new:false},
+  {id:'si2', cat:'Mobilidade leve', emoji:'🛴', nm:'Segway i2', sub:'Rondas e segurança em áreas internas',
+   specs:{Velocidade:'20 km/h',Autonomia:'40 km',Carga:'120 kg',Bateria:'73,3V 12Ah'},
+   img:'assets/produtos/si2.jpg', ficha:'assets/fichas/segway-i2.pdf',
+   locacao:'R$ 950/mês', venda:'Consultar', estoque:{qtd:2,loc:'SP — Vila Leopoldina',status:'low'}, new:false},
+  {id:'sx2', cat:'Mobilidade leve', emoji:'🛴', nm:'Segway X2', sub:'Rondas externas e piso irregular',
+   specs:{Velocidade:'19 km/h',Autonomia:'20 km',Carga:'120 kg',Bateria:'73,3V 12Ah'},
+   img:'assets/produtos/sx2.jpg', ficha:'assets/fichas/segway-x2.pdf',
+   locacao:'R$ 1.100/mês', venda:'Consultar', estoque:{qtd:0,loc:'—',status:'out'}, new:false},
 ];
 
 // Aniversariantes (mês/dia) — fonte: planilha ANIVERSARIANTES 2026 (CLTs + PJs)
@@ -1471,11 +1481,9 @@ function showApp(){
   initOnboarding();
   initPractices();
   initProducts();
-  initStock();
   initLeads();
   initObjections();
   initJourney();
-  initPrice();
   initKPIs();
   initCases();
   initContracts();
@@ -1898,6 +1906,18 @@ function initProducts(){
     row.appendChild(b);
   });
   renderProducts();
+  renderProdPolicy();
+}
+
+function renderProdPolicy(){
+  const box = document.getElementById('prod-policy');
+  if(!box) return;
+  const secs = PRICE_SECTIONS.filter(s=>s.id!=='tabela');
+  box.innerHTML = secs.map((s,i)=>`
+    <details class="pp-item"${i===0?' open':''}>
+      <summary>${s.ic} ${s.nm}</summary>
+      <div class="pp-item-body">${s.body}</div>
+    </details>`).join('');
 }
 
 function renderProducts(){
@@ -1908,16 +1928,25 @@ function renderProducts(){
     const card = document.createElement('div');
     card.className = 'prcard';
     const specsHtml = Object.entries(p.specs).map(([k,v])=>`<div class="spec"><div class="sp-l">${k}</div><div class="sp-v">${v}</div></div>`).join('');
-    const isConsult = p.price==='Consultar';
     const imgHtml = p.img ? `<img src="${p.img}" alt="${p.nm}" loading="lazy">` : p.emoji;
     const fichaHtml = p.ficha ? `<a class="pr-ficha" href="${p.ficha}" target="_blank" rel="noopener">📄 Baixar ficha técnica</a>` : '';
+    const e = p.estoque || {status:'consultar'};
+    const stCls = {ok:'stk-ok',low:'stk-low',out:'stk-out',consultar:'stk-consultar'}[e.status] || 'stk-consultar';
+    const estoqueTxt = e.status==='out' ? 'Indisponível'
+      : e.status==='consultar' ? 'Consultar'
+      : `${e.qtd} em estoque${e.loc && e.loc!=='—' ? ' · '+e.loc : ''}`;
     card.innerHTML = `
       <div class="pr-img">${imgHtml}</div>
       <div class="pr-body">
         <div class="pr-cat">${p.cat}</div>
         <div class="pr-nm">${p.nm}${p.new?'<span class="pr-new">Novo</span>':''}</div>
+        ${p.sub?`<div class="pr-sub">${p.sub}</div>`:''}
         <div class="pr-specs">${specsHtml}</div>
-        <div class="pr-price ${isConsult?'consult':''}">${p.price}</div>
+        <div class="pr-lines">
+          <div class="pr-line"><span>💰 Locação/mês</span><b>${p.locacao||'Consultar'}</b></div>
+          <div class="pr-line"><span>💵 Venda</span><b>${p.venda||'Consultar'}</b></div>
+          <div class="pr-line"><span>📦 Estoque</span><b class="${stCls}">${estoqueTxt}</b></div>
+        </div>
         ${fichaHtml}
       </div>`;
     grid.appendChild(card);
