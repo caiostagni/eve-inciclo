@@ -306,6 +306,7 @@ select.fi{appearance:none;cursor:pointer}
 .us-badge.off{background:var(--rl);color:var(--red)}
 .us-toggle{background:none;border:1px solid var(--border);color:var(--text2);border-radius:6px;font-size:11px;padding:4px 9px;cursor:pointer;font-family:inherit;transition:all .15s;flex-shrink:0}
 .us-toggle:hover{border-color:var(--blue-t);color:var(--blue-t)}
+.us-actions{display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end}
 /* Chat InCiclo */
 #chat-fab{position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:50%;background:var(--blue);color:#fff;border:none;font-size:24px;cursor:pointer;z-index:800;box-shadow:0 8px 28px rgba(0,63,222,.4);display:flex;align-items:center;justify-content:center;transition:transform .15s}
 #chat-fab:hover{transform:scale(1.06)}
@@ -2599,12 +2600,14 @@ function initSettings(){
   if(isAdmin) loadUsers();
 }
 
+let usersCache = [];
 async function loadUsers(){
   const box = document.getElementById('us-list'); if(!box) return;
   try{
     const r = await fetch('/api/users');
     if(!r.ok){ box.innerHTML='<div class="ag-empty">Sem permissão ou erro ao carregar.</div>'; return; }
     const { users } = await r.json();
+    usersCache = users;
     box.innerHTML = users.map(u=>`
       <div class="us-item">
         <div class="us-av">${u.iniciais||'?'}</div>
@@ -2614,7 +2617,10 @@ async function loadUsers(){
             ${!u.ativo?'<span class="us-badge off">inativo</span>':''}</div>
           <div class="us-em">${u.email}${u.dept?' · '+u.dept:''}</div>
         </div>
-        <button class="us-toggle" onclick="toggleUser('${u.id}',${u.ativo})">${u.ativo?'Desativar':'Ativar'}</button>
+        <div class="us-actions">
+          <button class="us-toggle" onclick="resetUserPw('${u.id}')">🔑 Resetar senha</button>
+          <button class="us-toggle" onclick="toggleUser('${u.id}',${u.ativo})">${u.ativo?'Desativar':'Ativar'}</button>
+        </div>
       </div>`).join('');
   }catch(e){ box.innerHTML='<div class="ag-empty">Falha de conexão.</div>'; }
 }
@@ -2643,6 +2649,19 @@ async function toggleUser(id, ativo){
     const r = await fetch('/api/users',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,ativo:!ativo})});
     if(r.ok) loadUsers();
   }catch(e){}
+}
+
+async function resetUserPw(id){
+  const u = usersCache.find(x=>x.id===id) || {nome:'usuário'};
+  if(!confirm('Resetar a senha de '+u.nome+'?\nUma senha temporária será gerada — você a repassa e a pessoa troca depois em Configurações → Alterar senha.')) return;
+  const temp = 'CW' + Math.random().toString(36).slice(2,7) + Math.floor(10+Math.random()*90); // ex.: CW7f9k42
+  const msg = document.getElementById('us-msg'); msg.className='set-msg'; msg.textContent='';
+  try{
+    const r = await fetch('/api/users',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({id, senha:temp})});
+    if(!r.ok){ msg.className='set-msg err'; msg.textContent='Não foi possível resetar a senha.'; return; }
+    msg.className='set-msg ok';
+    msg.innerHTML = `🔑 Nova senha de <b>${u.nome}</b>: <b style="user-select:all">${temp}</b> — copie e repasse (a pessoa troca no primeiro acesso).`;
+  }catch(e){ msg.className='set-msg err'; msg.textContent='Falha de conexão.'; }
 }
 
 function renderAgendaList(){

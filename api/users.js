@@ -47,6 +47,12 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'cannot_change_self' });
       if (typeof b.ativo === 'boolean') await sql`update users set ativo = ${b.ativo} where id = ${id}`;
       if (['admin', 'employee'].includes(b.role)) await sql`update users set role = ${b.role} where id = ${id}`;
+      // reset de senha (admin define nova senha para o usuário)
+      if (typeof b.senha === 'string' && b.senha) {
+        if (b.senha.length < 6) return res.status(400).json({ error: 'weak_password' });
+        const hash = await bcrypt.hash(b.senha, 10);
+        await sql`update users set password_hash = ${hash} where id = ${id}`;
+      }
       return res.status(200).json({ ok: true });
     }
 
