@@ -1,0 +1,49 @@
+tipo: "Locação para Pessoa Física"
+quando_usar: "Locação de veículos para uso pessoal (pessoa física), com plano e fidelidade."
+cicloway_papel: LOCADORA
+campos:
+  - chave: LOCATARIO_NOME
+    label: "Nome completo do locatário"
+    grupo: "Locatário"
+  - chave: LOCATARIO_CPF
+    label: "CPF do locatário"
+    grupo: "Locatário"
+  - chave: LOCATARIO_RG
+    label: "RG do locatário"
+    grupo: "Locatário"
+  - chave: LOCATARIO_ENDERECO
+    label: "Endereço do locatário"
+    grupo: "Locatário"
+  - chave: LOCATARIO_TELEFONE
+    label: "Telefone do locatário"
+    grupo: "Locatário"
+  - chave: LOCATARIO_EMAIL
+    label: "E-mail do locatário"
+    grupo: "Locatário"
+  - chave: MODELO
+    label: "Modelo do veículo"
+    grupo: "Objeto"
+  - chave: QTD
+    label: "Quantidade"
+    grupo: "Objeto"
+    default: "1"
+  - chave: PLANO
+    label: "Plano contratado"
+    grupo: "Plano"
+  - chave: VALOR_MENSAL
+    label: "Valor mensal (R$)"
+    grupo: "Plano"
+  - chave: VIGENCIA
+    label: "Prazo/vigência"
+    grupo: "Plano"
+  - chave: DIA_VENCIMENTO
+    label: "Dia de vencimento"
+    grupo: "Plano"
+    default: "10"
+  - chave: OUTROS_ITENS
+    label: "Outros itens entregues (descrever)"
+    grupo: "Itens"
+    default: ""
+  - chave: PRAZO_FIDELIDADE
+    label: "Prazo de fidelidade (meses)"
+    grupo: "Cancelamento"

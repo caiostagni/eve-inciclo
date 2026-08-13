@@ -1,0 +1,62 @@
+TEMPLATE 06 – CONTRATO DE COMPRA E VENDA
+
+INSTRUMENTO PARTICULAR DE COMPRA E VENDA
+
+VENDEDOR
+
+CICLOWAY INDÚSTRIA E COMÉRCIO DE VEÍCULOS ELÉTRICOS LTDA
+
+COMPRADOR
+
+Razão Social/Nome: [COMPRADOR]
+
+CPF/CNPJ: [CPF/CNPJ]
+
+Endereço: [ENDEREÇO]
+
+⸻
+
+OBJETO
+
+Aquisição de:
+
+* Quantidade: [QUANTIDADE]
+* Modelo: [MODELO]
+
+⸻
+
+VALOR
+
+Valor Unitário:
+
+R$ [VALOR UNITÁRIO]
+
+Valor Total:
+
+R$ [VALOR TOTAL]
+
+⸻
+
+CONDIÇÕES DE ENTREGA
+
+☐ Veículo Novo
+
+☐ Veículo Seminovo
+
+☐ Emplacamento em nome do comprador
+
+☐ Sem emplacamento
+
+⸻
+
+ASSINATURAS
+
+São Paulo, [DATA]
+
+⸻
+
+CICLOWAY
+
+⸻
+
+COMPRADOR

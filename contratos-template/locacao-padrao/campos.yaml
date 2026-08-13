@@ -1,0 +1,43 @@
+tipo: "Locação Padrão (Bem Móvel)"
+quando_usar: "Locação padrão de veículos/equipamentos para empresas (B2B), valor mensal e prazo."
+cicloway_papel: LOCADORA
+campos:
+  - chave: LOCATARIA_RAZAO_SOCIAL
+    label: "Razão social da locatária"
+    grupo: "Locatária"
+  - chave: LOCATARIA_CNPJ
+    label: "CNPJ da locatária"
+    grupo: "Locatária"
+  - chave: ENDERECO_ATIVACAO
+    label: "Endereço do local de ativação"
+    grupo: "Ativação"
+  - chave: LOCATARIA_ENDERECO
+    label: "Endereço da locatária"
+    grupo: "Locatária"
+  - chave: LOCATARIA_CIDADE
+    label: "Cidade da locatária"
+    grupo: "Locatária"
+  - chave: LOCATARIA_ESTADO
+    label: "Estado (UF) da locatária"
+    grupo: "Locatária"
+  - chave: VALOR_MENSAL
+    label: "Valor mensal (R$)"
+    grupo: "Valores"
+  - chave: VALOR_FRETE
+    label: "Valor do frete (R$)"
+    grupo: "Valores"
+    default: ""
+  - chave: VALOR_TOTAL
+    label: "Valor total (R$)"
+    grupo: "Valores"
+  - chave: DIA_VENCIMENTO
+    label: "Dia de vencimento"
+    grupo: "Valores"
+    default: "10"
+  - chave: PRAZO_MESES
+    label: "Prazo (meses)"
+    grupo: "Prazo"
+    default: "12"
+  - chave: VALOR_VEICULO
+    label: "Valor de ressarcimento por perda total (R$)"
+    grupo: "Ressarcimento"

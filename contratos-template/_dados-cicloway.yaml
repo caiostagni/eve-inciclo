@@ -1,0 +1,13 @@
+# Dados fixos da CicloWay — preenchidos automaticamente em TODO contrato gerado.
+# (Os templates atuais já trazem os dados da CicloWay no texto; estes valores
+#  ficam disponíveis para modelos que usem placeholders {{CICLOWAY_*}}.)
+# Campos com PREENCHER ainda precisam ser confirmados.
+
+CICLOWAY_RAZAO_SOCIAL: "CICLOWAY INDÚSTRIA E COMÉRCIO DE VEÍCULOS ELÉTRICOS LTDA"
+CICLOWAY_CNPJ: "07.888.840/0001-81"
+CICLOWAY_ENDERECO: "Rua Heliópolis, nº 121, Vila Hamburguesa, São Paulo/SP, CEP 05318-010"
+CICLOWAY_REPRESENTANTE: "João Hannud"
+CICLOWAY_REP_CARGO: "Diretor"
+CICLOWAY_REP_CPF: "[PREENCHER — CPF de João Hannud]"
+CICLOWAY_EMAIL: "[PREENCHER — e-mail para notificações]"
+CICLOWAY_FORO: "São Paulo, Estado de São Paulo"

@@ -1,0 +1,7 @@
+# Modelos .docx originais dos contratos: usados só para gerar lib/contract-templates-data.js
+# (via npm run build-templates). O runtime usa o módulo base64, então não precisam ir ao
+# deploy — e não devem ficar acessíveis publicamente.
+contratos-template/
+
+# Scripts de manutenção (rodam só localmente)
+scripts/

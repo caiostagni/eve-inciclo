@@ -280,6 +280,15 @@ body{font-family:'Poppins',-apple-system,sans-serif;background:var(--bg);color:v
 .gen-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:8px}
 .gen-fields .fg{margin-bottom:0}
 .gen-fields .gen-full{grid-column:1/-1}
+.gen-grp{grid-column:1/-1;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--blue-t);margin:6px 0 -2px}
+.gen-quando{font-size:12px;color:var(--text2);margin:-4px 0 14px;font-style:italic}
+.gen-legal{font-size:11px;color:var(--text2);margin-top:12px;line-height:1.5}
+.gen-checks{margin:4px 0 8px}
+.gen-cbgrp{margin:10px 0}
+.gen-cbgrp>.fl{display:block;margin-bottom:6px}
+.gen-opts{display:flex;flex-wrap:wrap;gap:8px 16px}
+.gen-opt{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--text);cursor:pointer}
+.gen-opt input{accent-color:var(--blue-t);width:15px;height:15px}
 textarea.fi{resize:vertical;min-height:56px;font-family:inherit}
 @media(max-width:560px){.gen-fields{grid-template-columns:1fr}}
 /* Funil de vendas (RD Station) */
@@ -794,17 +803,20 @@ a.btn-dl:hover{border-color:var(--blue-t);color:var(--blue-t)}
     <!-- CONTRATOS -->
     <div id="pg-contracts" class="pg">
       <div class="pg-title">Contratos</div>
-      <div class="pg-sub">Gere a ficha de contratação preenchida e baixe os modelos — revise sempre com o jurídico</div>
+      <div class="pg-sub">Gere o contrato oficial da CicloWay já preenchido (.docx) — revise sempre com o jurídico antes de assinar</div>
 
       <div class="gen-card">
-        <div class="gen-h">🧾 Gerar ficha de contratação</div>
-        <div class="gen-sub">Escolha o tipo, preencha os dados e baixe o documento (.docx) com tudo organizado para o contrato. Em breve o assistente InCiclo também fará isso conversando.</div>
-        <div class="fg" style="max-width:440px"><label class="fl">Tipo de contrato</label>
+        <div class="gen-h">🧾 Gerar contrato preenchido</div>
+        <div class="gen-sub">Escolha o modelo, preencha os dados do caso e baixe o contrato oficial (.docx) pronto para revisão. Os dados da CicloWay e a data entram automaticamente. Em breve o assistente InCiclo também fará isso conversando.</div>
+        <div class="fg" style="max-width:440px"><label class="fl">Modelo de contrato</label>
           <select id="gen-tipo" class="fi" onchange="renderGenForm()"><option value="">Selecione…</option></select>
         </div>
+        <div id="gen-quando" class="gen-quando"></div>
         <div id="gen-fields" class="gen-fields"></div>
+        <div id="gen-checks"></div>
         <div class="set-msg" id="gen-msg"></div>
-        <button class="set-btn" id="gen-btn" style="max-width:280px;display:none" onclick="generateDoc()">⬇ Gerar documento (.docx)</button>
+        <button class="set-btn" id="gen-btn" style="max-width:280px;display:none" onclick="generateDoc()">⬇ Gerar contrato (.docx)</button>
+        <div class="gen-legal">⚠️ Documento gerado como <b>rascunho</b> a partir do modelo oficial. Revise (idealmente com o jurídico) antes de assinar.</div>
       </div>
 
       <div class="upc-title" style="margin:26px 0 12px">📄 Modelos para download</div>
@@ -2672,70 +2684,41 @@ function makeDLCards(data, containerId){
 function initCases(){ makeDLCards(CASES,'cases-grid'); }
 function initContracts(){ makeDLCards(CONTRACTS,'contracts-grid'); initContractsGen(); }
 
-/* ═══ GERADOR DE FICHA DE CONTRATAÇÃO ═══ */
-const CONTRACT_FORMS = [
-  {id:'locacao-leves', nm:'Locação — Patinetes e Segways (leves)', fields:[
-    {key:'contratante',label:'Contratante (razão social)',req:true},
-    {key:'cnpj',label:'CNPJ',req:true,ph:'00.000.000/0000-00'},
-    {key:'endereco',label:'Endereço de operação',req:true},
-    {key:'responsavel',label:'Responsável / contato',req:true},
-    {key:'modelos',label:'Modelos e quantidades',req:true,ph:'Ex.: 5× Segway i2, 3× Formigão G3',full:true},
-    {key:'prazo',label:'Prazo (meses)',req:true,ph:'Mín. 12'},
-    {key:'valor',label:'Valor de locação (R$/mês)'},
-    {key:'inicio',label:'Início previsto'},
-    {key:'obs',label:'Observações',area:true,full:true},
-  ]},
-  {id:'locacao-pesados', nm:'Locação — Triciclos e veículos pesados', fields:[
-    {key:'contratante',label:'Contratante (razão social)',req:true},
-    {key:'cnpj',label:'CNPJ',req:true,ph:'00.000.000/0000-00'},
-    {key:'local',label:'Local de operação',req:true},
-    {key:'responsavel',label:'Responsável / contato',req:true},
-    {key:'modelos',label:'Modelos e quantidades',req:true,ph:'Ex.: 4× Besouro Coletor',full:true},
-    {key:'prazo',label:'Prazo (meses)',req:true,ph:'Mín. 12'},
-    {key:'valor',label:'Valor de locação (R$/mês)'},
-    {key:'inicio',label:'Início previsto'},
-    {key:'obs',label:'Observações (operação, SLA, reserva)',area:true,full:true},
-  ]},
-  {id:'venda-b2b', nm:'Venda direta — Frota B2B', fields:[
-    {key:'contratante',label:'Comprador (razão social)',req:true},
-    {key:'cnpj',label:'CNPJ',req:true,ph:'00.000.000/0000-00'},
-    {key:'modelos',label:'Modelos e quantidades',req:true,full:true},
-    {key:'valor',label:'Valor total (R$)'},
-    {key:'pagamento',label:'Condição de pagamento',req:true,ph:'Ex.: 6x boleto sem juros'},
-    {key:'garantia',label:'Garantia',ph:'Ex.: 12 meses + estendida'},
-    {key:'entrega',label:'Prazo de entrega'},
-    {key:'obs',label:'Observações',area:true,full:true},
-  ]},
-  {id:'publico', nm:'Contrato público — Prefeituras / órgãos', fields:[
-    {key:'orgao',label:'Órgão / ente público',req:true},
-    {key:'cnpj',label:'CNPJ do órgão',req:true},
-    {key:'processo',label:'Nº do processo',req:true,ph:'Licitação ou dispensa'},
-    {key:'modalidade',label:'Modalidade',req:true,ph:'Pregão, dispensa, etc.'},
-    {key:'empenho',label:'Dotação / empenho'},
-    {key:'objeto',label:'Objeto',req:true,area:true,full:true},
-    {key:'vigencia',label:'Prazo de vigência',req:true},
-    {key:'fiscal',label:'Fiscal do contrato'},
-    {key:'obs',label:'Observações',area:true,full:true},
-  ]},
-];
+/* ═══ GERADOR DE CONTRATO OFICIAL ═══ */
+let CONTRACT_FORMS = [];  // carregado do backend (GET /api/generate-doc) — fonte única dos campos
 
-function initContractsGen(){
+async function initContractsGen(){
   const sel=document.getElementById('gen-tipo'); if(!sel) return;
+  if(!CONTRACT_FORMS.length){
+    try{ const r=await fetch('/api/generate-doc'); const d=await r.json().catch(()=>({})); CONTRACT_FORMS=(d&&d.contracts)||[]; }
+    catch(e){ CONTRACT_FORMS=[]; }
+  }
   sel.innerHTML='<option value="">Selecione…</option>'+CONTRACT_FORMS.map(t=>`<option value="${t.id}">${t.nm}</option>`).join('');
 }
 
 function renderGenForm(){
   const id=document.getElementById('gen-tipo').value;
-  const box=document.getElementById('gen-fields'), btn=document.getElementById('gen-btn'), msg=document.getElementById('gen-msg');
+  const box=document.getElementById('gen-fields'), checks=document.getElementById('gen-checks'),
+        btn=document.getElementById('gen-btn'), msg=document.getElementById('gen-msg'), quando=document.getElementById('gen-quando');
   msg.textContent=''; msg.className='set-msg';
   const t=CONTRACT_FORMS.find(x=>x.id===id);
-  if(!t){ box.innerHTML=''; btn.style.display='none'; return; }
-  box.innerHTML=t.fields.map(f=>{
-    const inp = f.area
-      ? `<textarea class="fi" id="gf-${f.key}" rows="2" placeholder="${f.ph||''}"></textarea>`
-      : `<input class="fi" id="gf-${f.key}" placeholder="${f.ph||''}"/>`;
-    return `<div class="fg${f.full?' gen-full':''}"><label class="fl">${f.label}${f.req?' *':''}</label>${inp}</div>`;
-  }).join('');
+  if(!t){ box.innerHTML=''; checks.innerHTML=''; quando.textContent=''; btn.style.display='none'; return; }
+  quando.textContent=t.quando_usar||'';
+  let html='', grp=null;
+  t.fields.forEach(f=>{
+    if(f.grupo && f.grupo!==grp){ grp=f.grupo; html+=`<div class="gen-grp">${f.grupo}</div>`; }
+    const req = f.default===undefined;
+    const val = (f.default!==undefined && f.default!=='') ? ` value="${f.default}"` : '';
+    html+=`<div class="fg${f.full?' gen-full':''}"><label class="fl">${f.label}${req?' *':''}</label><input class="fi" id="gf-${f.key}" placeholder="${f.ph||''}"${val}/></div>`;
+  });
+  box.innerHTML=html;
+  if(t.checkboxes && t.checkboxes.groups){
+    checks.innerHTML=t.checkboxes.groups.map((g,gi)=>{
+      const type=g.type==='radio'?'radio':'checkbox';
+      const opts=g.options.map(o=>`<label class="gen-opt"><input type="${type}" name="cbg-${id}-${gi}" value="${o.i}"/> ${o.label}</label>`).join('');
+      return `<div class="gen-cbgrp"><label class="fl">${g.label}</label><div class="gen-opts">${opts}</div></div>`;
+    }).join('');
+  } else { checks.innerHTML=''; }
   btn.style.display='';
 }
 
@@ -2744,16 +2727,17 @@ async function generateDoc(){
   const t=CONTRACT_FORMS.find(x=>x.id===id); if(!t) return;
   const msg=document.getElementById('gen-msg'); msg.className='set-msg'; msg.textContent='';
   const fields={}, faltando=[];
-  t.fields.forEach(f=>{ const v=(document.getElementById('gf-'+f.key).value||'').trim(); fields[f.key]=v; if(f.req && !v) faltando.push(f.label); });
+  t.fields.forEach(f=>{ const v=(document.getElementById('gf-'+f.key).value||'').trim(); fields[f.key]=v; if(f.default===undefined && !v) faltando.push(f.label); });
   if(faltando.length){ msg.className='set-msg err'; msg.textContent='Preencha os obrigatórios: '+faltando.join(', '); return; }
+  const marks=[...document.querySelectorAll('#gen-checks input:checked')].map(el=>parseInt(el.value,10)).filter(n=>!isNaN(n));
   const btn=document.getElementById('gen-btn'); btn.disabled=true; const old=btn.textContent; btn.textContent='Gerando…';
   try{
-    const r=await fetch('/api/generate-doc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tipo:id,fields,autor:(CU&&CU.nm)||''})});
-    if(!r.ok){ msg.className='set-msg err'; msg.textContent='Não foi possível gerar o documento.'; return; }
+    const r=await fetch('/api/generate-doc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kind:'contrato-oficial',tipo:id,fields,marks,autor:(CU&&CU.nm)||''})});
+    if(!r.ok){ msg.className='set-msg err'; msg.textContent='Não foi possível gerar o contrato.'; return; }
     const blob=await r.blob();
     const url=URL.createObjectURL(blob);
-    const a=document.createElement('a'); a.href=url; a.download='ficha-contratacao-'+id+'.docx'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-    msg.className='set-msg ok'; msg.textContent='Documento gerado ✓ (baixado)';
+    const a=document.createElement('a'); a.href=url; a.download='contrato-'+id+'.docx'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    msg.className='set-msg ok'; msg.textContent='Contrato gerado ✓ (baixado) — revise antes de assinar.';
   }catch(e){ msg.className='set-msg err'; msg.textContent='Falha de conexão.'; }
   finally{ btn.disabled=false; btn.textContent=old; }
 }

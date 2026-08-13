@@ -1,0 +1,31 @@
+tipo: "Aditivo de Redução de Equipamento"
+quando_usar: "Retirar veículos/equipamentos de um contrato de locação existente."
+cicloway_papel: LOCADORA
+campos:
+  - chave: LOCATARIA_RAZAO_SOCIAL
+    label: "Razão social da locatária"
+    grupo: "Locatária"
+  - chave: LOCATARIA_CNPJ
+    label: "CNPJ da locatária"
+    grupo: "Locatária"
+  - chave: LOCATARIA_ENDERECO
+    label: "Endereço da locatária"
+    grupo: "Locatária"
+  - chave: QTD_REMANESCENTE
+    label: "Quantidade remanescente"
+    grupo: "Consolidado"
+  - chave: QTD_RETIRADA
+    label: "Quantidade retirada"
+    grupo: "Redução"
+  - chave: MODELO_REMANESCENTE
+    label: "Modelo(s) remanescente(s)"
+    grupo: "Consolidado"
+  - chave: MODELO_RETIRADO
+    label: "Modelo retirado"
+    grupo: "Redução"
+  - chave: VALOR_UNITARIO
+    label: "Valor unitário (R$)"
+    grupo: "Valores"
+  - chave: VALOR_CONSOLIDADO
+    label: "Valor mensal consolidado (R$)"
+    grupo: "Valores"

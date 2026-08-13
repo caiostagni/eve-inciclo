@@ -1,0 +1,44 @@
+tipo: "Aditivo de Inclusão de Equipamento"
+quando_usar: "Incluir veículos/equipamentos em um contrato de locação já existente."
+cicloway_papel: LOCADORA
+campos:
+  - chave: LOCATARIA_RAZAO_SOCIAL
+    label: "Razão social da locatária"
+    grupo: "Locatária"
+  - chave: LOCATARIA_CIDADE
+    label: "Cidade da locatária"
+    grupo: "Locatária"
+  - chave: LOCATARIA_ESTADO
+    label: "Estado (UF) da locatária"
+    grupo: "Locatária"
+  - chave: LOCATARIA_ENDERECO
+    label: "Endereço completo da locatária"
+    grupo: "Locatária"
+  - chave: LOCATARIA_CEP
+    label: "CEP da locatária"
+    grupo: "Locatária"
+  - chave: LOCATARIA_CNPJ
+    label: "CNPJ da locatária"
+    grupo: "Locatária"
+  - chave: QTD_INCLUIDA
+    label: "Quantidade incluída"
+    grupo: "Inclusão"
+  - chave: MODELO_INCLUIDO
+    label: "Modelo do veículo incluído"
+    grupo: "Inclusão"
+  - chave: QTD_TOTAL
+    label: "Quantidade total após a inclusão"
+    grupo: "Consolidado"
+  - chave: MODELO_CONSOLIDADO
+    label: "Modelo(s) no contrato consolidado"
+    grupo: "Consolidado"
+  - chave: VALOR_UNITARIO
+    label: "Valor unitário mensal (R$)"
+    grupo: "Valores"
+  - chave: VALOR_MENSAL_CONSOLIDADO
+    label: "Valor mensal consolidado (R$)"
+    grupo: "Valores"
+  - chave: VALOR_FRETE
+    label: "Valor do frete ida e volta (R$)"
+    grupo: "Valores"
+    default: ""

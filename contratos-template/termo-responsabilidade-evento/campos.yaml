@@ -1,0 +1,41 @@
+tipo: "Termo de Responsabilidade (Evento)"
+quando_usar: "Locação de curta duração para eventos, com responsabilidade de conservação e datas de início/fim."
+cicloway_papel: LOCADORA
+campos:
+  - chave: LOCATARIA_RAZAO_SOCIAL
+    label: "Razão social da locatária"
+    grupo: "Locatária"
+  - chave: LOCATARIA_CNPJ
+    label: "CNPJ da locatária"
+    grupo: "Locatária"
+  - chave: LOCATARIA_ENDERECO
+    label: "Endereço da locatária"
+    grupo: "Locatária"
+  - chave: QTD_DIAS
+    label: "Total de dias"
+    grupo: "Período"
+  - chave: QTD
+    label: "Quantidade de equipamentos"
+    grupo: "Equipamento"
+  - chave: MODELO
+    label: "Modelo do equipamento"
+    grupo: "Equipamento"
+  - chave: LOCAL_EVENTO
+    label: "Local de utilização (evento)"
+    grupo: "Equipamento"
+  - chave: DATA_INICIO
+    label: "Data de início"
+    grupo: "Período"
+  - chave: DATA_FIM
+    label: "Data de término"
+    grupo: "Período"
+  - chave: VALOR_LOCACAO
+    label: "Valor da locação (R$)"
+    grupo: "Valores"
+  - chave: VALOR_FRETE
+    label: "Valor do frete (R$)"
+    grupo: "Valores"
+    default: ""
+  - chave: VALOR_TOTAL
+    label: "Valor total (R$)"
+    grupo: "Valores"

@@ -1,0 +1,31 @@
+tipo: "Demonstração e Comodato"
+quando_usar: "Empréstimo gratuito (comodato) de veículos para demonstração/teste por um período."
+cicloway_papel: COMODANTE
+campos:
+  - chave: COMODATARIA_RAZAO_SOCIAL
+    label: "Razão social da comodatária"
+    grupo: "Comodatária"
+  - chave: COMODATARIA_CNPJ
+    label: "CNPJ da comodatária"
+    grupo: "Comodatária"
+  - chave: COMODATARIA_ENDERECO
+    label: "Endereço da comodatária"
+    grupo: "Comodatária"
+  - chave: COMODATARIA_CIDADE
+    label: "Cidade da comodatária"
+    grupo: "Comodatária"
+  - chave: COMODATARIA_ESTADO
+    label: "Estado (UF) da comodatária"
+    grupo: "Comodatária"
+  - chave: QTD
+    label: "Quantidade"
+    grupo: "Objeto"
+  - chave: MODELO
+    label: "Modelo do veículo"
+    grupo: "Objeto"
+  - chave: VALOR_VEICULO
+    label: "Valor de ressarcimento por veículo (R$)"
+    grupo: "Ressarcimento"
+  - chave: PRAZO
+    label: "Prazo de vigência"
+    grupo: "Vigência"

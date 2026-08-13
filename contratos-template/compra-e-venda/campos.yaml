@@ -1,0 +1,25 @@
+tipo: "Compra e Venda"
+quando_usar: "Venda de veículos (novos ou seminovos) para pessoa física ou jurídica."
+cicloway_papel: VENDEDOR
+campos:
+  - chave: COMPRADOR_NOME
+    label: "Comprador (razão social ou nome)"
+    grupo: "Comprador"
+  - chave: COMPRADOR_DOC
+    label: "CPF ou CNPJ do comprador"
+    grupo: "Comprador"
+  - chave: COMPRADOR_ENDERECO
+    label: "Endereço do comprador"
+    grupo: "Comprador"
+  - chave: QTD
+    label: "Quantidade"
+    grupo: "Objeto"
+  - chave: MODELO
+    label: "Modelo do veículo"
+    grupo: "Objeto"
+  - chave: VALOR_UNITARIO
+    label: "Valor unitário (R$)"
+    grupo: "Valores"
+  - chave: VALOR_TOTAL
+    label: "Valor total (R$)"
+    grupo: "Valores"
