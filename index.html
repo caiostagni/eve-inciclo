@@ -633,10 +633,9 @@ a.btn-dl:hover{border-color:var(--blue-t);color:var(--blue-t)}
     <div class="nav-sec">Cultura</div>
     <button class="nav-it" data-p="practices"><span class="ic">📖</span>Boas Práticas</button>
     <div class="nav-sec">Vendas</div>
-    <button class="nav-it" data-p="journey"><span class="ic">🗺️</span>Jornada de Vendas<span class="nav-demo" title="Dados de demonstração">⚙️</span></button>
-    <button class="nav-it" data-p="leads"><span class="ic">🎯</span>Qualificação de Leads<span class="nav-demo" title="Dados de demonstração">⚙️</span></button>
+    <button class="nav-it" data-p="journey"><span class="ic">📈</span>Dashboard de Vendas<span class="nav-demo" title="Dados de demonstração">⚙️</span></button>
     <button class="nav-it" data-p="objections"><span class="ic">💬</span>Biblioteca de Objeções</button>
-    <button class="nav-it" data-p="proposals"><span class="ic">📄</span>Propostas Padrão<span class="nav-demo" title="Dados de demonstração">⚙️</span></button>
+    <button class="nav-it" data-p="proposals"><span class="ic">📄</span>Propostas Padrão</button>
     <div class="nav-sec">Documentos</div>
     <button class="nav-it" data-p="cases"><span class="ic">🏆</span>Cases</button>
     <button class="nav-it" data-p="contracts"><span class="ic">📋</span>Contratos<span class="nav-demo" title="Dados de demonstração">⚙️</span></button>
@@ -720,24 +719,6 @@ a.btn-dl:hover{border-color:var(--blue-t);color:var(--blue-t)}
       <div class="pp-acc" id="prod-policy"></div>
     </div>
 
-    <!-- QUALIFICAÇÃO DE LEADS -->
-    <div id="pg-leads" class="pg">
-      <div class="pg-title">Qualificação de Leads</div>
-      <div class="pg-sub">Avalie o potencial de um lead com base nos critérios comerciais da CicloWay</div>
-      <div class="lq-layout">
-        <div class="lq-form" id="lq-form"></div>
-        <div class="lq-score-box">
-          <div class="lq-st">Pontuação</div>
-          <div class="lq-score-num" id="lq-num">0</div>
-          <div class="lq-score-max">de 100 pontos</div>
-          <div class="lq-temp" id="lq-temp">❄️ Lead Frio</div>
-          <div class="lq-bar-wrap"><div class="lq-bar" id="lq-bar" style="width:0%;background:var(--text2)"></div></div>
-          <div class="lq-action" id="lq-action">Responda as perguntas ao lado para qualificar o lead.</div>
-          <button class="btn-reset" onclick="resetLeads()">↺ Reiniciar</button>
-        </div>
-      </div>
-    </div>
-
     <!-- BIBLIOTECA DE OBJEÇÕES -->
     <div id="pg-objections" class="pg">
       <div class="pg-title">Biblioteca de Objeções</div>
@@ -750,9 +731,9 @@ a.btn-dl:hover{border-color:var(--blue-t);color:var(--blue-t)}
       <div class="obj-grid" id="obj-grid"></div>
     </div>
 
-    <!-- JORNADA DE VENDAS -->
+    <!-- DASHBOARD DE VENDAS -->
     <div id="pg-journey" class="pg">
-      <div class="pg-title">Jornada de Vendas</div>
+      <div class="pg-title">Dashboard de Vendas</div>
       <div class="pg-sub">Pipeline comercial CicloWay</div>
 
       <div class="fn-head">
@@ -1300,20 +1281,6 @@ const STOCK = [
   {modelo:'Trikke T67',       cat:'Trikke',     qtd:0,  loc:'—',                    status:'out'},
 ];
 
-const LQ_QUESTIONS = [
-  {id:'q1',txt:'Qual o segmento do cliente?',
-   opts:[{l:'Shopping / Mall',v:20},{l:'Segurança / Rondas',v:18},{l:'Logística / Last Mile',v:18},
-         {l:'Facilities / Condomínio',v:15},{l:'Outro',v:8}]},
-  {id:'q2',txt:'Tamanho da frota desejada?',
-   opts:[{l:'1 a 3 veículos',v:8},{l:'4 a 9 veículos',v:16},{l:'10 a 20 veículos',v:22},{l:'Mais de 20',v:25}]},
-  {id:'q3',txt:'Orçamento definido?',
-   opts:[{l:'Sim, aprovado pela diretoria',v:20},{l:'Em discussão / em aprovação',v:12},{l:'Ainda não',v:4}]},
-  {id:'q4',txt:'Modalidade preferida?',
-   opts:[{l:'Compra à vista',v:15},{l:'Parcelamento',v:12},{l:'Locação mensal',v:10}]},
-  {id:'q5',txt:'Prazo de decisão estimado?',
-   opts:[{l:'Menos de 30 dias',v:20},{l:'Entre 30 e 90 dias',v:13},{l:'Mais de 90 dias',v:5}]},
-];
-
 const OBJECTIONS = [
   {id:'o1', cat:'p', tag:'Preço',   q:'"É muito caro para o nosso orçamento"',
    a:'O custo operacional de um veículo elétrico CicloWay é até 90% menor que um veículo a combustão. Calculamos o TCO (Total Cost of Ownership) em conjunto: considere combustível, manutenção e emissões. A maioria dos clientes recupera o investimento em menos de 18 meses.'},
@@ -1557,7 +1524,6 @@ function showApp(){
   initOnboarding();
   initPractices();
   initProducts();
-  initLeads();
   initObjections();
   initJourney();
   initKPIs();
@@ -2077,59 +2043,6 @@ function renderStock(){
    LEAD QUALIFICATION
 ═══════════════════════════════════════════════ */
 let lqAnswers = {};
-
-function initLeads(){
-  const form = document.getElementById('lq-form');
-  form.innerHTML='';
-  LQ_QUESTIONS.forEach((q,qi)=>{
-    const sec = document.createElement('div');
-    sec.className='lq-item';
-    sec.innerHTML=`<div class="lq-sec-t">${qi+1} de ${LQ_QUESTIONS.length}</div>
-      <div class="lq-q">${q.txt}</div>
-      <div class="lq-opts">
-        ${q.opts.map((o,oi)=>`
-          <label class="lq-opt" data-qid="${q.id}" data-val="${o.v}">
-            <input type="radio" name="${q.id}" value="${o.v}" onchange="lqUpdate()"/>
-            ${o.l}
-          </label>`).join('')}
-      </div>`;
-    form.appendChild(sec);
-  });
-  lqUpdate();
-}
-
-function lqUpdate(){
-  let score=0;
-  document.querySelectorAll('.lq-opt input').forEach(inp=>{
-    const lbl=inp.closest('.lq-opt');
-    if(inp.checked){score+=parseInt(inp.value);lbl.classList.add('sel');}
-    else lbl.classList.remove('sel');
-  });
-  document.getElementById('lq-num').textContent=score;
-  const bar=document.getElementById('lq-bar');
-  const tmp=document.getElementById('lq-temp');
-  const act=document.getElementById('lq-action');
-  bar.style.width=score+'%';
-  if(score>=75){
-    bar.style.background='var(--red)';
-    tmp.className='lq-temp temp-hot';tmp.textContent='🔥 Lead Quente';
-    act.textContent='Alta prioridade! Envie proposta formal em até 24h e agende reunião de apresentação com a Elizabete.';
-  } else if(score>=45){
-    bar.style.background='var(--yellow)';
-    tmp.className='lq-temp temp-warm';tmp.textContent='🌤️ Lead Morno';
-    act.textContent='Potencial médio. Aprofunde o diagnóstico de necessidades e envie material educativo antes da proposta.';
-  } else {
-    bar.style.background='var(--text2)';
-    tmp.className='lq-temp temp-cold';tmp.textContent='❄️ Lead Frio';
-    act.textContent='Prioridade baixa no momento. Mantenha em nurturing e retorne em 60 dias com novidades de produtos.';
-  }
-}
-
-function resetLeads(){
-  document.querySelectorAll('.lq-opt input').forEach(i=>i.checked=false);
-  document.querySelectorAll('.lq-opt').forEach(l=>l.classList.remove('sel'));
-  lqUpdate();
-}
 
 /* ═══════════════════════════════════════════════
    OBJECTIONS
