@@ -282,6 +282,20 @@ body{font-family:'Poppins',-apple-system,sans-serif;background:var(--bg);color:v
 .gen-fields .gen-full{grid-column:1/-1}
 textarea.fi{resize:vertical;min-height:56px;font-family:inherit}
 @media(max-width:560px){.gen-fields{grid-template-columns:1fr}}
+/* Funil de vendas (RD Station) */
+.fn-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.fn-right{display:flex;align-items:center;gap:10px}
+.fn-meta{font-size:11px;color:var(--muted)}
+.fn-list{display:flex;flex-direction:column;gap:8px}
+.fn-row{display:grid;grid-template-columns:190px 1fr auto;gap:12px;align-items:center;font-size:13px}
+.fn-name{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fn-track{background:var(--bg2);border-radius:6px;height:22px;overflow:hidden;border:1px solid var(--border)}
+.fn-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--blue-t));min-width:3px}
+.fn-num{font-size:12px;color:var(--text2);white-space:nowrap;text-align:right}
+.fn-totals{display:flex;gap:18px;margin-top:14px;font-size:13px;color:var(--text2)}
+.fn-totals b{color:var(--blue-t)}
+.fn-empty{background:var(--card);border:1px dashed var(--border2);border-radius:10px;padding:18px;font-size:13px;color:var(--text2);line-height:1.6}
+@media(max-width:560px){.fn-row{grid-template-columns:110px 1fr auto}}
 /* Configurações */
 .set-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;align-items:start}
 .set-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px}
@@ -727,7 +741,18 @@ a.btn-dl:hover{border-color:var(--blue-t);color:var(--blue-t)}
     <!-- JORNADA DE VENDAS -->
     <div id="pg-journey" class="pg">
       <div class="pg-title">Jornada de Vendas</div>
-      <div class="pg-sub">Pipeline comercial CicloWay — atualizado Jun/2026</div>
+      <div class="pg-sub">Pipeline comercial CicloWay</div>
+
+      <div class="fn-head">
+        <div class="upc-title" style="margin:0">📊 Funil de Vendas · RD Station</div>
+        <div class="fn-right">
+          <span class="fn-meta" id="fn-meta"></span>
+          <button class="us-toggle" id="fn-refresh" style="display:none" onclick="syncFunnel()">🔄 Atualizar agora</button>
+        </div>
+      </div>
+      <div id="fn-box" style="margin-bottom:28px"></div>
+
+      <div class="upc-title" style="margin-bottom:12px">Etapas do processo comercial <span class="nav-demo" style="opacity:.6" title="Ilustrativo">⚙️</span></div>
       <div class="jrn-pipe" id="jrn-pipe"></div>
       <div class="upc-title" style="margin-bottom:12px">Métricas de Conversão</div>
       <div class="j-conv" id="j-conv"></div>
@@ -2124,7 +2149,46 @@ function filterObj(){ renderObj(); }
 /* ═══════════════════════════════════════════════
    JOURNEY
 ═══════════════════════════════════════════════ */
+/* ═══ FUNIL RD STATION ═══ */
+function fmtBRL(v){ return 'R$ ' + Math.round(v||0).toLocaleString('pt-BR'); }
+
+async function loadFunnel(){
+  const box=document.getElementById('fn-box'), meta=document.getElementById('fn-meta'), btn=document.getElementById('fn-refresh');
+  if(!box) return;
+  if(btn) btn.style.display = (CU && CU.role==='admin') ? '' : 'none';
+  try{
+    const r=await fetch('/api/funnel'); const d=await r.json().catch(()=>({}));
+    if(!r.ok || d.empty || !d.stages || !d.stages.length){
+      meta.textContent='';
+      box.innerHTML=`<div class="fn-empty">Sem dados do funil ainda. ${CU&&CU.role==='admin'?'Configure o token do RD Station (variável <b>RD_CRM_TOKEN</b> na Vercel) e clique em <b>Atualizar agora</b>.':'Peça a um administrador para conectar o RD Station.'}</div>`;
+      return;
+    }
+    meta.textContent = 'Atualizado em '+(d.capturedAt||'—');
+    const max=Math.max(...d.stages.map(s=>s.count),1);
+    box.innerHTML = `<div class="fn-list">`+ d.stages.map(s=>`
+      <div class="fn-row">
+        <div class="fn-name" title="${s.name}">${s.name}</div>
+        <div class="fn-track"><div class="fn-fill" style="width:${Math.round(s.count/max*100)}%"></div></div>
+        <div class="fn-num">${s.count} neg. · ${fmtBRL(s.value)}</div>
+      </div>`).join('') + `</div>
+      <div class="fn-totals"><span>Total: <b>${d.totalCount}</b> negociações abertas</span><span>Valor em pipeline: <b>${fmtBRL(d.totalValue)}</b></span></div>`;
+  }catch(e){ box.innerHTML='<div class="fn-empty">Falha ao carregar o funil.</div>'; }
+}
+
+async function syncFunnel(){
+  const btn=document.getElementById('fn-refresh'), meta=document.getElementById('fn-meta');
+  if(!btn) return; btn.disabled=true; const old=btn.textContent; btn.textContent='Sincronizando…';
+  try{
+    const r=await fetch('/api/cron/rd-sync',{method:'POST'}); const d=await r.json().catch(()=>({}));
+    if(r.status===503){ meta.textContent='Falta configurar RD_CRM_TOKEN na Vercel.'; }
+    else if(!r.ok){ meta.textContent = d.message || 'Falha ao sincronizar.'; }
+    else { await loadFunnel(); }
+  }catch(e){ meta.textContent='Falha de conexão.'; }
+  finally{ btn.disabled=false; btn.textContent=old; }
+}
+
 function initJourney(){
+  loadFunnel();
   const pipe=document.getElementById('jrn-pipe');
   pipe.innerHTML='';
   JOURNEY_STAGES.forEach(st=>{

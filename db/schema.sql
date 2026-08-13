@@ -27,3 +27,12 @@ create table if not exists events (
   created_at timestamptz not null default now()
 );
 create index if not exists events_dt_idx on events (dt);
+
+-- Snapshots do funil de vendas (RD Station CRM) — atualizado 1x/dia por cron.
+create table if not exists funnel_snapshot (
+  id          uuid primary key default gen_random_uuid(),
+  captured_at timestamptz not null default now(),
+  source      text not null default 'rd-crm',
+  payload     jsonb not null      -- { stages:[{name,count,value}], totalCount, totalValue }
+);
+create index if not exists funnel_snapshot_at_idx on funnel_snapshot (captured_at desc);
