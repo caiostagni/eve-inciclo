@@ -1,8 +1,8 @@
 import { Packer } from 'docx';
 import { readSessionCookie, verifySession } from '../lib/auth.js';
-import { getType, buildContractDoc } from '../lib/doc-templates.js';
+import { getType, buildContractDoc, getProposalType, buildProposalDoc } from '../lib/doc-templates.js';
 
-// Gera a Ficha de Contratação (.docx) a partir dos campos preenchidos. Só logado.
+// Gera a Ficha de Contratação OU a Proposta Comercial (.docx) a partir dos campos. Só logado.
 export default async function handler(req, res) {
   if (req.method !== 'POST') { res.setHeader('Allow', 'POST'); return res.status(405).json({ error: 'method_not_allowed' }); }
 
@@ -13,7 +13,8 @@ export default async function handler(req, res) {
 
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
-    const type = getType(String(body.tipo || ''));
+    const isProposta = String(body.kind || 'contract') === 'proposta';
+    const type = isProposta ? getProposalType(String(body.tipo || '')) : getType(String(body.tipo || ''));
     if (!type) return res.status(400).json({ error: 'invalid_type' });
 
     const values = {};
@@ -23,12 +24,13 @@ export default async function handler(req, res) {
 
     const data = new Date().toLocaleDateString('pt-BR');
     const autor = body.autor ? String(body.autor).slice(0, 80) : '';
-    const doc = buildContractDoc(type, values, { data, autor });
+    const doc = isProposta ? buildProposalDoc(type, values, { data, autor }) : buildContractDoc(type, values, { data, autor });
     const buf = await Packer.toBuffer(doc);
 
     const slug = type.id.replace(/[^a-z0-9-]/g, '');
+    const fname = isProposta ? `proposta-comercial-${slug}.docx` : `ficha-contratacao-${slug}.docx`;
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-    res.setHeader('Content-Disposition', `attachment; filename="ficha-contratacao-${slug}.docx"`);
+    res.setHeader('Content-Disposition', `attachment; filename="${fname}"`);
     return res.status(200).end(buf);
   } catch (e) {
     console.error('generate-doc error:', e?.message);
