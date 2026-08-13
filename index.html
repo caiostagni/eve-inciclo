@@ -344,6 +344,9 @@ select.fi{appearance:none;cursor:pointer}
 #chat-fab:hover{transform:scale(1.06)}
 #chat-panel{position:fixed;bottom:92px;right:24px;width:380px;max-width:calc(100vw - 32px);height:540px;max-height:calc(100vh - 130px);background:var(--card);border:1px solid var(--border);border-radius:16px;z-index:801;display:none;flex-direction:column;overflow:hidden;box-shadow:0 16px 48px rgba(0,0,0,.55)}
 #chat-panel.on{display:flex}
+.chat-dls{margin-top:8px;display:flex;flex-direction:column;gap:6px}
+.chat-dl{display:inline-flex;align-items:center;gap:6px;background:var(--blue);color:#fff;border:none;border-radius:8px;padding:8px 12px;font-size:12.5px;font-weight:600;cursor:pointer;text-align:left;transition:filter .15s}
+.chat-dl:hover{filter:brightness(1.08)}
 .chat-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border);background:var(--bg2)}
 .chat-hd-l{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700}
 .chat-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
@@ -3009,19 +3012,34 @@ function fmtChat(t){
   return out.replace(/(<br>)+$/,'');
 }
 
-function addChatMsg(role, text){
-  chatHistory.push({ role: role==='bot'?'assistant':'user', content:text });
+function addChatMsg(role, text, files){
+  chatHistory.push({ role: role==='bot'?'assistant':'user', content:text, _files:(files&&files.length)?files:undefined });
   renderChat();
 }
 
 function renderChat(typing){
   const body = document.getElementById('chat-body');
+  window.__chatFiles = [];
   body.innerHTML = chatHistory.map(m=>{
     const bot = m.role==='assistant';
     const html = bot ? fmtChat(m.content) : m.content.replace(/&/g,'&amp;').replace(/</g,'&lt;');
-    return `<div class="msg ${bot?'bot':'user'}">${html}</div>`;
+    let dl='';
+    if(bot && m._files && m._files.length){
+      dl = '<div class="chat-dls">'+m._files.map(f=>{ const i=window.__chatFiles.push(f)-1; return `<button class="chat-dl" onclick="chatDL(${i})">⬇ ${f.name}</button>`; }).join('')+'</div>';
+    }
+    return `<div class="msg ${bot?'bot':'user'}">${html}${dl}</div>`;
   }).join('') + (typing?'<div class="msg bot typing">InCiclo está digitando…</div>':'');
   body.scrollTop = body.scrollHeight;
+}
+
+function chatDL(i){
+  const f=(window.__chatFiles||[])[i]; if(!f) return;
+  try{
+    const bytes=Uint8Array.from(atob(f.b64), c=>c.charCodeAt(0));
+    const blob=new Blob([bytes], {type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a'); a.href=url; a.download=f.name; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  }catch(e){}
 }
 
 async function chatSend(){
@@ -3033,9 +3051,9 @@ async function chatSend(){
   chatBusy = true; document.getElementById('chat-send').disabled = true;
   renderChat(true);
   try{
-    const r = await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:chatHistory})});
+    const r = await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:chatHistory.map(m=>({role:m.role,content:m.content}))})});
     const d = await r.json().catch(()=>({}));
-    addChatMsg('bot', d.reply || 'Desculpe, não consegui responder agora.');
+    addChatMsg('bot', d.reply || 'Desculpe, não consegui responder agora.', d.files);
   }catch(e){
     addChatMsg('bot','Falha de conexão. Tente novamente.');
   }finally{

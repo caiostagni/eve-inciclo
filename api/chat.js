@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { readSessionCookie, verifySession } from '../lib/auth.js';
 import { SYSTEM_PROMPT } from '../lib/knowledge.js';
+import { buildTools, runTool } from '../lib/chat-tools.js';
 
 // Assistente InCiclo — só para colaboradores logados. Chama o Claude (Sonnet 5).
 export default async function handler(req, res) {
@@ -29,17 +30,45 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'bad_request' });
 
     const client = new Anthropic({ apiKey });
-    const msg = await client.messages.create({
-      model: 'claude-sonnet-5',
-      max_tokens: 1024,
-      thinking: { type: 'disabled' }, // FAQ ágil e econômico
-      system: SYSTEM_PROMPT,
-      messages,
-    });
+    const tools = buildTools();
+    const autor = (session && session.nm) ? String(session.nm) : '';
+    const convo = messages.map(m => ({ role: m.role, content: m.content }));
+    const files = [];
+    let reply = '';
 
-    const reply = (msg.content || []).filter(b => b.type === 'text').map(b => b.text).join('\n').trim()
-      || 'Desculpe, não consegui gerar uma resposta agora.';
-    return res.status(200).json({ reply });
+    // Loop de tool use: modelo pergunta os dados, chama a ferramenta, geramos o .docx.
+    for (let turn = 0; turn < 4; turn++) {
+      const msg = await client.messages.create({
+        model: 'claude-sonnet-5',
+        max_tokens: 1024,
+        thinking: { type: 'disabled' },
+        system: SYSTEM_PROMPT,
+        tools,
+        messages: convo,
+      });
+
+      if (msg.stop_reason === 'tool_use') {
+        convo.push({ role: 'assistant', content: msg.content });
+        const results = [];
+        for (const block of msg.content) {
+          if (block.type !== 'tool_use') continue;
+          const out = await runTool(block.name, block.input, autor);
+          if (out.file) files.push(out.file);
+          const txt = out.error
+            ? `ERRO: ${out.error}`
+            : `${out.resumo}${out.semValor && out.semValor.length ? ' (campos sem valor: ' + out.semValor.join(', ') + ')' : ''}. O arquivo .docx foi entregue ao colaborador com um botão de download — avise que baixe e revise antes de assinar.`;
+          results.push({ type: 'tool_result', tool_use_id: block.id, content: txt, is_error: !!out.error });
+        }
+        convo.push({ role: 'user', content: results });
+        continue;
+      }
+
+      reply = (msg.content || []).filter(b => b.type === 'text').map(b => b.text).join('\n').trim();
+      break;
+    }
+
+    if (!reply) reply = files.length ? 'Pronto! Gerei o documento — é só baixar. Revise antes de assinar. 📄' : 'Desculpe, não consegui gerar uma resposta agora.';
+    return res.status(200).json({ reply, files });
   } catch (e) {
     console.error('chat error:', e?.status, e?.message);
     if (e?.status === 401) return res.status(503).json({ error: 'bad_key', reply: 'A chave da API do assistente parece inválida. Fale com o admin.' });
