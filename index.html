@@ -744,7 +744,7 @@ a.btn-dl:hover{border-color:var(--blue-t);color:var(--blue-t)}
       <div class="pg-sub">Pipeline comercial CicloWay</div>
 
       <div class="fn-head">
-        <div class="upc-title" style="margin:0">📊 Funil de Vendas · RD Station</div>
+        <div class="upc-title" style="margin:0">📊 Funil de Leads · RD Station Marketing</div>
         <div class="fn-right">
           <span class="fn-meta" id="fn-meta"></span>
           <button class="us-toggle" id="fn-refresh" style="display:none" onclick="syncFunnel()">🔄 Atualizar agora</button>
@@ -2160,18 +2160,21 @@ async function loadFunnel(){
     const r=await fetch('/api/funnel'); const d=await r.json().catch(()=>({}));
     if(!r.ok || d.empty || !d.stages || !d.stages.length){
       meta.textContent='';
-      box.innerHTML=`<div class="fn-empty">Sem dados do funil ainda. ${CU&&CU.role==='admin'?'Configure o token do RD Station (variável <b>RD_CRM_TOKEN</b> na Vercel) e clique em <b>Atualizar agora</b>.':'Peça a um administrador para conectar o RD Station.'}</div>`;
+      box.innerHTML=`<div class="fn-empty">Sem dados do funil ainda. ${CU&&CU.role==='admin'?'Configure as credenciais do RD Station Marketing (<b>RD_MKT_CLIENT_ID</b>, <b>RD_MKT_CLIENT_SECRET</b>, <b>RD_MKT_REFRESH_TOKEN</b> na Vercel) e clique em <b>Atualizar agora</b>.':'Peça a um administrador para conectar o RD Station.'}</div>`;
       return;
     }
+    const leads = d.kind==='leads';
     meta.textContent = 'Atualizado em '+(d.capturedAt||'—');
     const max=Math.max(...d.stages.map(s=>s.count),1);
     box.innerHTML = `<div class="fn-list">`+ d.stages.map(s=>`
       <div class="fn-row">
         <div class="fn-name" title="${s.name}">${s.name}</div>
         <div class="fn-track"><div class="fn-fill" style="width:${Math.round(s.count/max*100)}%"></div></div>
-        <div class="fn-num">${s.count} neg. · ${fmtBRL(s.value)}</div>
+        <div class="fn-num">${s.count} ${leads?'leads':'neg. · '+fmtBRL(s.value)}</div>
       </div>`).join('') + `</div>
-      <div class="fn-totals"><span>Total: <b>${d.totalCount}</b> negociações abertas</span><span>Valor em pipeline: <b>${fmtBRL(d.totalValue)}</b></span></div>`;
+      <div class="fn-totals">${leads
+        ? `<span>Total: <b>${d.totalCount}</b> leads no funil</span>`
+        : `<span>Total: <b>${d.totalCount}</b> negociações abertas</span><span>Valor em pipeline: <b>${fmtBRL(d.totalValue)}</b></span>`}</div>`;
   }catch(e){ box.innerHTML='<div class="fn-empty">Falha ao carregar o funil.</div>'; }
 }
 
@@ -2180,7 +2183,7 @@ async function syncFunnel(){
   if(!btn) return; btn.disabled=true; const old=btn.textContent; btn.textContent='Sincronizando…';
   try{
     const r=await fetch('/api/cron/rd-sync',{method:'POST'}); const d=await r.json().catch(()=>({}));
-    if(r.status===503){ meta.textContent='Falta configurar RD_CRM_TOKEN na Vercel.'; }
+    if(r.status===503){ meta.textContent='Faltam as credenciais do RD Marketing na Vercel.'; }
     else if(!r.ok){ meta.textContent = d.message || 'Falha ao sincronizar.'; }
     else { await loadFunnel(); }
   }catch(e){ meta.textContent='Falha de conexão.'; }
