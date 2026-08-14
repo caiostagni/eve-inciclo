@@ -347,6 +347,9 @@ select.fi{appearance:none;cursor:pointer}
 .chat-dls{margin-top:8px;display:flex;flex-direction:column;gap:6px}
 .chat-dl{display:inline-flex;align-items:center;gap:6px;background:var(--blue);color:#fff;border:none;border-radius:8px;padding:8px 12px;font-size:12.5px;font-weight:600;cursor:pointer;text-align:left;transition:filter .15s}
 .chat-dl:hover{filter:brightness(1.08)}
+.chat-sugg{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.chat-sugg-b{text-align:left;background:var(--card2,rgba(255,255,255,.04));border:1px solid var(--border);color:var(--text);border-radius:10px;padding:9px 12px;font-size:12.5px;cursor:pointer;line-height:1.35;transition:border-color .15s,background .15s}
+.chat-sugg-b:hover{border-color:var(--blue-t);background:rgba(91,134,255,.10)}
 .chat-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border);background:var(--bg2)}
 .chat-hd-l{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700}
 .chat-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
@@ -2895,6 +2898,13 @@ async function doChangePassword(){
 ═══════════════════════════════════════════════ */
 let chatHistory = [];
 let chatBusy = false;
+const CHAT_SUGGESTIONS = [
+  'Qual contrato uso para locar 5 Segways para um shopping?',
+  'Gere uma proposta de locação para um cliente de coleta seletiva',
+  'Qual veículo é melhor para entregas last mile?',
+  'Como respondo à objeção "está muito caro"?',
+];
+function chatSuggest(i){ const t=CHAT_SUGGESTIONS[i]; if(!t) return; const inp=document.getElementById('chat-in'); if(inp) inp.value=t; chatSend(); }
 
 function toggleChat(){
   const p = document.getElementById('chat-panel');
@@ -2941,7 +2951,9 @@ function renderChat(typing){
       dl = '<div class="chat-dls">'+m._files.map(f=>{ const i=window.__chatFiles.push(f)-1; return `<button class="chat-dl" onclick="chatDL(${i})">⬇ ${f.name}</button>`; }).join('')+'</div>';
     }
     return `<div class="msg ${bot?'bot':'user'}">${html}${dl}</div>`;
-  }).join('') + (typing?'<div class="msg bot typing">InCiclo está digitando…</div>':'');
+  }).join('')
+    + ((chatHistory.length<=1 && !typing) ? '<div class="chat-sugg">'+CHAT_SUGGESTIONS.map((s,i)=>`<button class="chat-sugg-b" onclick="chatSuggest(${i})">${s.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</button>`).join('')+'</div>' : '')
+    + (typing?'<div class="msg bot typing">InCiclo está digitando…</div>':'');
   body.scrollTop = body.scrollHeight;
 }
 
