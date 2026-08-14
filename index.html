@@ -266,6 +266,11 @@ body{font-family:'Poppins',-apple-system,sans-serif;background:var(--bg);color:v
 .stk-low{color:var(--yellow)}
 .stk-out{color:var(--red)}
 .stk-consultar{color:var(--text2)}
+.stk-banner{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:12.5px;padding:9px 14px;border-radius:10px;margin-bottom:14px;border:1px solid var(--border)}
+.stk-banner.live{background:rgba(145,255,176,.08);border-color:rgba(145,255,176,.35);color:var(--text)}
+.stk-banner.off{background:var(--bg2);color:var(--text2)}
+.stk-refresh{background:var(--blue);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer}
+.stk-refresh:disabled{opacity:.6;cursor:default}
 .pp-acc{display:flex;flex-direction:column;gap:8px;max-width:820px}
 .pp-item{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden}
 .pp-item>summary{cursor:pointer;padding:12px 16px;font-size:14px;font-weight:600;list-style:none;display:flex;align-items:center;gap:8px}
@@ -716,6 +721,7 @@ a.btn-dl:hover{border-color:var(--blue-t);color:var(--blue-t)}
       <div class="pg-title">Produtos</div>
       <div class="pg-sub">Catálogo, estoque e preços dos veículos elétricos CicloWay — centralizado</div>
       <div class="frow" id="prod-row"></div>
+      <div id="prod-stock-banner"></div>
       <div class="prodgrid" id="prodgrid"></div>
 
       <div class="upc-title" style="margin:28px 0 12px">💼 Política comercial e de preços</div>
@@ -1952,6 +1958,38 @@ function initProducts(){
   });
   renderProducts();
   renderProdPolicy();
+  loadStock();
+}
+
+let LIVE_STOCK=null, STOCK_AT=null;
+async function loadStock(){
+  try{
+    const r=await fetch('/api/stock'); const d=await r.json().catch(()=>({}));
+    if(r.ok && d && d.items && Object.keys(d.items).length){ LIVE_STOCK=d.items; STOCK_AT=d.capturedAt||''; }
+    else { LIVE_STOCK=null; STOCK_AT=null; }
+  }catch(e){ LIVE_STOCK=null; STOCK_AT=null; }
+  renderStockBanner(); renderProducts();
+}
+function renderStockBanner(msg){
+  const banner=document.getElementById('prod-stock-banner'); if(!banner) return;
+  const admin = CU && CU.role==='admin';
+  const btn = admin ? `<button class="stk-refresh" onclick="syncStock()">🔄 Atualizar agora</button>` : '';
+  if(LIVE_STOCK){
+    banner.innerHTML=`<div class="stk-banner live"><span>📦 Estoque ao vivo · Sankhya · atualizado em <b>${STOCK_AT||'—'}</b>${msg?' · '+msg:''}</span>${btn}</div>`;
+  } else if(admin){
+    banner.innerHTML=`<div class="stk-banner off"><span>📦 Estoque ao vivo (Sankhya) ainda não conectado — mostrando dados de referência.${msg?' '+msg:''}</span>${btn}</div>`;
+  } else { banner.innerHTML=''; }
+}
+async function syncStock(){
+  const banner=document.getElementById('prod-stock-banner');
+  const b=banner&&banner.querySelector('.stk-refresh');
+  if(b){ b.disabled=true; b.textContent='Sincronizando…'; }
+  try{
+    const r=await fetch('/api/cron/sankhya-sync',{method:'POST'}); const d=await r.json().catch(()=>({}));
+    if(r.status===503){ renderStockBanner('faltam credenciais do Sankhya na Vercel.'); return; }
+    if(!r.ok){ renderStockBanner(d.message||'falha ao sincronizar.'); return; }
+    await loadStock();
+  }catch(e){ renderStockBanner('falha de conexão.'); }
 }
 
 function renderProdPolicy(){
@@ -1975,7 +2013,9 @@ function renderProducts(){
     const specsHtml = Object.entries(p.specs).map(([k,v])=>`<div class="spec"><div class="sp-l">${k}</div><div class="sp-v">${v}</div></div>`).join('');
     const imgHtml = p.img ? `<img src="${p.img}" alt="${p.nm}" loading="lazy">` : p.emoji;
     const fichaHtml = p.ficha ? `<a class="pr-ficha" href="${p.ficha}" target="_blank" rel="noopener">📄 Baixar ficha técnica</a>` : '';
-    const e = p.estoque || {status:'consultar'};
+    const e0 = p.estoque || {status:'consultar'};
+    const lv = LIVE_STOCK && LIVE_STOCK[p.id];
+    const e = lv ? { qtd: lv.qtd, status: lv.status, loc: lv.loc || e0.loc } : e0;
     const stCls = {ok:'stk-ok',low:'stk-low',out:'stk-out',consultar:'stk-consultar'}[e.status] || 'stk-consultar';
     const estoqueTxt = e.status==='out' ? 'Indisponível'
       : e.status==='consultar' ? 'Consultar'
