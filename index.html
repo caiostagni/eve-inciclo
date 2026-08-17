@@ -451,7 +451,7 @@ select.fi{appearance:none;cursor:pointer}
 .obj-card.open .obj-ans{display:block}
 
 /* ── SALES JOURNEY ──────────────────────────────── */
-.jrn-pipe{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:28px}
+.jrn-pipe{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:28px}
 .jrn-stage{background:var(--card);border:1px solid var(--border);border-top:3px solid;border-radius:0 0 10px 10px;padding:16px 14px}
 .jrn-ic{font-size:22px;margin-bottom:8px}
 .jrn-nm{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px}
@@ -755,10 +755,8 @@ a.btn-dl:hover{border-color:var(--blue-t);color:var(--blue-t)}
       </div>
       <div id="fn-box" style="margin-bottom:28px"></div>
 
-      <div class="upc-title" style="margin-bottom:12px">Etapas do processo comercial <span class="nav-demo" style="opacity:.6" title="Ilustrativo">⚙️</span></div>
+      <div class="upc-title" style="margin-bottom:12px">Leads por etapa</div>
       <div class="jrn-pipe" id="jrn-pipe"></div>
-      <div class="upc-title" style="margin-bottom:12px">Métricas de Conversão</div>
-      <div class="j-conv" id="j-conv"></div>
     </div>
 
     <!-- DASHBOARD KPIs -->
@@ -1316,29 +1314,6 @@ const OBJECTIONS = [
    a:'Temos rede técnica em todo o Brasil. Em SP, RJ, MG, RS, PE e CE há técnicos credenciados. Para outras cidades, o suporte é feito via diagnóstico remoto + envio de técnico ou peças com custo coberto pelo contrato. Confirmo a cobertura para a sua cidade agora.'},
   {id:'o12',cat:'s', tag:'Suporte', q:'"E se quebrar? Quem resolve?"',
    a:'Clientes com contrato de locação têm SLA garantido em contrato: chamado aberto até 24h úteis, atendimento em até 2 dias em SP ou envio de veículo reserva. Para compras, oferecemos plano de manutenção preventiva anual com desconto. Posso detalhar as condições?'},
-];
-
-const JOURNEY_STAGES = [
-  {nm:'Prospecção',  ic:'🔭', color:'#3b82f6', deals:[
-    {co:'iFood',            prod:'5x Patinete SN-200',   val:'R$ 17K'},
-    {co:'Grupo Allada',     prod:'3x Triciclo C-3',       val:'R$ 45K'},
-    {co:'Cond. Alphaville', prod:'2x Segway i2',          val:'Consultar'},
-  ]},
-  {nm:'Qualificação',ic:'🔍', color:'#8b5cf6', deals:[
-    {co:'Prosegur CE',      prod:'8x Patinete SN-200',   val:'R$ 28K'},
-    {co:'Carajás Mining',   prod:'10x Triciclo C-3',      val:'R$ 150K'},
-  ]},
-  {nm:'Proposta',    ic:'📋', color:'#eab308', deals:[
-    {co:'Shopping Iguatemi',prod:'3x Segway i2',          val:'Consultar'},
-    {co:'Pague Menos',      prod:'20x Triciclo C-3',      val:'R$ 300K'},
-  ]},
-  {nm:'Negociação',  ic:'🤝', color:'#f97316', deals:[
-    {co:'Jadlog Logística', prod:'15x Patinete SN-100',  val:'R$ 43K'},
-  ]},
-  {nm:'Fechamento',  ic:'✅', color:'#22c55e', deals:[
-    {co:'Multiplan',        prod:'4x Segway i2',          val:'Consultar'},
-    {co:'Coopercaps',       prod:'5x Triciclo C-3',       val:'R$ 75K'},
-  ]},
 ];
 
 const PRICE_SECTIONS = [
@@ -2149,6 +2124,7 @@ async function loadFunnel(){
     if(!r.ok || d.empty || !d.stages || !d.stages.length){
       meta.textContent='';
       box.innerHTML=`<div class="fn-empty">Sem dados do funil ainda. ${CU&&CU.role==='admin'?'Com as credenciais na Vercel (<b>RD_MKT_CLIENT_ID</b> e <b>RD_MKT_CLIENT_SECRET</b>), clique em <b>🔗 Conectar RD</b>, autorize no RD e depois em <b>🔄 Atualizar agora</b>.':'Peça a um administrador para conectar o RD Station.'}</div>`;
+      renderJrnPipe(null);
       return;
     }
     const leads = d.kind==='leads';
@@ -2163,7 +2139,31 @@ async function loadFunnel(){
       <div class="fn-totals">${leads
         ? `<span>Total: <b>${fmtN(d.totalCount)}${d.capped?'+':''}</b> leads no funil</span>`
         : `<span>Total: <b>${d.totalCount}</b> negociações abertas</span><span>Valor em pipeline: <b>${fmtBRL(d.totalValue)}</b></span>`}</div>`;
-  }catch(e){ box.innerHTML='<div class="fn-empty">Falha ao carregar o funil.</div>'; }
+    renderJrnPipe(leads?d.stages:null);
+  }catch(e){ box.innerHTML='<div class="fn-empty">Falha ao carregar o funil.</div>'; renderJrnPipe(null); }
+}
+
+const FN_META = {
+  'Leads': {ic:'🌱', color:'var(--blue-t)'},
+  'Leads Qualificados': {ic:'✅', color:'var(--green)'},
+  'Oportunidades': {ic:'🎯', color:'var(--yellow)'},
+  'Vendas': {ic:'🤝', color:'#a78bfa'},
+};
+function renderJrnPipe(stages){
+  const pipe=document.getElementById('jrn-pipe'); if(!pipe) return;
+  if(!stages || !stages.length){
+    pipe.innerHTML='<div class="fn-empty" style="grid-column:1/-1">Conecte o RD Station para ver os leads por etapa.</div>';
+    return;
+  }
+  pipe.innerHTML = stages.map(s=>{
+    const m=FN_META[s.name]||{ic:'📊',color:'var(--blue-t)'};
+    return `<div class="jrn-stage" style="border-top-color:${m.color}">
+      <div class="jrn-ic">${m.ic}</div>
+      <div class="jrn-nm" style="color:${m.color}">${s.name}</div>
+      <div class="jrn-cnt">${fmtN(s.count)}${s.capped?'+':''}</div>
+      <div class="jrn-val">leads</div>
+    </div>`;
+  }).join('');
 }
 
 function connectRD(){ window.open('/api/rd/connect','_blank','noopener'); }
@@ -2180,36 +2180,7 @@ async function syncFunnel(){
   finally{ btn.disabled=false; btn.textContent=old; }
 }
 
-function initJourney(){
-  loadFunnel();
-  const pipe=document.getElementById('jrn-pipe');
-  pipe.innerHTML='';
-  JOURNEY_STAGES.forEach(st=>{
-    const div=document.createElement('div');
-    div.className='jrn-stage';
-    div.style.borderTopColor=st.color;
-    const totalVal=st.deals.filter(d=>d.val!=='Consultar').length;
-    div.innerHTML=`<div class="jrn-ic">${st.ic}</div>
-      <div class="jrn-nm" style="color:${st.color}">${st.nm}</div>
-      <div class="jrn-cnt">${st.deals.length}</div>
-      <div class="jrn-val">${st.deals.length===1?'1 negócio':st.deals.length+' negócios'}</div>
-      <ul class="jrn-items">
-        ${st.deals.map(d=>`<li class="jrn-item">
-          <div class="jrn-co">${d.co}</div>
-          <div class="jrn-prod">${d.prod}</div>
-          <div class="jrn-val-sm">${d.val}</div>
-        </li>`).join('')}
-      </ul>`;
-    pipe.appendChild(div);
-  });
-  const total=JOURNEY_STAGES.reduce((a,s)=>a+s.deals.length,0);
-  const fechados=JOURNEY_STAGES[4].deals.length;
-  document.getElementById('j-conv').innerHTML=`
-    <div class="j-cv"><div class="j-cv-v">${total}</div><div class="j-cv-l">Negócios ativos</div></div>
-    <div class="j-cv"><div class="j-cv-v">R$ 75K+</div><div class="j-cv-l">Em pipeline</div></div>
-    <div class="j-cv"><div class="j-cv-v">${Math.round(fechados/total*100)}%</div><div class="j-cv-l">Taxa de fechamento</div></div>
-    <div class="j-cv"><div class="j-cv-v">34d</div><div class="j-cv-l">Ciclo médio</div></div>`;
-}
+function initJourney(){ loadFunnel(); }  // funil + "leads por etapa" vêm do RD (loadFunnel)
 
 /* ═══════════════════════════════════════════════
    PRICE POLICY
