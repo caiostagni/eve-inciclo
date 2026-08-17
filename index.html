@@ -2136,6 +2136,7 @@ function filterObj(){ renderObj(); }
 ═══════════════════════════════════════════════ */
 /* ═══ FUNIL RD STATION ═══ */
 function fmtBRL(v){ return 'R$ ' + Math.round(v||0).toLocaleString('pt-BR'); }
+function fmtN(n){ return (n||0).toLocaleString('pt-BR'); }
 
 async function loadFunnel(){
   const box=document.getElementById('fn-box'), meta=document.getElementById('fn-meta'), btn=document.getElementById('fn-refresh');
@@ -2157,10 +2158,10 @@ async function loadFunnel(){
       <div class="fn-row">
         <div class="fn-name" title="${s.name}">${s.name}</div>
         <div class="fn-track"><div class="fn-fill" style="width:${Math.round(s.count/max*100)}%"></div></div>
-        <div class="fn-num">${s.count} ${leads?'leads':'neg. · '+fmtBRL(s.value)}</div>
+        <div class="fn-num">${leads?fmtN(s.count)+(s.capped?'+':'')+' leads':s.count+' neg. · '+fmtBRL(s.value)}</div>
       </div>`).join('') + `</div>
       <div class="fn-totals">${leads
-        ? `<span>Total: <b>${d.totalCount}</b> leads no funil</span>`
+        ? `<span>Total: <b>${fmtN(d.totalCount)}${d.capped?'+':''}</b> leads no funil</span>`
         : `<span>Total: <b>${d.totalCount}</b> negociações abertas</span><span>Valor em pipeline: <b>${fmtBRL(d.totalValue)}</b></span>`}</div>`;
   }catch(e){ box.innerHTML='<div class="fn-empty">Falha ao carregar o funil.</div>'; }
 }
