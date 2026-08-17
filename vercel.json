@@ -2,5 +2,9 @@
   "crons": [
     { "path": "/api/cron/rd-sync", "schedule": "0 11 * * *" },
     { "path": "/api/cron/sankhya-sync", "schedule": "0 10 * * *" }
-  ]
+  ],
+  "functions": {
+    "api/cron/rd-sync.js": { "maxDuration": 60 },
+    "api/cron/sankhya-sync.js": { "maxDuration": 60 }
+  }
 }

@@ -33,12 +33,14 @@ export default async function handler(req, res) {
     return res.status(503).json({ error: 'not_connected', message: 'RD Marketing ainda não conectado. Clique em "Conectar RD".' });
   }
 
-  const stageNames = (process.env.RD_MKT_STAGES || '').split(',').map((s) => s.trim()).filter(Boolean);
+  // Etapas do funil: override opcional via RD_MKT_FUNNEL (JSON [{label,segId}]); senão o padrão da CicloWay.
+  let stages;
+  try { const j = JSON.parse(process.env.RD_MKT_FUNNEL || 'null'); if (Array.isArray(j) && j.length) stages = j; } catch { /* usa default */ }
 
   try {
     const tok = await refreshAccessToken({ clientId, clientSecret, refreshToken });
     if (tok.refresh_token && tok.refresh_token !== refreshToken) await setStoredRefresh(sql, tok.refresh_token);
-    const funnel = await fetchLeadFunnel(tok.access_token, stageNames);
+    const funnel = await fetchLeadFunnel(tok.access_token, stages);
     await sql`insert into funnel_snapshot (source, payload) values ('rd-marketing', ${JSON.stringify(funnel)}::jsonb)`;
     return res.status(200).json({ ok: true, via, ...funnel });
   } catch (e) {
