@@ -749,6 +749,7 @@ a.btn-dl:hover{border-color:var(--blue-t);color:var(--blue-t)}
         <div class="upc-title" style="margin:0">📊 Funil de Leads · RD Station Marketing</div>
         <div class="fn-right">
           <span class="fn-meta" id="fn-meta"></span>
+          <button class="us-toggle" id="fn-connect" style="display:none" onclick="connectRD()">🔗 Conectar RD</button>
           <button class="us-toggle" id="fn-refresh" style="display:none" onclick="syncFunnel()">🔄 Atualizar agora</button>
         </div>
       </div>
@@ -2139,12 +2140,14 @@ function fmtBRL(v){ return 'R$ ' + Math.round(v||0).toLocaleString('pt-BR'); }
 async function loadFunnel(){
   const box=document.getElementById('fn-box'), meta=document.getElementById('fn-meta'), btn=document.getElementById('fn-refresh');
   if(!box) return;
-  if(btn) btn.style.display = (CU && CU.role==='admin') ? '' : 'none';
+  const isAdmin = CU && CU.role==='admin';
+  if(btn) btn.style.display = isAdmin ? '' : 'none';
+  const cbtn=document.getElementById('fn-connect'); if(cbtn) cbtn.style.display = isAdmin ? '' : 'none';
   try{
     const r=await fetch('/api/funnel'); const d=await r.json().catch(()=>({}));
     if(!r.ok || d.empty || !d.stages || !d.stages.length){
       meta.textContent='';
-      box.innerHTML=`<div class="fn-empty">Sem dados do funil ainda. ${CU&&CU.role==='admin'?'Configure as credenciais do RD Station Marketing (<b>RD_MKT_CLIENT_ID</b>, <b>RD_MKT_CLIENT_SECRET</b>, <b>RD_MKT_REFRESH_TOKEN</b> na Vercel) e clique em <b>Atualizar agora</b>.':'Peça a um administrador para conectar o RD Station.'}</div>`;
+      box.innerHTML=`<div class="fn-empty">Sem dados do funil ainda. ${CU&&CU.role==='admin'?'Com as credenciais na Vercel (<b>RD_MKT_CLIENT_ID</b> e <b>RD_MKT_CLIENT_SECRET</b>), clique em <b>🔗 Conectar RD</b>, autorize no RD e depois em <b>🔄 Atualizar agora</b>.':'Peça a um administrador para conectar o RD Station.'}</div>`;
       return;
     }
     const leads = d.kind==='leads';
@@ -2161,6 +2164,8 @@ async function loadFunnel(){
         : `<span>Total: <b>${d.totalCount}</b> negociações abertas</span><span>Valor em pipeline: <b>${fmtBRL(d.totalValue)}</b></span>`}</div>`;
   }catch(e){ box.innerHTML='<div class="fn-empty">Falha ao carregar o funil.</div>'; }
 }
+
+function connectRD(){ window.open('/api/rd/connect','_blank','noopener'); }
 
 async function syncFunnel(){
   const btn=document.getElementById('fn-refresh'), meta=document.getElementById('fn-meta');

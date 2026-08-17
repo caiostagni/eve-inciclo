@@ -45,3 +45,10 @@ create table if not exists stock_snapshot (
   payload     jsonb not null      -- { items: { <productId>: {qtd,status,loc} }, rowsCount, mapped }
 );
 create index if not exists stock_snapshot_at_idx on stock_snapshot (captured_at desc);
+
+-- Tokens de integração (ex.: refresh_token do RD Marketing). Guardado no servidor, nunca no browser.
+create table if not exists integration_token (
+  key        text primary key,          -- ex.: 'rd_mkt_refresh'
+  value      text not null,
+  updated_at timestamptz not null default now()
+);
