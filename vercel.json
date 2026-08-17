@@ -4,7 +4,7 @@
     { "path": "/api/cron/sankhya-sync", "schedule": "0 10 * * *" }
   ],
   "functions": {
-    "api/cron/rd-sync.js": { "maxDuration": 60 },
+    "api/cron/rd-sync.js": { "maxDuration": 120 },
     "api/cron/sankhya-sync.js": { "maxDuration": 60 }
   }
 }
