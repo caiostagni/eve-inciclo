@@ -22,8 +22,9 @@ export default async function handler(req, res) {
     // ?seg=ID → devolve a resposta crua (envelope) de 1 página de contatos, p/ ver se há total.
     const seg = req.query?.seg;
     if (seg) {
-      const raw = await segmentContactsPage(tok.access_token, seg, 1, 10);
-      return res.status(200).json({ envelopeKeys: Object.keys(raw || {}), contactsLen: (raw?.contacts || raw?.items || []).length, raw: { ...raw, contacts: undefined, items: undefined } });
+      const ps = parseInt(req.query?.ps || '10', 10);
+      const raw = await segmentContactsPage(tok.access_token, seg, 1, ps);
+      return res.status(200).json({ requestedPageSize: ps, contactsLen: (raw?.contacts || raw?.items || []).length, envelopeKeys: Object.keys(raw || {}) });
     }
 
     const segs = await listSegmentations(tok.access_token);
