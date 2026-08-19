@@ -52,3 +52,11 @@ create table if not exists integration_token (
   value      text not null,
   updated_at timestamptz not null default now()
 );
+
+-- Progresso de onboarding por colaborador. Uma linha por item concluído (+ '__concluido__' ao finalizar).
+create table if not exists onboarding_progress (
+  user_id  uuid not null references users(id) on delete cascade,
+  item_key text not null,
+  done_at  timestamptz not null default now(),
+  primary key (user_id, item_key)
+);

@@ -1,6 +1,6 @@
 import { Packer } from 'docx';
 import { readSessionCookie, verifySession } from '../lib/auth.js';
-import { getProposalType, buildProposalDoc } from '../lib/doc-templates.js';
+import { getProposalType, buildProposalDoc, CERT_FIELDS, buildCertificateDoc } from '../lib/doc-templates.js';
 import { getOfficial, officialFormsPublic, fillContract } from '../lib/contract-fill.js';
 
 // Gera documentos (.docx). Só logado.
@@ -13,7 +13,7 @@ export default async function handler(req, res) {
   if (!session) return res.status(401).json({ error: 'no_session' });
 
   if (req.method === 'GET') {
-    return res.status(200).json({ contracts: officialFormsPublic() });
+    return res.status(200).json({ contracts: officialFormsPublic(), cert: CERT_FIELDS });
   }
   if (req.method !== 'POST') { res.setHeader('Allow', 'GET, POST'); return res.status(405).json({ error: 'method_not_allowed' }); }
 
@@ -34,6 +34,18 @@ export default async function handler(req, res) {
       const buf = await Packer.toBuffer(buildProposalDoc(type, values, { data, autor }));
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
       res.setHeader('Content-Disposition', `attachment; filename="proposta-comercial-${type.id}.docx"`);
+      return res.status(200).end(buf);
+    }
+
+    // ── Certificado de treinamento ──
+    if (kind === 'certificado') {
+      const values = {};
+      for (const f of CERT_FIELDS) values[f.key] = String((body.fields && body.fields[f.key]) || '').slice(0, 2000).trim();
+      const faltando = CERT_FIELDS.filter((f) => f.req && !values[f.key]).map((f) => f.label);
+      if (faltando.length) return res.status(400).json({ error: 'missing_fields', faltando });
+      const buf = await Packer.toBuffer(buildCertificateDoc(values, { data: new Date().toLocaleDateString('pt-BR') }));
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+      res.setHeader('Content-Disposition', 'attachment; filename="certificado-treinamento.docx"');
       return res.status(200).end(buf);
     }
 

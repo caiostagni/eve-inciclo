@@ -228,6 +228,35 @@ body{font-family:'Poppins',-apple-system,sans-serif;background:var(--bg);color:v
 .btn-bl{padding:9px 20px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .15s}
 .btn-bl:hover{opacity:.88}
 .btn-bl:disabled{opacity:.3;cursor:not-allowed}
+.ob-headcard{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;margin-bottom:20px}
+.ob-head-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.ob-pct{font-size:30px;font-weight:800;color:var(--blue-t);line-height:1}
+.ob-barwrap{height:8px;background:var(--bg2);border-radius:6px;overflow:hidden;margin:12px 0 8px}
+.ob-bar{height:100%;background:var(--green);border-radius:6px;transition:width .3s}
+.ob-headmeta{font-size:12px;color:var(--text2)}
+.ob-item{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:12px}
+.ob-item.done{border-color:rgba(145,255,176,.35)}
+.ob-item-head{display:flex;gap:12px;align-items:flex-start}
+.ob-check{width:26px;height:26px;flex-shrink:0;border-radius:7px;border:2px solid var(--border2,#3a3f4a);background:var(--bg2);color:#09090b;font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.ob-check.on{background:var(--green);border-color:var(--green)}
+.ob-item-nm{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ob-req{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--yellow);background:rgba(234,179,8,.12);padding:2px 7px;border-radius:5px}
+.ob-item-desc{font-size:12.5px;color:var(--text2);margin-top:3px;line-height:1.5}
+.ob-item-content{margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+.ob-doc{margin-bottom:10px}
+.ob-doc>summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--blue-t);padding:8px 0}
+.ob-doc-body{font-size:13px;color:var(--text2);line-height:1.65;max-height:340px;overflow:auto;padding:8px 14px;background:var(--bg2);border-radius:8px;border:1px solid var(--border)}
+.ob-doc-body h3{font-size:13px;color:var(--text);margin:14px 0 4px}
+.ob-doc-body h3:first-child{margin-top:2px}
+.ob-doc-body ul{margin:4px 0 4px 18px}
+.ob-doc-body li{margin-bottom:3px}
+.ob-doc-body p{margin-bottom:6px}
+.ob-epis{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.ob-epi{margin:0}
+.ob-epi img{width:100%;border-radius:8px;border:1px solid var(--border);cursor:zoom-in;display:block;background:#fff}
+.ob-epi figcaption{font-size:11px;color:var(--text2);text-align:center;margin-top:5px;font-weight:600}
+.ob-zoom{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:1200;display:flex;align-items:center;justify-content:center;padding:24px;cursor:zoom-out}
+.ob-zoom img{max-width:96vw;max-height:92vh;border-radius:10px;background:#fff}
 
 /* ── BOAS PRÁTICAS ──────────────────────────────── */
 .bp-layout{display:flex;gap:24px;align-items:flex-start}
@@ -699,11 +728,8 @@ a.btn-dl:hover{border-color:var(--blue-t);color:var(--blue-t)}
     <!-- ONBOARDING -->
     <div id="pg-onboarding" class="pg">
       <div class="pg-title">Onboarding</div>
-      <div class="pg-sub">Trilha de integração para novos colaboradores</div>
-      <div class="ob-wrap">
-        <div class="ob-prog" id="ob-prog"></div>
-        <div class="ob-card" id="ob-card"></div>
-      </div>
+      <div class="pg-sub">Leia e confirme os materiais obrigatórios para concluir sua integração</div>
+      <div id="ob-body"></div>
     </div>
 
     <!-- BOAS PRÁTICAS -->
@@ -1082,19 +1108,6 @@ const TRAININGS = [
   {id:'t7',emoji:'⚠️',cat:'Segurança', nm:'Segurança no Trabalho — Oficina',          dur:'15 min',desc:'Normas de segurança para trabalho em oficina de veículos elétricos.'},
   {id:'t8',emoji:'🚛',cat:'Produtos',  nm:'Formigão G3 — Visão Geral',                dur:'20 min',desc:'Apresentação completa do Formigão G3 (2025): specs, montagem e diferenciais.'},
   {id:'t9',emoji:'🤝',cat:'Comercial', nm:'Atendimento ao Cliente B2B',               dur:'25 min',desc:'Boas práticas no atendimento a clientes corporativos da CicloWay.'},
-];
-
-const ONBOARDING = [
-  {num:1,nm:'Bem-vindo à CicloWay',desc:'Conheça nossa história, missão e valores. A CicloWay é pioneira em mobilidade elétrica no Brasil desde 2005.',
-   items:['Assista ao vídeo institucional da CicloWay','Acesse o site www.cicloway.com.br e explore os produtos','Leia o manual de cultura e boas práticas no InCiclo','Apresente-se para seu gestor direto no primeiro dia']},
-  {num:2,nm:'Conheça o Time',desc:'Familiarize-se com o organograma e identifique as pessoas-chave da sua área e das áreas com as quais você vai se relacionar.',
-   items:['Explore o Organograma no InCiclo e leia o JD do seu cargo','Identifique seu gestor direto e colegas de área','Conecte-se com as pessoas no WhatsApp','Agende um café/papo rápido com pelo menos 3 colegas de outra área']},
-  {num:3,nm:'Sistemas e Ferramentas',desc:'Configure suas contas nos sistemas que você vai usar no dia a dia. Se tiver dúvidas, o Altair (T.I.) é sua referência.',
-   items:['Configure seu e-mail @cicloway.com.br no Google Workspace','Acesse o Sankhya com suas credenciais','Acesse o Produtivo e leia o treinamento de chamados','Entre no grupo de WhatsApp da sua área']},
-  {num:4,nm:'Treinamentos Obrigatórios',desc:'Assista aos módulos de treinamento relevantes para sua área. Você pode marcar cada um como concluído na tela de Treinamentos.',
-   items:['Assista: Segurança no Trabalho — Oficina','Assista: Uso do Produtivo — Chamados Técnicos','Assista: Sankhya — Módulo de Vendas e Contratos','Complete ao menos 1 módulo da sua área específica']},
-  {num:5,nm:'Primeiros 30 Dias',desc:'Objetivos e entregas esperadas no primeiro mês. Pequenos progressos constantes são mais importantes do que grandes entregas no início.',
-   items:['Agende um 1:1 com seu gestor na primeira semana','Participe da reunião semanal da sua área','Anote pelo menos 3 dúvidas ou melhorias que você identificou','Tire dúvidas sobre processos com os colegas mais experientes']},
 ];
 
 const PRACTICES = [
@@ -1815,77 +1828,174 @@ function renderTraining(){
 /* ═══════════════════════════════════════════════
    ONBOARDING
 ═══════════════════════════════════════════════ */
-function obKey(){ return `inciclo_ob_${CU.id}`; }
-function obChecks(stepIdx){ return `inciclo_ob_ck_${CU.id}_${stepIdx}`; }
+const OB_EPIS = [
+  {nm:'Serralheria', img:'assets/onboarding/epis-serralheria.jpg'},
+  {nm:'Usinagem', img:'assets/onboarding/epis-usinagem.jpg'},
+  {nm:'Pintura', img:'assets/onboarding/epis-pintura.jpg'},
+  {nm:'Oficina — Pesados', img:'assets/onboarding/epis-oficina-pesados.jpg'},
+  {nm:'Oficina — Leves', img:'assets/onboarding/epis-oficina-leves.jpg'},
+];
 
-function getObStep(){ return parseInt(localStorage.getItem(obKey())||'0'); }
-function setObStep(s){ localStorage.setItem(obKey(), s); }
+const OB_WELCOME_HTML = `
+<h3>Nossos veículos</h3>
+<p>A CicloWay tem uma linha diversificada de veículos elétricos para mobilidade, transporte de pessoas, cargas, coleta e operações especiais (Segways, triciclos elétricos e motos elétricas).</p>
+<h3>Processos — ISO 9001:2015</h3>
+<p>Organização e padronização dos processos, definição de responsabilidades, controle de registros, indicadores e melhoria contínua.</p>
+<p><b>Fluxo de operação:</b> Cliente → Comercial → Pedido → Estoque/Operação → Produção → Entrega → Pós-vendas → Satisfação.</p>
+<p><b>Indicadores:</b> satisfação do cliente, NPS, não conformidades, manutenção, estoque, vendas e produção.</p>
+<h3>Uso do uniforme</h3>
+<ul><li>Utilizar o uniforme corretamente e mantê-lo limpo e em boas condições.</li><li>Seguir os padrões estabelecidos pela empresa.</li></ul>
+<h3>Uso das ferramentas</h3>
+<ul><li>Usar a ferramenta adequada para cada atividade; manter organizadas e conservadas.</li><li>Comunicar problemas ou danos; devolver após o uso.</li></ul>
+<h3>Uso de EPIs (segurança)</h3>
+<ul><li>Utilizar os EPIs obrigatórios de cada atividade e verificar as condições antes do uso.</li><li>Comunicar a necessidade de substituição.</li><li><b>Nunca realizar atividades de risco sem a proteção adequada.</b></li></ul>
+<h3>Ordem de Serviço (OS)</h3>
+<ul><li>Usar a OS para registrar e acompanhar as atividades, preenchendo corretamente.</li><li>Registrar serviços realizados, problemas e soluções; manter os registros atualizados.</li></ul>
+<h3>Comportamental</h3>
+<ul><li><b>Pontualidade:</b> chegar no horário e cumprir compromissos.</li><li><b>Postura com o cliente:</b> ser cordial, respeitoso e profissional; atenção e disposição para ajudar.</li><li><b>Atendimento:</b> ouvir a necessidade, comunicar-se com clareza, buscar soluções e direcionar ao responsável quando necessário.</li></ul>
+<h3>Disciplinar</h3>
+<ul><li>Cumprir normas e procedimentos; respeitar colegas, clientes e gestores; zelar pelo patrimônio.</li></ul>
+<p><b>PODE:</b> comunicar problemas, tirar dúvidas, sugerir melhorias e pedir apoio.<br><b>NÃO PODE:</b> desrespeitar pessoas, usar equipamentos de forma inadequada, descumprir procedimentos ou colocar a segurança em risco.</p>
+<p>O descumprimento das normas pode resultar em orientação, advertência e outras medidas disciplinares, conforme a gravidade e as regras da empresa (RH).</p>
+`;
 
-function getChecks(idx){
-  try { return JSON.parse(localStorage.getItem(obChecks(idx))||'[]'); }
-  catch(e){ return []; }
+let OB_STATE = null;
+let CERT_FORM = null;
+
+function initOnboarding(){ loadOnboarding(); }
+
+async function loadOnboarding(){
+  const body=document.getElementById('ob-body'); if(!body) return;
+  body.innerHTML='<div class="ob-sd">Carregando…</div>';
+  try{
+    const r=await fetch('/api/onboarding'); OB_STATE=await r.json().catch(()=>({}));
+    if(!r.ok || !OB_STATE.items){ body.innerHTML='<div class="fn-empty">Não foi possível carregar o onboarding.</div>'; return; }
+  }catch(e){ body.innerHTML='<div class="fn-empty">Falha de conexão.</div>'; return; }
+  renderOnboarding();
 }
-function setChecks(idx, arr){ localStorage.setItem(obChecks(idx), JSON.stringify(arr)); }
 
-function initOnboarding(){ renderOb(); }
+function obDone(key){ return OB_STATE.done && OB_STATE.done.includes(key); }
 
-function renderOb(){
-  const cur = getObStep();
-  const prog = document.getElementById('ob-prog');
-  prog.innerHTML='';
-  ONBOARDING.forEach((s,i)=>{
-    if(i>0){
-      const ln = document.createElement('div');
-      ln.className = 'ob-line'+(i<=cur?' done':'');
-      prog.appendChild(ln);
-    }
-    const dot = document.createElement('div');
-    dot.className = 'ob-dot'+(i<cur?' done':i===cur?' cur':'');
-    dot.textContent = i<cur ? '✓' : (i+1);
-    dot.title = s.nm;
-    if(i<=cur){ dot.style.cursor='pointer'; dot.onclick=()=>{ setObStep(i); renderOb(); }; }
-    prog.appendChild(dot);
-  });
+function obContent(key){
+  if(key==='welcome') return `<details class="ob-doc"><summary>📖 Abrir o manual completo</summary><div class="ob-doc-body">${OB_WELCOME_HTML}</div></details>
+    <a class="pr-ficha" href="assets/onboarding/boas-vindas-cicloway.pdf" target="_blank" rel="noopener">📄 Baixar o PDF do manual</a>`;
+  if(key==='epis') return `<div class="ob-epis">${OB_EPIS.map(e=>`<figure class="ob-epi"><img src="${e.img}" alt="EPIs ${e.nm}" loading="lazy" onclick="obZoom('${e.img}')"><figcaption>${e.nm}</figcaption></figure>`).join('')}</div>
+    <div class="gen-sub" style="margin-top:8px">Clique numa imagem para ampliar. Confira os EPIs da SUA área de trabalho.</div>`;
+  return '';
+}
 
-  const s = ONBOARDING[cur];
-  const checks = getChecks(cur);
-  const allDone = s.items.every((_,i)=>checks.includes(i));
+function renderOnboarding(){
+  const body=document.getElementById('ob-body');
+  const items=OB_STATE.items||[];
+  const mand=items.filter(i=>i.mandatory);
+  const mandDone=mand.filter(i=>obDone(i.key)).length;
+  const pct=mand.length?Math.round(mandDone/mand.length*100):0;
+  const concluded=OB_STATE.concluded;
 
-  const card = document.getElementById('ob-card');
-  card.innerHTML = `
-    <div class="ob-sn">Passo ${cur+1} de ${ONBOARDING.length}</div>
-    <div class="ob-st">${s.nm}</div>
-    <div class="ob-sd">${s.desc}</div>
-    <ul class="ob-cl">
-      ${s.items.map((it,i)=>`
-        <li class="ob-ci${checks.includes(i)?' ck':''}" data-i="${i}">
-          <div class="ob-cb">${checks.includes(i)?'✓':''}</div>
-          <span class="ob-ct">${it}</span>
-        </li>`).join('')}
-    </ul>
-    <div class="ob-act">
-      ${cur>0?`<button class="btn-sec" onclick="obBack()">← Anterior</button>`:''}
-      ${cur<ONBOARDING.length-1
-        ? `<button class="btn-bl" ${allDone?'':'disabled'} onclick="obNext()">Próximo passo →</button>`
-        : `<div style="color:var(--green);font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px">🎉 Onboarding concluído!</div>`
-      }
+  let html=`
+    <div class="ob-headcard">
+      <div class="ob-head-top">
+        <div><div class="ob-sn">Sua integração</div><div class="ob-st">${concluded?'Onboarding concluído 🎉':'Complete os itens obrigatórios'}</div></div>
+        <div class="ob-pct">${pct}%</div>
+      </div>
+      <div class="ob-barwrap"><div class="ob-bar" style="width:${pct}%"></div></div>
+      <div class="ob-headmeta">${concluded?`Concluído em <b>${OB_STATE.concludedAt||'—'}</b>`:`${mandDone} de ${mand.length} itens obrigatórios confirmados`}</div>
+      ${concluded?'':`<button class="btn-bl" id="ob-conclude" ${mandDone>=mand.length?'':'disabled'} onclick="obConclude()" style="margin-top:14px">✓ Concluir onboarding</button>`}
+      <div class="set-msg" id="ob-msg"></div>
     </div>`;
 
-  card.querySelectorAll('.ob-ci').forEach(li=>{
-    li.onclick=()=>{
-      const idx = parseInt(li.dataset.i);
-      const cur2 = getObStep();
-      const cks = getChecks(cur2);
-      const pos = cks.indexOf(idx);
-      if(pos>-1){ cks.splice(pos,1); } else { cks.push(idx); }
-      setChecks(cur2, cks);
-      renderOb();
-    };
-  });
+  html+= items.map(it=>{
+    const done=obDone(it.key); const content=obContent(it.key);
+    return `<div class="ob-item${done?' done':''}">
+      <div class="ob-item-head">
+        <button class="ob-check${done?' on':''}" onclick="obToggle('${it.key}',${!done})" aria-label="marcar">${done?'✓':''}</button>
+        <div class="ob-item-txt">
+          <div class="ob-item-nm">${it.title}${it.mandatory?' <span class="ob-req">obrigatório</span>':''}</div>
+          <div class="ob-item-desc">${it.desc}</div>
+        </div>
+      </div>
+      ${content?`<div class="ob-item-content">${content}</div>`:''}
+    </div>`;
+  }).join('');
+
+  html+=`<div class="upc-title" style="margin:28px 0 12px">🎓 Emitir certificado de treinamento</div>
+    <div class="gen-card" id="ob-cert-card"></div>`;
+
+  if(CU && CU.role==='admin') html+=`<div class="upc-title" style="margin:28px 0 12px">👥 Painel de conclusão (RH)</div><div id="ob-rh"></div>`;
+
+  body.innerHTML=html;
+  renderCertForm();
+  if(CU && CU.role==='admin') loadObRH();
 }
 
-function obNext(){ const c=getObStep(); if(c<ONBOARDING.length-1){ setObStep(c+1); renderOb(); } }
-function obBack(){ const c=getObStep(); if(c>0){ setObStep(c-1); renderOb(); } }
+async function obToggle(key, done){
+  if(!OB_STATE.done) OB_STATE.done=[];
+  if(done){ if(!OB_STATE.done.includes(key)) OB_STATE.done.push(key); }
+  else { OB_STATE.done=OB_STATE.done.filter(k=>k!==key); OB_STATE.concluded=false; }
+  renderOnboarding();
+  try{ await fetch('/api/onboarding',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({item_key:key,done})}); }
+  catch(e){ loadOnboarding(); }
+}
+
+async function obConclude(){
+  const msg=document.getElementById('ob-msg');
+  try{
+    const r=await fetch('/api/onboarding',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'conclude'})});
+    if(r.ok){ OB_STATE.concluded=true; OB_STATE.concludedAt=new Date().toLocaleDateString('pt-BR'); renderOnboarding(); }
+    else if(msg){ msg.className='set-msg err'; msg.textContent='Faltam itens obrigatórios.'; }
+  }catch(e){ if(msg){ msg.className='set-msg err'; msg.textContent='Falha de conexão.'; } }
+}
+
+function obZoom(src){
+  const o=document.createElement('div'); o.className='ob-zoom'; o.onclick=()=>o.remove();
+  o.innerHTML=`<img src="${src}" alt="EPIs">`;
+  document.body.appendChild(o);
+}
+
+async function renderCertForm(){
+  const card=document.getElementById('ob-cert-card'); if(!card) return;
+  if(!CERT_FORM){
+    try{ const r=await fetch('/api/generate-doc'); const d=await r.json().catch(()=>({})); CERT_FORM=(d&&d.cert)||[]; }catch(e){ CERT_FORM=[]; }
+  }
+  card.innerHTML=`<div class="gen-h">Certificado de treinamento por veículo</div>
+    <div class="gen-sub">Preencha os dados e baixe o certificado (.docx) no modelo oficial CicloWay.</div>
+    <div class="gen-fields">${CERT_FORM.map(f=>{
+      const inp=f.area?`<textarea class="fi" id="cf-${f.key}" rows="3" placeholder="${f.ph||''}"></textarea>`:`<input class="fi" id="cf-${f.key}" placeholder="${f.ph||''}"/>`;
+      return `<div class="fg${f.area?' gen-full':''}"><label class="fl">${f.label}${f.req?' *':''}</label>${inp}</div>`;
+    }).join('')}</div>
+    <div class="set-msg" id="cf-msg"></div>
+    <button class="set-btn" style="max-width:280px" onclick="generateCert()">⬇ Gerar certificado (.docx)</button>`;
+}
+
+async function generateCert(){
+  const msg=document.getElementById('cf-msg'); if(msg){ msg.className='set-msg'; msg.textContent=''; }
+  const fields={}, faltando=[];
+  CERT_FORM.forEach(f=>{ const v=(document.getElementById('cf-'+f.key).value||'').trim(); fields[f.key]=v; if(f.req && !v) faltando.push(f.label); });
+  if(faltando.length){ msg.className='set-msg err'; msg.textContent='Preencha os obrigatórios: '+faltando.join(', '); return; }
+  try{
+    const r=await fetch('/api/generate-doc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kind:'certificado',fields})});
+    if(!r.ok){ msg.className='set-msg err'; msg.textContent='Não foi possível gerar o certificado.'; return; }
+    const blob=await r.blob(); const url=URL.createObjectURL(blob);
+    const a=document.createElement('a'); a.href=url; a.download='certificado-treinamento.docx'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    msg.className='set-msg ok'; msg.textContent='Certificado gerado ✓ (baixado)';
+  }catch(e){ msg.className='set-msg err'; msg.textContent='Falha de conexão.'; }
+}
+
+async function loadObRH(){
+  const box=document.getElementById('ob-rh'); if(!box) return;
+  try{
+    const r=await fetch('/api/onboarding?all=1'); const d=await r.json().catch(()=>({}));
+    if(!r.ok || !d.users){ box.innerHTML='<div class="gen-sub">Sem dados.</div>'; return; }
+    const tot=d.totalItems||1;
+    box.innerHTML=`<div class="stk-wrap"><table class="stk-table">
+      <thead><tr><th>Colaborador</th><th>Área</th><th>Progresso</th><th>Onboarding</th></tr></thead>
+      <tbody>${d.users.map(u=>`<tr>
+        <td>${u.nome}</td><td>${u.dept||'—'}</td>
+        <td>${u.done}/${tot}</td>
+        <td>${u.concluded?`<span class="stk-ok">✓ concluído ${u.concludedAt||''}</span>`:'<span class="stk-consultar">pendente</span>'}</td>
+      </tr>`).join('')}</tbody></table></div>`;
+  }catch(e){ box.innerHTML='<div class="gen-sub">Falha ao carregar.</div>'; }
+}
 
 /* ═══════════════════════════════════════════════
    BOAS PRÁTICAS

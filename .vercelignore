@@ -5,3 +5,6 @@ contratos-template/
 
 # Scripts de manutenção (rodam só localmente)
 scripts/
+
+# Pasta-fonte do onboarding (inputs crus). Os assets processados ficam em assets/onboarding/.
+onboarding/
