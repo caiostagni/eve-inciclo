@@ -21,6 +21,9 @@ export default async function handler(req, res) {
   try {
     const session = await login(cfg); // valida credenciais
 
+    // só valida o login (não roda query)
+    if (req.query?.step === 'login') return res.status(200).json({ ok: true, loginOk: true });
+
     const find = req.query?.find;
     if (find) {
       const term = String(find).toUpperCase().replace(/[^A-Z0-9 ]/g, '').slice(0, 40);
@@ -33,6 +36,6 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: true, loginOk: true, sql: cfg.sql, totalRows: rows.length, amostra: rows.slice(0, 15) });
   } catch (e) {
     console.error('sankhya probe error:', e?.status, e?.message, e?.body);
-    return res.status(502).json({ error: 'sankhya_error', status: e?.status, detail: e?.body || e?.message });
+    return res.status(502).json({ error: 'sankhya_error', status: e?.status, service: e?.message, detail: e?.body || e?.message });
   }
 }
