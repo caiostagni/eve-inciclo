@@ -40,11 +40,34 @@ export default async function handler(req, res) {
     }
 
     const attempts = [];
+    // GRUPO 1 — endpoints candidatos que trocam appkey+token+user/senha por um Bearer
     attempts.push(await tryB('gw /login (plain)', gwBase + '/login', { appkey, token: apptoken, username: cfg.username, password: cfg.password }));
     attempts.push(await tryB('gw /login (b64)', gwBase + '/login', { appkey, token: apptoken, username: b64u, password: b64p }));
+    attempts.push(await tryB('mge /login', cfg.base.replace(/\/$/, '') + '/login', { appkey, token: apptoken, username: cfg.username, password: cfg.password }));
+    attempts.push(await tryB('mgeAutenticador/oauth2/token', gwBase + '/mgeAutenticador/oauth2/token', { appkey, token: apptoken, username: cfg.username, password: cfg.password }));
     attempts.push(await tryB('mge MobileLoginSP + appkey/token headers', cfg.base.replace(/\/$/, '') + '/service.sbr?serviceName=MobileLoginSP.login&outputType=json', { appkey, token: apptoken }, { serviceName: 'MobileLoginSP.login', requestBody: { NOMUSU: { $: cfg.username }, INTERNO: { $: cfg.password } } }));
 
-    // Para quem obteve bearer, testa a consulta de estoque
+    // GRUPO 2 — usar as chaves DIRETO na consulta (loadRecords), com a sessão do login normal
+    let sess = null; try { sess = await login(cfg); } catch { /* */ }
+    async function testLoad(name, headers, qp = {}) {
+      try {
+        const url = new URL(cfg.base.replace(/\/$/, '') + '/service.sbr');
+        url.searchParams.set('serviceName', 'CRUDServiceProvider.loadRecords'); url.searchParams.set('outputType', 'json'); url.searchParams.set('output', 'json');
+        for (const [k, v] of Object.entries(qp)) url.searchParams.set(k, v);
+        const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', ...headers }, body: JSON.stringify({ serviceName: 'CRUDServiceProvider.loadRecords', requestBody: { dataSet: { rootEntity: 'Estoque', includePresentationFields: 'N', offsetPage: '0', criteria: { expression: { $: 'this.ESTOQUE > 0' } }, entity: { fieldset: { list: 'CODPROD,ESTOQUE' } } } } }) });
+        const raw = dec(await r.arrayBuffer()); let j = {}; try { j = JSON.parse(raw); } catch { /* */ }
+        return { name, http: r.status, status: j.status ?? null, works: String(j.status) === '1', msg: String(j.statusMessage || '').slice(0, 120) };
+      } catch (e) { return { name, error: e.message }; }
+    }
+    const direct = [];
+    if (sess) {
+      direct.push(await testLoad('load: appkey+token headers + session', { appkey, token: apptoken, Cookie: 'JSESSIONID=' + sess }, { mgeSession: sess }));
+      direct.push(await testLoad('load: Authorization Bearer=apptoken', { Authorization: 'Bearer ' + apptoken, Cookie: 'JSESSIONID=' + sess }, { mgeSession: sess }));
+      direct.push(await testLoad('load: token=apptoken header', { token: apptoken, Cookie: 'JSESSIONID=' + sess }, { mgeSession: sess }));
+      direct.push(await testLoad('load: appkey+Authorization Bearer=session', { appkey, Authorization: 'Bearer ' + sess }, {}));
+    }
+
+    // Para quem obteve bearer no GRUPO 1, testa a consulta de estoque
     for (const a of attempts) {
       if (a._bearer) {
         try {
@@ -57,7 +80,7 @@ export default async function handler(req, res) {
       }
       delete a._bearer;
     }
-    return res.status(200).json({ gwBase, attempts });
+    return res.status(200).json({ gwBase, attempts, direct });
   }
 
   try {
