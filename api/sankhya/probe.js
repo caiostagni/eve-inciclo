@@ -1,5 +1,5 @@
 import { readSessionCookie, verifySession } from '../../lib/auth.js';
-import { login, fetchStock, searchProducts, DEFAULT_BASE } from '../../lib/sankhya.js';
+import { login, loginRaw, fetchStock, searchProducts, DEFAULT_BASE } from '../../lib/sankhya.js';
 
 // Diagnóstico Sankhya (admin): valida login e ajuda a mapear produtos.
 //   ?step=login    → só valida o login
@@ -19,6 +19,14 @@ export default async function handler(req, res) {
   if (!cfg.username || !cfg.password) return res.status(503).json({ error: 'not_configured', message: 'Faltam SANKHYA_USERNAME / SANKHYA_PASSWORD.' });
 
   try {
+    // dump da resposta de login (redige o jsessionid) — p/ ver se há token/bearer
+    if (req.query?.logininfo) {
+      const j = await loginRaw(cfg);
+      const rb = { ...(j?.responseBody || {}) };
+      if (rb.jsessionid) rb.jsessionid = { $: '***redacted***' };
+      return res.status(200).json({ status: j?.status, keys: Object.keys(rb), responseBody: rb });
+    }
+
     const session = await login(cfg); // valida credenciais
     if (req.query?.step === 'login') return res.status(200).json({ ok: true, loginOk: true });
 
