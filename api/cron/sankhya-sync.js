@@ -1,5 +1,5 @@
 import { db, readSessionCookie, verifySession } from '../../lib/auth.js';
-import { fetchStock, DEFAULT_BASE, DEFAULT_STOCK_SQL } from '../../lib/sankhya.js';
+import { fetchStock, DEFAULT_BASE } from '../../lib/sankhya.js';
 
 // Sincroniza o saldo de estoque do Sankhya e grava um snapshot no Neon.
 // Autorizado por: (a) cron da Vercel (Authorization: Bearer CRON_SECRET) ou (b) admin logado (botão).
@@ -21,7 +21,6 @@ export default async function handler(req, res) {
     base: process.env.SANKHYA_BASE_URL || DEFAULT_BASE,
     username: process.env.SANKHYA_USERNAME,
     password: process.env.SANKHYA_PASSWORD,
-    sql: process.env.SANKHYA_STOCK_SQL || DEFAULT_STOCK_SQL,
   };
   if (!cfg.username || !cfg.password) {
     return res.status(503).json({ error: 'not_configured', message: 'Faltam credenciais do Sankhya (SANKHYA_USERNAME / SANKHYA_PASSWORD).' });
