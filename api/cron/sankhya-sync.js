@@ -1,5 +1,5 @@
 import { db, readSessionCookie, verifySession } from '../../lib/auth.js';
-import { fetchStock, DEFAULT_BASE } from '../../lib/sankhya.js';
+import { fetchStock, DEFAULT_BASE, DEFAULT_AUTH_URL } from '../../lib/sankhya.js';
 
 // Sincroniza o saldo de estoque do Sankhya e grava um snapshot no Neon.
 // Autorizado por: (a) cron da Vercel (Authorization: Bearer CRON_SECRET) ou (b) admin logado (botão).
@@ -19,6 +19,7 @@ export default async function handler(req, res) {
 
   const cfg = {
     base: process.env.SANKHYA_BASE_URL || DEFAULT_BASE,
+    authUrl: process.env.SANKHYA_AUTH_URL || DEFAULT_AUTH_URL,
     username: process.env.SANKHYA_USERNAME,
     password: process.env.SANKHYA_PASSWORD,
     appkey: process.env.SANKHYA_APPKEY,
