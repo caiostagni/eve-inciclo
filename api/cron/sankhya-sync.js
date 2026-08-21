@@ -21,9 +21,11 @@ export default async function handler(req, res) {
     base: process.env.SANKHYA_BASE_URL || DEFAULT_BASE,
     username: process.env.SANKHYA_USERNAME,
     password: process.env.SANKHYA_PASSWORD,
+    appkey: process.env.SANKHYA_APPKEY,
+    token: process.env.SANKHYA_TOKEN,
   };
-  if (!cfg.username || !cfg.password) {
-    return res.status(503).json({ error: 'not_configured', message: 'Faltam credenciais do Sankhya (SANKHYA_USERNAME / SANKHYA_PASSWORD).' });
+  if (!cfg.username || !cfg.password || !cfg.appkey || !cfg.token) {
+    return res.status(503).json({ error: 'not_configured', message: 'Faltam credenciais do Sankhya (USERNAME/PASSWORD/APPKEY/TOKEN).' });
   }
 
   // Mapa productId(InCiclo) → CODPROD(Sankhya). Sem ele, não há como casar os produtos.
