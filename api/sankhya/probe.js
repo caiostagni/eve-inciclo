@@ -22,6 +22,24 @@ export default async function handler(req, res) {
     return res.status(503).json({ error: 'not_configured', message: 'Faltam SANKHYA_USERNAME/PASSWORD/APPKEY/TOKEN.' });
   }
 
+  // Testa variações do nome do serviço de OAuth (o MGE recusou 'login_oauth')
+  if (req.query?.svctest) {
+    const dec = (buf) => new TextDecoder('iso-8859-1').decode(buf);
+    const cands = ['MobileLoginSP.login_oauth', 'MobileLoginSP.loginOAuth', 'MobileLoginSP.loginOauth', 'MobileLoginSP.oauthLogin', 'MobileLoginSP.loginOAuth2', 'MobileLoginSP.login'];
+    const out = [];
+    for (const sn of cands) {
+      try {
+        const url = new URL(cfg.base.replace(/\/$/, '') + '/service.sbr');
+        url.searchParams.set('serviceName', sn); url.searchParams.set('outputType', 'json'); url.searchParams.set('output', 'json');
+        const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', appkey: cfg.appkey, token: cfg.token }, body: JSON.stringify({ serviceName: sn, requestBody: { nomusu: { $: cfg.username }, internumpadd: { $: cfg.password } } }) });
+        const raw = dec(await r.arrayBuffer()); let j = {}; try { j = JSON.parse(raw); } catch { /* */ }
+        const bearer = j?.responseBody?.bearerToken?.$ || j?.responseBody?.bearerToken || null;
+        out.push({ serviceName: sn, status: j.status ?? null, gotBearer: !!bearer, respKeys: j.responseBody ? Object.keys(j.responseBody) : null, msg: String(j.statusMessage || '').slice(0, 130) });
+      } catch (e) { out.push({ serviceName: sn, error: e.message }); }
+    }
+    return res.status(200).json({ out });
+  }
+
   try {
     const bearer = await getBearer(cfg);
     if (req.query?.step === 'bearer') return res.status(200).json({ ok: true, bearerOk: true });
