@@ -6,5 +6,6 @@ contratos-template/
 # Scripts de manutenção (rodam só localmente)
 scripts/
 
-# Pasta-fonte do onboarding (inputs crus). Os assets processados ficam em assets/onboarding/.
-onboarding/
+# Pasta-fonte do onboarding (inputs crus) — só a da RAIZ. NÃO usar "onboarding/" sem a
+# barra inicial: isso casaria também com assets/onboarding/ (imagens dos EPIs) e as tiraria do deploy.
+/onboarding/
