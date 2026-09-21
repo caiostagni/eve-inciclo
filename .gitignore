@@ -16,3 +16,6 @@ assets/cases/imagens/
 
 # pasta-fonte do onboarding (inputs crus, inclui PDF de 24MB) — não versionar nem deployar
 /onboarding/
+
+# Planilhas-fonte (organograma, base de e-mails) — dados sensíveis, não versionar
+*.xlsx
