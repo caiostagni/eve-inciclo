@@ -849,9 +849,6 @@ a.btn-dl:hover{border-color:var(--blue-t);color:var(--blue-t)}
         <button class="set-btn" id="gen-btn" style="max-width:280px;display:none" onclick="generateDoc()">⬇ Gerar contrato (.docx)</button>
         <div class="gen-legal">⚠️ Documento gerado como <b>rascunho</b> a partir do modelo oficial. Revise (idealmente com o jurídico) antes de assinar.</div>
       </div>
-
-      <div class="upc-title" style="margin:26px 0 12px">📄 Modelos para download</div>
-      <div class="dl-grid" id="contracts-grid"></div>
     </div>
 
     <!-- PROPOSTAS PADRÃO -->
@@ -1460,17 +1457,6 @@ const CASES = [
   {img:'assets/cases/metro.jpg',title:'Metrô de São Paulo',sub:'Segurança patrimonial',
    desc:'Segways da CicloWay apoiam as rondas nas estações do Metrô SP: mais cobertura e menor tempo de resposta no intenso fluxo de passageiros, com condução estável e autoequilíbrio.',
    tags:['50% menos tempo de ronda','Até 3x mais área patrulhada','−58% no trajeto de 3 km'],file:'assets/cases/arquivos/case-metro.docx'},
-];
-
-const CONTRACTS = [
-  {emoji:'📑',title:'Locação — Patinetes (B2B)',sub:'Contrato padrão para locação de patinetes',desc:'Contrato mensal com cláusulas de manutenção, SLA e seguro para frota de patinetes elétricos.',tags:['Locação','Patinetes'],file:'contrato-locacao-patinetes.docx'},
-  {emoji:'📑',title:'Locação — Segways e Triciclos',sub:'Contrato para veículos pesados e Segways',desc:'Versão do contrato de locação adaptada para veículos maiores com cláusulas específicas de operação.',tags:['Locação','Segway','Triciclos'],file:'contrato-locacao-pesados.docx'},
-  {emoji:'🤝',title:'Venda Direta — Frota B2B',sub:'Contrato de compra e venda em frota',desc:'Contrato de venda com garantia estendida, condições especiais e termos de suporte pós-venda.',tags:['Venda','B2B'],file:'contrato-venda-b2b.docx'},
-  {emoji:'🏛️',title:'Contrato Público — Prefeituras',sub:'Modelo para licitações e órgãos públicos',desc:'Adaptado às exigências da Lei 14.133/21 (nova Lei de Licitações) com cláusulas de FIAT e ICMS Manaus.',tags:['Público','Prefeitura'],file:'contrato-publico.docx'},
-  {emoji:'🔧',title:'Manutenção Preventiva Anual',sub:'Contrato de serviço de manutenção',desc:'Plano anual de manutenção preventiva para frotas adquiridas. Inclui 2 revisões e peças básicas.',tags:['Serviço','Manutenção'],file:'contrato-manutencao.docx'},
-  {emoji:'🤝',title:'Parceria Comercial (Representante)',sub:'Contrato de representação comercial',desc:'Contrato de representante comercial PJ com metas, comissões e área de atuação.',tags:['Parceria','Comercial'],file:'contrato-representante.docx'},
-  {emoji:'🔒',title:'NDA — Acordo de Confidencialidade',sub:'Modelo de NDA para negociações',desc:'NDA padrão para negociações estratégicas, due diligence e apresentação de projetos.',tags:['NDA','Jurídico'],file:'nda-cicloway.docx'},
-  {emoji:'🏭',title:'Contrato de Fornecimento — Produção',sub:'Compra de insumos e componentes',desc:'Contrato com fornecedores de componentes elétricos para a linha de produção de Manaus.',tags:['Fornecedor','Produção'],file:'contrato-fornecimento.docx'},
 ];
 
 const PROPOSALS = [
@@ -2719,7 +2705,7 @@ function makeDLCards(data, containerId){
 }
 
 function initCases(){ makeDLCards(CASES,'cases-grid'); }
-function initContracts(){ makeDLCards(CONTRACTS,'contracts-grid'); initContractsGen(); }
+function initContracts(){ initContractsGen(); }
 
 /* ═══ GERADOR DE CONTRATO OFICIAL ═══ */
 let CONTRACT_FORMS = [];  // carregado do backend (GET /api/generate-doc) — fonte única dos campos
