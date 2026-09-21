@@ -60,3 +60,16 @@ create table if not exists onboarding_progress (
   done_at  timestamptz not null default now(),
   primary key (user_id, item_key)
 );
+
+-- Avaliações de treinamento por colaborador. Uma linha por (usuário, treinamento):
+-- guarda a melhor nota, se foi aprovado e as respostas dissertativas (para o RH ler).
+create table if not exists training_progress (
+  user_id      uuid not null references users(id) on delete cascade,
+  training_id  text not null,
+  score        int  not null default 0,        -- % de acerto nas objetivas
+  passed       boolean not null default false,
+  attempts     int  not null default 0,
+  essays       jsonb,                           -- respostas dissertativas [{q, a}]
+  submitted_at timestamptz not null default now(),
+  primary key (user_id, training_id)
+);

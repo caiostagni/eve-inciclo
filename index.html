@@ -207,6 +207,40 @@ body{font-family:'Poppins',-apple-system,sans-serif;background:var(--bg);color:v
 .vstatus.pend:hover{color:var(--blue-t);border-color:var(--blue-t);background:var(--bl)}
 .vstatus.done{color:var(--green);border-color:var(--green);background:var(--gl)}
 
+/* ── QUIZ (avaliações) ──────────────────────────── */
+.qz-ov{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:flex-start;justify-content:center;padding:32px 16px;z-index:200;overflow-y:auto}
+.qz-box{background:var(--card);border:1px solid var(--border);border-radius:14px;width:100%;max-width:640px;display:flex;flex-direction:column;max-height:calc(100vh - 64px)}
+.qz-hd{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:18px 20px;border-bottom:1px solid var(--border)}
+.qz-title{font-size:16px;font-weight:700}
+.qz-sub{font-size:11px;color:var(--text2);margin-top:3px}
+.qz-body{padding:18px 20px;overflow-y:auto}
+.qz-video{position:relative;padding-bottom:56.25%;height:0;margin-bottom:16px;border-radius:10px;overflow:hidden;background:var(--bg2)}
+.qz-video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.qz-mats{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.qz-q{padding:14px 0;border-bottom:1px solid var(--border)}
+.qz-q:last-child{border-bottom:0}
+.qz-qt{font-size:13px;font-weight:600;line-height:1.5;margin-bottom:10px}
+.qz-diss{font-size:10px;font-weight:700;color:var(--blue-t);background:var(--bl);padding:2px 7px;border-radius:10px;margin-left:4px}
+.qz-opts{display:flex;flex-direction:column;gap:6px}
+.qz-opt{display:flex;align-items:flex-start;gap:9px;font-size:13px;padding:9px 11px;border:1px solid var(--border);border-radius:9px;cursor:pointer;transition:border-color .12s,background .12s}
+.qz-opt:hover{border-color:var(--blue-t);background:var(--bg2)}
+.qz-opt input{margin-top:2px;accent-color:var(--blue)}
+.qz-opt:has(input:checked){border-color:var(--blue-t);background:var(--bl)}
+.qz-txt{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:10px;font-family:inherit;font-size:13px;color:var(--text);resize:vertical}
+.qz-txt:focus{outline:none;border-color:var(--blue-t)}
+.qz-ft{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;border-top:1px solid var(--border)}
+.qz-result{text-align:center;padding:36px 20px}
+.qz-res-ic{font-size:52px;margin-bottom:8px}
+.qz-res-score{font-size:40px;font-weight:800;line-height:1}
+.qz-result.ok .qz-res-score{color:var(--green)}
+.qz-result.no .qz-res-score{color:var(--muted)}
+.qz-res-msg{font-size:14px;font-weight:600;margin:12px 0 6px}
+.qz-res-detail{font-size:12px;color:var(--text2);margin-bottom:20px}
+.qz-es-sec{margin-bottom:20px}
+.qz-es-tt{font-size:13px;font-weight:700;margin-bottom:8px}
+.qz-es-q{font-size:12px;font-weight:600;color:var(--text2);margin-top:10px}
+.qz-es-a{font-size:13px;line-height:1.5;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:9px 11px;margin-top:4px;white-space:pre-wrap}
+
 /* ── ONBOARDING ─────────────────────────────────── */
 .ob-wrap{max-width:680px}
 .ob-prog{display:flex;align-items:center;margin-bottom:32px}
@@ -670,7 +704,7 @@ a.btn-dl:hover{border-color:var(--blue-t);color:var(--blue-t)}
     <div class="nav-sec">Pessoas</div>
     <button class="nav-it" data-p="org"><span class="ic">🏢</span>Organograma</button>
     <div class="nav-sec">Aprendizado</div>
-    <button class="nav-it" data-p="training"><span class="ic">🎬</span>Treinamentos<span class="nav-demo" title="Dados de demonstração">⚙️</span></button>
+    <button class="nav-it" data-p="training"><span class="ic">🎬</span>Treinamentos</button>
     <button class="nav-it" data-p="onboarding"><span class="ic">🚀</span>Onboarding</button>
     <div class="nav-sec">Cultura</div>
     <button class="nav-it" data-p="practices"><span class="ic">📖</span>Boas Práticas</button>
@@ -733,9 +767,12 @@ a.btn-dl:hover{border-color:var(--blue-t);color:var(--blue-t)}
     <!-- TREINAMENTOS -->
     <div id="pg-training" class="pg">
       <div class="pg-title">Treinamentos</div>
-      <div class="pg-sub">Módulos de capacitação técnica e operacional</div>
-      <div class="frow" id="cat-row"></div>
+      <div class="pg-sub">Assista ao material e faça a avaliação. Aprovação a partir de 70% de acerto.</div>
       <div class="tgrid" id="tgrid"></div>
+      <div id="tr-rh-wrap" style="display:none">
+        <div class="upc-title" style="margin:28px 0 12px">👥 Painel de avaliações (RH)</div>
+        <div id="tr-rh"></div>
+      </div>
     </div>
 
     <!-- ONBOARDING -->
@@ -1897,18 +1934,6 @@ const PEOPLE = [
  }
 ];let EVENTS = []; // carregado do banco via /api/events (gerenciado em Configurações)
 
-const TRAININGS = [
-  {id:'t1',emoji:'🛴',cat:'Manutenção',nm:'Manutenção Básica — Patinetes Linha SN',   dur:'32 min',desc:'Procedimentos de revisão preventiva para a linha SN-100 e SN-200.'},
-  {id:'t2',emoji:'⚙️',cat:'Manutenção',nm:'Diagnóstico de Bateria — Triciclos',       dur:'45 min',desc:'Processo completo de diagnóstico e substituição de baterias em triciclos.'},
-  {id:'t3',emoji:'🛤️',cat:'Operação',  nm:'Operação do Segway i2',                    dur:'18 min',desc:'Como operar e orientar clientes no uso correto do Segway i2.'},
-  {id:'t4',emoji:'🔧',cat:'Operação',  nm:'Calibração e Ajuste de Freios',            dur:'27 min',desc:'Procedimento de calibração de freios em veículos pesados e leves.'},
-  {id:'t5',emoji:'💻',cat:'Sistemas',  nm:'Uso do Produtivo — Chamados Técnicos',     dur:'22 min',desc:'Como abrir, acompanhar e fechar chamados técnicos no Produtivo.'},
-  {id:'t6',emoji:'📊',cat:'Sistemas',  nm:'Sankhya — Módulo de Vendas e Contratos',    dur:'28 min',desc:'Cadastro de clientes, propostas e contratos no ERP Sankhya.'},
-  {id:'t7',emoji:'⚠️',cat:'Segurança', nm:'Segurança no Trabalho — Oficina',          dur:'15 min',desc:'Normas de segurança para trabalho em oficina de veículos elétricos.'},
-  {id:'t8',emoji:'🚛',cat:'Produtos',  nm:'Formigão G3 — Visão Geral',                dur:'20 min',desc:'Apresentação completa do Formigão G3 (2025): specs, montagem e diferenciais.'},
-  {id:'t9',emoji:'🤝',cat:'Comercial', nm:'Atendimento ao Cliente B2B',               dur:'25 min',desc:'Boas práticas no atendimento a clientes corporativos da CicloWay.'},
-];
-
 const PRACTICES = [
   {id:'cultura',ic:'🌟',nm:'Cultura e Valores',
    body:`<h3>Quem somos</h3>
@@ -2561,55 +2586,142 @@ function closeMod(e){
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeMod(); });
 
 /* ═══════════════════════════════════════════════
-   TRAINING
+   TRAINING — avaliações (correção server-side)
 ═══════════════════════════════════════════════ */
-let trainCat = 'Todos';
+let TR_STATE = { trainings: [], progress: {} };
+let TR_RH = null;
+let quizId = null;
+const TR_EMOJI = { atendimento:'🤝', checklist:'✅', satisfacao:'📊' };
 
-function tKey(tid){ return `inciclo_t_${CU.id}_${tid}`; }
-function isDone(tid){ return localStorage.getItem(tKey(tid))==='1'; }
-function toggleDone(tid, btn){
-  const done = isDone(tid);
-  if(done){ localStorage.removeItem(tKey(tid)); }
-  else { localStorage.setItem(tKey(tid),'1'); }
-  btn.className = 'vstatus '+(done?'pend':'done');
-  btn.textContent = done ? 'Marcar concluído' : '✓ Concluído';
-}
+function initTraining(){ loadTrainings(); }
 
-function initTraining(){
-  const cats = ['Todos',...new Set(TRAININGS.map(t=>t.cat))];
-  const row = document.getElementById('cat-row');
-  row.innerHTML='';
-  cats.forEach(c=>{
-    const b = document.createElement('button');
-    b.className = 'fchip'+(c===trainCat?' on':'');
-    b.textContent = c;
-    b.onclick=()=>{ trainCat=c; document.querySelectorAll('#cat-row .fchip').forEach(x=>x.classList.remove('on')); b.classList.add('on'); renderTraining(); };
-    row.appendChild(b);
-  });
+async function loadTrainings(){
+  const grid=document.getElementById('tgrid'); if(!grid) return;
+  grid.innerHTML='<div class="ob-sd">Carregando…</div>';
+  try{
+    const r=await fetch('/api/training'); TR_STATE=await r.json().catch(()=>({}));
+    if(!r.ok || !TR_STATE.trainings){ grid.innerHTML='<div class="fn-empty">Não foi possível carregar os treinamentos.</div>'; return; }
+  }catch(e){ grid.innerHTML='<div class="fn-empty">Falha de conexão.</div>'; return; }
   renderTraining();
 }
 
 function renderTraining(){
-  const grid = document.getElementById('tgrid');
-  grid.innerHTML='';
-  const list = trainCat==='Todos' ? TRAININGS : TRAININGS.filter(t=>t.cat===trainCat);
-  list.forEach(t=>{
-    const done = isDone(t.id);
-    const card = document.createElement('div');
-    card.className = 'vcard';
-    card.innerHTML = `
-      <div class="vthumb">${t.emoji}<div class="vplay"><div class="vplay-ic">▶</div></div></div>
+  const grid=document.getElementById('tgrid'); if(!grid) return;
+  const prog=TR_STATE.progress||{};
+  grid.innerHTML=(TR_STATE.trainings||[]).map(t=>{
+    const p=prog[t.id]; const passed=p&&p.passed; const has=!!p;
+    const nq=t.questions.filter(q=>!q.dissertativa).length;
+    const btn = passed
+      ? `<button class="vstatus done" onclick="openQuiz('${t.id}')">✓ Aprovado · ${p.score}%</button>`
+      : `<button class="vstatus pend" onclick="openQuiz('${t.id}')">${has?`Refazer · ${p.score}%`:'Fazer avaliação'}</button>`;
+    return `<div class="vcard">
+      <div class="vthumb">${TR_EMOJI[t.id]||'🎓'}${t.video?'<div class="vplay"><div class="vplay-ic">▶</div></div>':''}</div>
       <div class="vinfo">
-        <div class="vcat">${t.cat}</div>
-        <div class="vtitle">${t.nm}</div>
+        <div class="vcat">Avaliação${passed?' · concluída':''}</div>
+        <div class="vtitle">${t.title}</div>
         <div class="vdesc">${t.desc}</div>
         <div class="vft">
-          <span class="vdur">⏱ ${t.dur}</span>
-          <button class="vstatus ${done?'done':'pend'}" onclick="toggleDone('${t.id}',this)">${done?'✓ Concluído':'Marcar concluído'}</button>
+          <span class="vdur">📝 ${nq} questões · mín. ${t.pass}%</span>
+          ${btn}
         </div>
-      </div>`;
-    grid.appendChild(card);
+      </div></div>`;
+  }).join('');
+  const wrap=document.getElementById('tr-rh-wrap');
+  if(CU && CU.role==='admin'){ wrap.style.display=''; loadTrRH(); } else if(wrap){ wrap.style.display='none'; }
+}
+
+function openQuiz(id){
+  const t=(TR_STATE.trainings||[]).find(x=>x.id===id); if(!t) return;
+  quizId=id;
+  let mat='';
+  if(t.video) mat+=`<div class="qz-video"><iframe src="${t.video}" allow="autoplay" allowfullscreen></iframe></div>`;
+  if(t.materials&&t.materials.length) mat+=`<div class="qz-mats">${t.materials.map(m=>`<a class="pr-ficha" href="${m.url}" target="_blank" rel="noopener">📄 ${m.nm}</a>`).join('')}</div>`;
+  const qs=t.questions.map((q,i)=>{
+    if(q.dissertativa) return `<div class="qz-q"><div class="qz-qt">${i+1}. ${q.q} <span class="qz-diss">dissertativa</span></div>
+      <textarea class="qz-txt" data-i="${i}" rows="4" placeholder="Escreva sua resposta…"></textarea></div>`;
+    return `<div class="qz-q"><div class="qz-qt">${i+1}. ${q.q}</div>
+      <div class="qz-opts">${q.opts.map((o,j)=>`<label class="qz-opt"><input type="radio" name="q${i}" value="${j}"><span>${o}</span></label>`).join('')}</div></div>`;
+  }).join('');
+  const ov=document.createElement('div'); ov.className='qz-ov'; ov.id='qz-ov';
+  ov.onclick=(e)=>{ if(e.target===ov) closeQuiz(); };
+  ov.innerHTML=`<div class="qz-box">
+    <div class="qz-hd"><div><div class="qz-title">${t.title}</div><div class="qz-sub">Nota mínima ${t.pass}% · dissertativas obrigatórias (não entram na nota)</div></div><button class="mcls" onclick="closeQuiz()">×</button></div>
+    <div class="qz-body">${mat}${qs}</div>
+    <div class="qz-ft"><div class="set-msg" id="qz-msg"></div><button class="btn-bl" id="qz-send" onclick="submitQuiz()">Enviar avaliação</button></div>
+  </div>`;
+  document.body.appendChild(ov);
+}
+function closeQuiz(){ const o=document.getElementById('qz-ov'); if(o)o.remove(); quizId=null; }
+
+async function submitQuiz(){
+  const t=(TR_STATE.trainings||[]).find(x=>x.id===quizId); if(!t) return;
+  const answers=[]; let missing=false;
+  t.questions.forEach((q,i)=>{
+    if(q.dissertativa){ const el=document.querySelector(`.qz-txt[data-i="${i}"]`); const v=(el?.value||'').trim(); if(!v)missing=true; answers[i]=v; }
+    else { const sel=document.querySelector(`input[name="q${i}"]:checked`); if(!sel)missing=true; answers[i]=sel?Number(sel.value):null; }
   });
+  const msg=document.getElementById('qz-msg');
+  if(missing){ msg.className='set-msg err'; msg.textContent='Responda todas as questões antes de enviar.'; return; }
+  const btn=document.getElementById('qz-send'); btn.disabled=true; btn.textContent='Enviando…';
+  try{
+    const r=await fetch('/api/training',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:quizId,answers})});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok){ msg.className='set-msg err'; msg.textContent=d.error==='essay_required'?'Responda as questões dissertativas.':'Falha ao enviar.'; btn.disabled=false; btn.textContent='Enviar avaliação'; return; }
+    if(!TR_STATE.progress) TR_STATE.progress={};
+    const prev=TR_STATE.progress[quizId]||{score:0,passed:false};
+    TR_STATE.progress[quizId]={score:Math.max(prev.score,d.score),passed:prev.passed||d.passed};
+    showQuizResult(d);
+  }catch(e){ msg.className='set-msg err'; msg.textContent='Falha de conexão.'; btn.disabled=false; btn.textContent='Enviar avaliação'; }
+}
+
+function showQuizResult(d){
+  const box=document.querySelector('#qz-ov .qz-box'); if(!box) return;
+  const ok=d.passed;
+  box.innerHTML=`<div class="qz-result ${ok?'ok':'no'}">
+    <div class="qz-res-ic">${ok?'🎉':'📚'}</div>
+    <div class="qz-res-score">${d.score}%</div>
+    <div class="qz-res-msg">${ok?'Aprovado! Avaliação concluída.':`Você precisa de ${d.pass}% para ser aprovado. Reveja o material e tente novamente.`}</div>
+    <div class="qz-res-detail">${d.acertos} de ${d.total} questões objetivas corretas</div>
+    <button class="btn-bl" onclick="closeQuiz();renderTraining()">Fechar</button>
+  </div>`;
+}
+
+async function loadTrRH(){
+  const box=document.getElementById('tr-rh'); if(!box) return;
+  try{
+    const r=await fetch('/api/training?all=1'); const d=await r.json().catch(()=>({}));
+    if(!r.ok||!d.users){ box.innerHTML='<div class="gen-sub">Sem dados.</div>'; return; }
+    TR_RH=d;
+    const ths=d.trainings.map(t=>`<th>${t.title}</th>`).join('');
+    box.innerHTML=`<div class="stk-wrap"><table class="stk-table">
+      <thead><tr><th>Colaborador</th><th>Área</th>${ths}</tr></thead>
+      <tbody>${d.users.map(u=>{
+        const hasEssays=Object.values(u.trainings).some(p=>p.essays&&p.essays.length);
+        const nameCell=hasEssays?`<td><a href="#" onclick="trShowEssays('${u.id}');return false" style="color:var(--blue-t)">${u.nome}</a></td>`:`<td>${u.nome}</td>`;
+        return `<tr>${nameCell}<td>${u.dept||'—'}</td>${d.trainings.map(t=>{
+          const p=u.trainings[t.id];
+          if(!p) return '<td><span class="stk-consultar">—</span></td>';
+          return `<td>${p.passed?`<span class="stk-ok">✓ ${p.score}%</span>`:`<span class="stk-consultar">${p.score}%</span>`}</td>`;
+        }).join('')}</tr>`;
+      }).join('')}</tbody></table></div>
+      <div class="gen-sub" style="margin-top:8px">Clique no nome de quem já fez para ler as respostas dissertativas.</div>`;
+  }catch(e){ box.innerHTML='<div class="gen-sub">Falha ao carregar.</div>'; }
+}
+
+function trShowEssays(uid){
+  if(!TR_RH) return;
+  const u=TR_RH.users.find(x=>x.id===uid); if(!u) return;
+  const title=t=>{ const tr=TR_RH.trainings.find(x=>x.id===t); return tr?tr.title:t; };
+  let secs='';
+  Object.entries(u.trainings).forEach(([tid,p])=>{
+    if(!p.essays||!p.essays.length) return;
+    secs+=`<div class="qz-es-sec"><div class="qz-es-tt">${title(tid)} <span class="gen-sub">· ${p.submittedAt||''}</span></div>`;
+    secs+=p.essays.map(e=>`<div class="qz-es-q">${e.q}</div><div class="qz-es-a">${(e.a||'—').replace(/</g,'&lt;')}</div>`).join('');
+    secs+=`</div>`;
+  });
+  const ov=document.createElement('div'); ov.className='qz-ov'; ov.onclick=(e)=>{ if(e.target===ov) ov.remove(); };
+  ov.innerHTML=`<div class="qz-box"><div class="qz-hd"><div><div class="qz-title">${u.nome}</div><div class="qz-sub">Respostas dissertativas</div></div><button class="mcls" onclick="this.closest('.qz-ov').remove()">×</button></div><div class="qz-body">${secs||'<div class="gen-sub">Sem respostas dissertativas.</div>'}</div></div>`;
+  document.body.appendChild(ov);
 }
 
 /* ═══════════════════════════════════════════════
