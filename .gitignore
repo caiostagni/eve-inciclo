@@ -13,6 +13,7 @@ node_modules/
 assets/cases/imagens/
 !assets/manuais/*.pdf
 !assets/onboarding/*.pdf
+!assets/treinamentos/*.pdf
 
 # pasta-fonte do onboarding (inputs crus, inclui PDF de 24MB) — não versionar nem deployar
 /onboarding/
