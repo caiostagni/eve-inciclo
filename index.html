@@ -92,6 +92,9 @@ body{font-family:'Poppins',-apple-system,sans-serif;background:var(--bg);color:v
 .nav-it.on{background:var(--bl);color:var(--blue-t);font-weight:600}
 .nav-it .ic{font-size:15px;flex-shrink:0;width:20px;text-align:center}
 .nav-demo{margin-left:auto;font-size:11px;opacity:.65}
+.nav-social{display:flex;gap:10px;padding:14px 16px;margin-top:10px;border-top:1px solid var(--border)}
+.nav-social a{width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:var(--text2);border:1px solid var(--border);border-radius:9px;transition:color .15s,border-color .15s,background .15s}
+.nav-social a:hover{color:var(--blue-t);border-color:var(--blue-t);background:var(--bl)}
 
 /* Main */
 #main{margin-left:var(--sw);margin-top:var(--hh);min-height:calc(100vh - var(--hh))}
@@ -684,6 +687,14 @@ a.btn-dl:hover{border-color:var(--blue-t);color:var(--blue-t)}
     <button class="nav-it" data-p="products"><span class="ic">🛒</span>Produtos</button>
     <div class="nav-sec">Conta</div>
     <button class="nav-it" data-p="settings"><span class="ic">⚙️</span>Configurações</button>
+    <div class="nav-social">
+      <a href="https://www.instagram.com/ciclowayoficial/" target="_blank" rel="noopener" title="Instagram da CicloWay" aria-label="Instagram">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.6" cy="6.4" r="1.1" fill="currentColor" stroke="none"/></svg>
+      </a>
+      <a href="https://www.linkedin.com/company/cicloway/posts/" target="_blank" rel="noopener" title="LinkedIn da CicloWay" aria-label="LinkedIn">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.2 8h4.6v14H.2V8zm7.4 0h4.4v1.9h.06c.61-1.1 2.1-2.26 4.32-2.26 4.62 0 5.47 2.9 5.47 6.68V22h-4.6v-6.1c0-1.45-.03-3.32-2.02-3.32-2.02 0-2.33 1.58-2.33 3.21V22H7.6V8z"/></svg>
+      </a>
+    </div>
   </nav>
 
   <!-- Main -->
@@ -1874,7 +1885,6 @@ const OB_WELCOME_HTML = `
 `;
 
 let OB_STATE = null;
-let CERT_FORM = null;
 
 function initOnboarding(){ loadOnboarding(); }
 
@@ -1932,13 +1942,9 @@ function renderOnboarding(){
     </div>`;
   }).join('');
 
-  html+=`<div class="upc-title" style="margin:28px 0 12px">🎓 Emitir certificado de treinamento</div>
-    <div class="gen-card" id="ob-cert-card"></div>`;
-
   if(CU && CU.role==='admin') html+=`<div class="upc-title" style="margin:28px 0 12px">👥 Painel de conclusão (RH)</div><div id="ob-rh"></div>`;
 
   body.innerHTML=html;
-  renderCertForm();
   if(CU && CU.role==='admin') loadObRH();
 }
 
@@ -1964,35 +1970,6 @@ function obZoom(src){
   const o=document.createElement('div'); o.className='ob-zoom'; o.onclick=()=>o.remove();
   o.innerHTML=`<img src="${src}" alt="EPIs">`;
   document.body.appendChild(o);
-}
-
-async function renderCertForm(){
-  const card=document.getElementById('ob-cert-card'); if(!card) return;
-  if(!CERT_FORM){
-    try{ const r=await fetch('/api/generate-doc'); const d=await r.json().catch(()=>({})); CERT_FORM=(d&&d.cert)||[]; }catch(e){ CERT_FORM=[]; }
-  }
-  card.innerHTML=`<div class="gen-h">Certificado de treinamento por veículo</div>
-    <div class="gen-sub">Preencha os dados e baixe o certificado (.docx) no modelo oficial CicloWay.</div>
-    <div class="gen-fields">${CERT_FORM.map(f=>{
-      const inp=f.area?`<textarea class="fi" id="cf-${f.key}" rows="3" placeholder="${f.ph||''}"></textarea>`:`<input class="fi" id="cf-${f.key}" placeholder="${f.ph||''}"/>`;
-      return `<div class="fg${f.area?' gen-full':''}"><label class="fl">${f.label}${f.req?' *':''}</label>${inp}</div>`;
-    }).join('')}</div>
-    <div class="set-msg" id="cf-msg"></div>
-    <button class="set-btn" style="max-width:280px" onclick="generateCert()">⬇ Gerar certificado (.docx)</button>`;
-}
-
-async function generateCert(){
-  const msg=document.getElementById('cf-msg'); if(msg){ msg.className='set-msg'; msg.textContent=''; }
-  const fields={}, faltando=[];
-  CERT_FORM.forEach(f=>{ const v=(document.getElementById('cf-'+f.key).value||'').trim(); fields[f.key]=v; if(f.req && !v) faltando.push(f.label); });
-  if(faltando.length){ msg.className='set-msg err'; msg.textContent='Preencha os obrigatórios: '+faltando.join(', '); return; }
-  try{
-    const r=await fetch('/api/generate-doc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kind:'certificado',fields})});
-    if(!r.ok){ msg.className='set-msg err'; msg.textContent='Não foi possível gerar o certificado.'; return; }
-    const blob=await r.blob(); const url=URL.createObjectURL(blob);
-    const a=document.createElement('a'); a.href=url; a.download='certificado-treinamento.docx'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-    msg.className='set-msg ok'; msg.textContent='Certificado gerado ✓ (baixado)';
-  }catch(e){ msg.className='set-msg err'; msg.textContent='Falha de conexão.'; }
 }
 
 async function loadObRH(){
