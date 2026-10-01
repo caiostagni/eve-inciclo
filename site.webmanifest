@@ -1,0 +1,14 @@
+{
+  "name": "InCiclo — Intranet CicloWay",
+  "short_name": "InCiclo",
+  "description": "Conhecimento, processos e ferramentas do time CicloWay num só lugar.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#003FDE",
+  "theme_color": "#003FDE",
+  "icons": [
+    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

@@ -2,9 +2,30 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <title>InCiclo — CicloWay</title>
+<meta name="description" content="InCiclo — a intranet da CicloWay. Conhecimento, processos e ferramentas do time num só lugar."/>
 <link rel="icon" type="image/png" href="assets/cicloway-symbol-blue.png"/>
+<!-- Ícone do atalho no iPhone / iPad (fundo azul da marca) -->
+<link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png"/>
+<link rel="manifest" href="site.webmanifest"/>
+<meta name="theme-color" content="#003FDE"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="InCiclo"/>
+<meta name="application-name" content="InCiclo"/>
+<!-- Prévia ao compartilhar o link (WhatsApp, iMessage, LinkedIn…) -->
+<meta property="og:type" content="website"/>
+<meta property="og:site_name" content="InCiclo"/>
+<meta property="og:title" content="InCiclo — Intranet CicloWay"/>
+<meta property="og:description" content="Conhecimento, processos e ferramentas do time CicloWay num só lugar."/>
+<meta property="og:image" content="https://eve-inciclo.vercel.app/assets/og-image.png"/>
+<meta property="og:url" content="https://eve-inciclo.vercel.app/"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="InCiclo — Intranet CicloWay"/>
+<meta name="twitter:description" content="Conhecimento, processos e ferramentas do time CicloWay num só lugar."/>
+<meta name="twitter:image" content="https://eve-inciclo.vercel.app/assets/og-image.png"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
 <style>
@@ -100,6 +121,28 @@ body{font-family:'Poppins',-apple-system,sans-serif;background:var(--bg);color:v
 #main{margin-left:var(--sw);margin-top:var(--hh);min-height:calc(100vh - var(--hh))}
 .pg{display:none;padding:28px 32px 64px}
 .pg.on{display:block}
+
+/* Hamburger (menu) — escondido no desktop, aparece no mobile */
+#sb-toggle{display:none;flex-direction:column;justify-content:center;gap:4px;width:36px;height:36px;padding:0 8px;margin-left:-4px;background:none;border:none;cursor:pointer;border-radius:8px}
+#sb-toggle:hover{background:var(--card)}
+#sb-toggle span{display:block;height:2px;width:20px;background:var(--text);border-radius:2px;transition:transform .2s,opacity .2s}
+#sb-toggle.open span:nth-child(1){transform:translateY(6px) rotate(45deg)}
+#sb-toggle.open span:nth-child(2){opacity:0}
+#sb-toggle.open span:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
+#sb-backdrop{display:none;position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.5);opacity:0;transition:opacity .2s}
+#sb-backdrop.on{display:block;opacity:1}
+
+@media(max-width:820px){
+  #hdr{padding:0 14px;padding-left:max(14px,env(safe-area-inset-left))}
+  #sb-toggle{display:flex}
+  .hdr-div,.hdr-cw{display:none}
+  .hdr-uname,.hdr-role{display:none}
+  #main{margin-left:0}
+  .pg{padding:20px 16px 56px}
+  /* menu vira painel deslizante */
+  #sb{transform:translateX(-100%);transition:transform .25s ease;width:min(80vw,280px);box-shadow:2px 0 18px rgba(0,0,0,.25)}
+  #sb.open{transform:translateX(0)}
+}
 .pg-title{font-size:22px;font-weight:700;letter-spacing:-.4px;margin-bottom:3px}
 .pg-sub{font-size:13px;color:var(--text2);margin-bottom:24px}
 
@@ -681,6 +724,7 @@ a.btn-dl:hover{border-color:var(--blue-t);color:var(--blue-t)}
   <!-- Header -->
   <header id="hdr">
     <div class="hdr-l">
+      <button id="sb-toggle" aria-label="Abrir menu" aria-expanded="false" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
       <img class="hdr-logo" src="assets/cicloway-symbol-white.png" alt="CicloWay"/>
       <div class="hdr-name">In<em>Ciclo</em></div>
       <div class="hdr-div"></div>
@@ -730,6 +774,9 @@ a.btn-dl:hover{border-color:var(--blue-t);color:var(--blue-t)}
       </a>
     </div>
   </nav>
+
+  <!-- Backdrop do menu no mobile -->
+  <div id="sb-backdrop" onclick="closeSidebar()"></div>
 
   <!-- Main -->
   <main id="main">
@@ -2364,7 +2411,25 @@ function navigate(p){
   document.querySelectorAll('.pg').forEach(x=>x.classList.remove('on'));
   document.getElementById('pg-'+p).classList.add('on');
   curPage = p;
+  closeSidebar();
+  window.scrollTo(0,0);
 }
+
+/* Menu lateral retrátil (mobile) */
+function openSidebar(){
+  document.getElementById('sb').classList.add('open');
+  document.getElementById('sb-backdrop').classList.add('on');
+  const t=document.getElementById('sb-toggle'); t.classList.add('open'); t.setAttribute('aria-expanded','true');
+}
+function closeSidebar(){
+  document.getElementById('sb').classList.remove('open');
+  document.getElementById('sb-backdrop').classList.remove('on');
+  const t=document.getElementById('sb-toggle'); t.classList.remove('open'); t.setAttribute('aria-expanded','false');
+}
+function toggleSidebar(){
+  document.getElementById('sb').classList.contains('open') ? closeSidebar() : openSidebar();
+}
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeSidebar(); });
 
 /* ═══════════════════════════════════════════════
    HOME — CALENDAR
